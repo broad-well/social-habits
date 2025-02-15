@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton } from "react-native-paper";
+import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -11,6 +11,9 @@ import DarkThemeColors from "../../constants/DarkThemeColors.json";
 import LightThemeColors from "../../constants/LightThemeColors.json";
 import { useColorTheme } from "../../stores/useColorTheme";
 import { Link, Stack } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/backend/firebaseConfig";
+import { modalStyle } from "@/components/modalStyle";
 
 export default function SignIn() {
   const screenOptions = {
@@ -27,6 +30,14 @@ export default function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const resetState = () => {
+    setUsername("");
+    setPassword("");
+    setPasswordVisible(false);
+    setError(null);
+  }
 
   useEffect(() => {
     if (loaded) {
@@ -44,11 +55,16 @@ export default function SignIn() {
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
 
-  const handleSignIn = () => {
-    console.log(
-      `Attempting to sign in with username: ${username}@ucsd.edu and password: ${password}`
-    );
-    // Add authentication logic here
+  const handleSignIn = async () => {
+    try {
+      const cred = await signInWithEmailAndPassword(auth, username + "@ucsd.edu", password);
+      if (!cred.user.emailVerified) {
+        throw new Error("You must verify your email before using this app! Please check your inbox.");
+      }
+      
+    } catch (fail) {
+      setError(`${fail}`);
+    }
   };
 
   return (
@@ -111,6 +127,20 @@ export default function SignIn() {
           </Text>
         </View>
       </View>
+      <Portal>
+        <Modal
+          visible={error !== null}
+          contentContainerStyle={modalStyle.modal}
+          onDismiss={() => {
+            resetState();
+          }}
+        >
+          <PaperText variant="titleMedium">Sign-In Failed</PaperText>
+          <PaperText>
+            {error}
+          </PaperText>
+        </Modal>
+      </Portal>
     </PaperProvider>
   );
 }
