@@ -15,14 +15,22 @@ import { auth } from "@/backend/firebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
 import { modalStyle } from "@/components/modalStyle";
+import { FirebaseError } from "firebase/app";
 
 
 type RegistrationOutcome = {
   type: 'success'
 } | {
   type: 'error',
-  errorMessage: string,
+  error: Error,
 };
+
+export function formatErrorMessage(error: FirebaseError) {
+  if (error.code === "auth/email-already-in-use") {
+    return "The email you entered is already in use. Did you mean to sign in?";
+  }
+  return error.message;
+}
 
 export default function SignUp() {
   const screenOptions = {
@@ -82,7 +90,7 @@ export default function SignUp() {
       await sendEmailVerification(cred.user);
       setOutcome({ type: 'success' });
     } catch (prob) {
-      setOutcome({ type: 'error', errorMessage: `${prob}` });
+      setOutcome({ type: 'error', error: prob as Error });
     }
   };
 
@@ -134,6 +142,7 @@ export default function SignUp() {
             value={retypePassword}
             onChangeText={setRetypePassword}
             style={styles.input}
+            error={retypePassword.length > 0 && retypePassword !== password}
             placeholder="Retype your password"
             placeholderTextColor={theme.colors.onBackground}
             secureTextEntry={!retypePasswordVisible}
@@ -144,12 +153,18 @@ export default function SignUp() {
               />
             }
           />
+          {retypePassword.length > 0 && retypePassword !== password &&
+            <Text style={{ marginLeft: 8 }}>Passwords do not match</Text>}
         </View>
         <Button
           icon="login"
           mode="contained"
           onPress={handleSignUp}
-          disabled={username.trim().length === 0 || password.trim().length === 0}
+          disabled={
+            username.trim().length === 0 ||
+            password.trim().length === 0 ||
+            (retypePassword !== password)
+          }
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
           labelStyle={styles.buttonLabel}
         >
@@ -173,9 +188,6 @@ export default function SignUp() {
           contentContainerStyle={modalStyle.modal}
           onDismiss={() => {
             resetState();
-            if (outcome?.type !== "error") {
-              router.navigate('/');
-            }
           }}
         >
           {outcome?.type === 'success' &&
@@ -191,7 +203,8 @@ export default function SignUp() {
             <>
               <PaperText variant="titleMedium">Registration Failed</PaperText>
               <PaperText>
-                {outcome.errorMessage}
+                {outcome.error instanceof FirebaseError ?
+                  formatErrorMessage(outcome.error) : outcome.error.message}
               </PaperText>
             </>
           }

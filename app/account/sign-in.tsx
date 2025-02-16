@@ -14,6 +14,14 @@ import { Link, Stack } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/backend/firebaseConfig";
 import { modalStyle } from "@/components/modalStyle";
+import { FirebaseError } from "firebase/app";
+
+export function formatError(error: FirebaseError) {
+  if (error.code === "auth/invalid-credential") {
+    return "Entered credentials do not match an existing user";
+  }
+  return error.message;
+}
 
 export default function SignIn() {
   const screenOptions = {
@@ -30,14 +38,14 @@ export default function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown | null>(null);
 
-  const resetState = () => {
-    setUsername("");
-    setPassword("");
-    setPasswordVisible(false);
-    setError(null);
-  }
+  // const resetState = () => {
+  //   setUsername("");
+  //   setPassword("");
+  //   setPasswordVisible(false);
+  //   setError(null);
+  // }
 
   useEffect(() => {
     if (loaded) {
@@ -63,7 +71,7 @@ export default function SignIn() {
       }
       
     } catch (fail) {
-      setError(`${fail}`);
+      setError(fail);
     }
   };
 
@@ -82,10 +90,12 @@ export default function SignIn() {
             label="Username"
             value={username}
             onChangeText={setUsername}
+            inputMode="text"
             style={styles.input}
             placeholder="Enter your username"
             placeholderTextColor={theme.colors.onBackground}
             right={<TextInput.Affix text="@ucsd.edu" />}
+            textContentType="username"
           />
         </View>
         <View style={styles.inputContainer}>
@@ -96,6 +106,7 @@ export default function SignIn() {
             onChangeText={setPassword}
             style={styles.input}
             placeholder="Enter your password"
+            passwordRules="minlength: 6; required: lower; required: digit;"
             placeholderTextColor={theme.colors.onBackground}
             secureTextEntry={!passwordVisible}
             right={
@@ -131,13 +142,11 @@ export default function SignIn() {
         <Modal
           visible={error !== null}
           contentContainerStyle={modalStyle.modal}
-          onDismiss={() => {
-            resetState();
-          }}
         >
           <PaperText variant="titleMedium">Sign-In Failed</PaperText>
           <PaperText>
-            {error}
+            {error instanceof FirebaseError ?
+              formatError(error) : `${error}`}
           </PaperText>
         </Modal>
       </Portal>
@@ -163,7 +172,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    backgroundColor: "transparent",
     fontFamily: "Poppins",
   },
   button: {
