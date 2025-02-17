@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "expo": "^52.0.35",
+    "react-native-push-notification": "^8.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/react": "~18.3.12"
+  }
+}
