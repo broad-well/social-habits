@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton } from "react-native-paper";
+import { Button, TextInput } from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -7,9 +7,9 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-import DarkThemeColors from "../../constants/DarkThemeColors.json";
-import LightThemeColors from "../../constants/LightThemeColors.json";
-import { useColorTheme } from "../../stores/useColorTheme";
+import DarkThemeColors from "@/constants/DarkThemeColors.json";
+import LightThemeColors from "@/constants/LightThemeColors.json";
+import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, Stack } from "expo-router";
 
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -235,7 +235,7 @@ export default function SignUp() {
           <Text style={{ color: theme.colors.onPrimary }}>
             Already have an account?{" "}
             <Link
-              href="/account/sign-in"
+              href="/(account)/sign-in"
               style={[styles.signupLink, { color: theme.colors.onPrimary }]}
             >
               Sign In!
