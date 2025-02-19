@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import { Alert, Text, View, StyleSheet, Image } from "react-native";
 import { Button, TextInput, IconButton } from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
@@ -11,6 +11,34 @@ import DarkThemeColors from "../../constants/DarkThemeColors.json";
 import LightThemeColors from "../../constants/LightThemeColors.json";
 import { useColorTheme } from "../../stores/useColorTheme";
 import { Stack, router } from "expo-router";
+import { auth } from "@/config/firebaseConfig";
+
+const handleDeleteAccount = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Error", "No user is signed in.");
+      return;
+    }
+
+    // Send request to backend
+    const response = await fetch("https://your-backend.com/deleteUser", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ firebaseId: user.uid }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      Alert.alert("Success", data.message);
+      await user.delete(); // Delete from client-side Firebase Auth
+    } else {
+      throw new Error(data.error || "Failed to delete account");
+    }
+  } catch (error) {
+    Alert.alert("Error", error.message);
+  }
+};
 
 export default function Account() {
   const [loaded] = useFonts({
@@ -142,6 +170,15 @@ export default function Account() {
           onPress={() => {
             router.replace("/");
           }}
+        >
+          Sign Out
+        </Button>
+
+        <Button
+          mode="contained"
+          style={[styles.button, { backgroundColor: "#ff4444" }]}
+          labelStyle={styles.buttonLabel}
+          onPress={handleDeleteAccount}
         >
           Sign Out
         </Button>

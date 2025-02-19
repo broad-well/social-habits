@@ -12,9 +12,10 @@ import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/backend/firebaseConfig";
+// import { auth } from "@/backend/firebaseConfig";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
+import { auth } from "@/config/firebaseConfig";
 
 export function formatError(error: FirebaseError) {
   if (error.code === "auth/invalid-credential") {
@@ -126,6 +127,15 @@ export default function SignIn() {
             labelStyle={styles.buttonLabel}
           >
             Sign In
+          </Button>
+          <Button
+            icon="google"
+            mode="contained"
+            onPress={handleGoogleSignIn}
+            style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+            labelStyle={styles.buttonLabel}
+          >
+            Sign Up with Google
           </Button>
           <View style={styles.signupContainer}>
             <Text style={{ color: theme.colors.onPrimary }}>

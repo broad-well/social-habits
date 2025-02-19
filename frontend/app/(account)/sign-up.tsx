@@ -1,9 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-<<<<<<< HEAD:frontend/app/(account)/sign-up.tsx
-import { Button, TextInput } from "react-native-paper";
-=======
 import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
->>>>>>> 94337bc9625342265c4f966796c1c3cce8cb9c6d:app/account/sign-up.tsx
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -11,22 +7,19 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-<<<<<<< HEAD:frontend/app/(account)/sign-up.tsx
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
-import { Link, Stack } from "expo-router";
-=======
-import DarkThemeColors from "../../constants/DarkThemeColors.json";
-import LightThemeColors from "../../constants/LightThemeColors.json";
-import { useColorTheme } from "../../stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
-import { auth } from "@/backend/firebaseConfig";
+// import { auth } from "@/backend/firebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
-
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '@/config/firebaseConfig';
+import { Alert } from 'react-native';
 
 type RegistrationOutcome = {
   type: 'success'
@@ -41,12 +34,6 @@ export function formatErrorMessage(error: FirebaseError) {
   }
   return error.message;
 }
->>>>>>> 94337bc9625342265c4f966796c1c3cce8cb9c6d:app/account/sign-up.tsx
-
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '@/config/firebaseConfig';
-import { Alert } from 'react-native';
 
 export default function SignUp() {
   const screenOptions = {
@@ -88,39 +75,12 @@ export default function SignUp() {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: "884027047581-q28n1u7ke6lqkma87bpiakepgm7ugpe0.apps.googleusercontent.com", 
+       
+      webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
       offlineAccess: false,
       scopes: ['profile', 'email']
     });
   }, []);
-
-  // Old Code that used GoogleAuthProvider but kept getting blocked by Google
-
-  // const [request, response, promptAsync] = Google.useAuthRequest({
-  //   androidClientId: "884027047581-q28n1u7ke6lqkma87bpiakepgm7ugpe0.apps.googleusercontent.com",
-  //   webClientId: "884027047581-q28n1u7ke6lqkma87bpiakepgm7ugpe0.apps.googleusercontent.com"
-  // });
-  
-  // useEffect(() => {
-  //   if (response?.type === 'success') {
-  //     const { id_token } = response.params;
-  //     const credential = GoogleAuthProvider.credential(id_token);
-  //     signInWithCredential(auth, credential)
-  //       .then((userCredential) => {
-  //         const email = userCredential.user.email;
-  //         if (!email?.endsWith('@ucsd.edu')) {
-  //           auth.signOut();
-  //           Alert.alert("Access Denied", "Only UCSD emails are allowed.");
-  //         } else {
-  //           Alert.alert("Success", "Welcome to GrubGrab!");
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         console.error("Firebase Sign-In Error:", error);
-  //         Alert.alert("Login Failed", "Please try again.");
-  //       });
-  //   }
-  // }, [response]);
 
   if (!loaded) {
     return null;
@@ -132,27 +92,48 @@ export default function SignUp() {
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
 
-<<<<<<< HEAD:frontend/app/(account)/sign-up.tsx
   const handleGoogleSignUp = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       const tokens = await GoogleSignin.getTokens();
       const idToken = tokens.idToken;
-
+  
       if (!idToken) {
         throw new Error("No ID token returned from Google Sign-In");
       }
-
+  
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(auth, googleCredential);
-
-      const email = userCredential.user.email;
-      if (!email?.endsWith('@ucsd.edu')) {
+      const user = userCredential.user;
+  
+      if (!user.email?.endsWith("@ucsd.edu")) {
         await auth.signOut();
         Alert.alert("Access Denied", "Only UCSD emails are allowed.");
+        return;
+      }
+  
+      const response = await fetch("http://localhost:5000/api/user/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.exists) {
+        Alert.alert("Success", "User exists, please log in.");
       } else {
-        Alert.alert("Success", "Please login.");
+        await fetch("http://localhost:5000/api/user/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firebaseId: user.uid,
+            name: user.displayName,
+            email: user.email,
+          }),
+        });
+        Alert.alert("Success", "User created, please log in.");
       }
     } catch (error) {
       console.error(error);
@@ -166,14 +147,13 @@ export default function SignUp() {
     );
     // Add authentication logic here
   };
-=======
+
   const handleSignUp = async () => {
     if (!isEmailHandleValid(username)) {
       setUsernameError('Invalid username!');
       return;
     }
     // TODO verify retyped password matches original password
->>>>>>> 94337bc9625342265c4f966796c1c3cce8cb9c6d:app/account/sign-up.tsx
 
     try {
       const cred = await createUserWithEmailAndPassword(auth, username + '@ucsd.edu', password);

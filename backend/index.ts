@@ -1,9 +1,6 @@
 import dotenv from "dotenv";
 import express, { Express, NextFunction, Request, Response } from "express";
 import { isHttpError } from "http-errors";
-
-import discussionRoutes from "./src/routes/discussion";
-import replyRoutes from "./src/routes/reply";
 import userRoutes from "./src/routes/user";
 
 dotenv.config();
@@ -23,11 +20,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/users", userRoutes);
-app.use("/api/discussions", discussionRoutes);
-app.use("/api/replies", replyRoutes);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
+app.use((error: unknown, req: Request, res: Response) => {
   // 500 is the "internal server error" error code, this will be our fallback
   let statusCode = 500;
   let errorMessage = "An error has occurred.";
@@ -50,3 +45,5 @@ app.listen(port, () => {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });
+
+export default app;
