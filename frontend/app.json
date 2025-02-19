@@ -8,18 +8,22 @@
     "scheme": "cohabit",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "originalFullName": "@rohan800360/cohabit",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "edu.ucsd.cse210.cohabit"
+      "bundleIdentifier": "edu.ucsd.cse210.cohabit",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "googleServicesFile": "./config/google-services.json"
       },
       "package": "edu.ucsd.cse210.cohabit"
     },
     "plugins": [
+      "@react-native-google-signin/google-signin",
       "expo-router",
       [
         "expo-splash-screen",

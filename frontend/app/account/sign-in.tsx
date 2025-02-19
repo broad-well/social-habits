@@ -12,7 +12,14 @@ import LightThemeColors from "../../constants/LightThemeColors.json";
 import { useColorTheme } from "../../stores/useColorTheme";
 import { Link, Stack } from "expo-router";
 
-export default function SignUp() {
+import { collection, doc, getDoc } from "firebase/firestore";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
+import { Alert } from "react-native";
+import { auth, db } from "@/config/firebaseConfig"; // Import Firebase Firestore (db) and auth
+
+
+export default function SignIn() {
   const screenOptions = {
     headerShown: false,
   };
@@ -27,9 +34,6 @@ export default function SignUp() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [retypePassword, setRetypePassword] = useState("");
-  const [retypePasswordVisible, setRetypePasswordVisible] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
 
   useEffect(() => {
     if (loaded) {
@@ -54,9 +58,46 @@ export default function SignUp() {
     // Add authentication logic here
   };
 
-  const handleSendVerificationCode = () => {
-    console.log(`Attempting to send verification code to ${username}@ucsd.edu`);
-  };
+  const handleGoogleSignIn = async () => {
+      try {
+        await GoogleSignin.hasPlayServices();
+        const userInfo = await GoogleSignin.signIn();
+        const tokens = await GoogleSignin.getTokens();
+        const idToken = tokens.idToken;
+
+        if (!idToken) {
+          throw new Error("No ID token returned from Google Sign-In");
+        }
+
+        const googleCredential = GoogleAuthProvider.credential(idToken);
+        const userCredential = await signInWithCredential(auth, googleCredential);
+  
+        const email = userCredential.user.email;
+        const uid = userCredential.user.uid; // Get unique user ID
+
+        if (!email?.endsWith('@ucsd.edu')) {
+          await auth.signOut();
+          Alert.alert("Access Denied", "Only UCSD emails are allowed.");
+          return;
+        } 
+
+        // Check if user is registered in Firestore
+        const userRef = doc(db, "users", uid);
+        const userSnapshot = await getDoc(userRef);
+        if (!userSnapshot.exists()) {
+          await auth.signOut();
+          Alert.alert("Access Denied", "You are not registered. Please sign up first.");
+          return;
+        }
+        
+        Alert.alert("Success", "Welcome to Cohabit!");
+        
+
+      } catch (error) {
+        console.error(error);
+        Alert.alert("Login Failed", "Please try again.");
+      }
+    };
 
   return (
     <PaperProvider theme={theme}>
@@ -65,7 +106,7 @@ export default function SignUp() {
         style={[styles.container, { backgroundColor: theme.colors.primary }]}
       >
         <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-          Sign Up to Cohabit
+          Sign In to Cohabit
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -97,52 +138,6 @@ export default function SignUp() {
             }
           />
         </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            mode="outlined"
-            label="Retype Password"
-            value={retypePassword}
-            onChangeText={setRetypePassword}
-            style={styles.input}
-            placeholder="Retype your password"
-            placeholderTextColor={theme.colors.onBackground}
-            secureTextEntry={!retypePasswordVisible}
-            right={
-              <TextInput.Icon
-                icon={retypePasswordVisible ? "eye" : "eye-off"}
-                onPress={() => setRetypePasswordVisible(!retypePasswordVisible)}
-              />
-            }
-          />
-        </View>
-        <View
-          style={[
-            styles.inputContainer,
-            { flexDirection: "row", gap: 10, alignItems: "center" },
-          ]}
-        >
-          <TextInput
-            mode="outlined"
-            label="Verification Code"
-            value={verificationCode}
-            onChangeText={setVerificationCode}
-            style={[styles.input, { flex: 1 }]}
-            placeholder="Enter your verification code"
-            placeholderTextColor={theme.colors.onBackground}
-          />
-          <Button
-            icon="send"
-            mode="contained"
-            style={[
-              styles.verifyButton,
-              { backgroundColor: theme.colors.onPrimary },
-            ]}
-            onPress={handleSendVerificationCode}
-            labelStyle={styles.verifyButtonLabel}
-          >
-            Verify
-          </Button>
-        </View>
         <Button
           icon="login"
           mode="contained"
@@ -150,16 +145,25 @@ export default function SignUp() {
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
           labelStyle={styles.buttonLabel}
         >
-          Sign Up
+          Sign In
+        </Button>
+        <Button
+          icon="googe"
+          mode="contained"
+          onPress={handleGoogleSignIn}
+          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          labelStyle={styles.buttonLabel}
+        >
+          Sign In with Google
         </Button>
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimary }}>
-            Already have an account?{" "}
+            Don't have an account?{" "}
             <Link
-              href="/account/sign-in"
+              href="/account/sign-up"
               style={[styles.signupLink, { color: theme.colors.onPrimary }]}
             >
-              Sign In!
+              Sign Up!
             </Link>
           </Text>
         </View>
@@ -207,16 +211,5 @@ const styles = StyleSheet.create({
   signupLink: {
     textDecorationLine: "underline",
     fontWeight: "bold",
-  },
-  verifyButton: {
-    height: 56,
-    justifyContent: "center",
-    borderRadius: 8,
-    elevation: 3,
-  },
-  verifyButtonLabel: {
-    fontSize: 14,
-    fontFamily: "Poppins",
-    color: "#fff",
   },
 });
