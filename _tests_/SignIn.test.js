@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react-native';
+import { render, fireEvent, cleanup } from '@testing-library/react-native';
 import SignIn from '../app/account/sign-in';
 // import { useColorTheme } from '../stores/useColorTheme';
 
@@ -35,6 +35,10 @@ describe('SignIn Screen', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   it('renders correctly', async () => {
     const { getByText, getByPlaceholderText } = render(<SignIn />);
 
@@ -42,8 +46,7 @@ describe('SignIn Screen', () => {
     expect(getByPlaceholderText('Enter your username')).toBeTruthy();
     expect(getByPlaceholderText('Enter your password')).toBeTruthy();
     expect(getByText('Sign In')).toBeTruthy();
-    expect(getByText("Don't have an account?")).toBeTruthy();
-    expect(getByText('Sign Up!')).toBeTruthy();
+    expect(getByText("Don't have an account? Sign Up!")).toBeTruthy();
   });
 
   it('updates username and password fields', async () => {
@@ -77,17 +80,14 @@ describe('SignIn Screen', () => {
   it('toggles password visibility', async () => {
     const { getByTestId } = render(<SignIn />);
 
-    // Add data-testid to your password TextInput and icon in the SignIn component
     const passwordInput = getByTestId('password-input');
     const visibilityToggle = getByTestId('password-visibility-toggle');
 
-    // Initially password should be hidden
     expect(passwordInput.props.secureTextEntry).toBe(true);
 
-    // Toggle visibility
     fireEvent.press(visibilityToggle);
 
-    // Password should now be visible
     expect(passwordInput.props.secureTextEntry).toBe(false);
+
   });
 });

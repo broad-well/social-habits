@@ -13,6 +13,6 @@ jest.mock("expo-constants", () => ({
     },
 }));
 
-jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
+global.setImmediate = (callback) => setTimeout(callback, 0);
 
 jest.setTimeout(30000); // 30 seconds

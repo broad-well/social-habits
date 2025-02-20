@@ -1,9 +1,10 @@
 module.exports = {
     preset: "react-native",
-    setUpFilesAfterEnv: ["social-habits/jest-setup.js"],
+    setupFilesAfterEnv: ["<rootDir>/jest-setup.js"],
     transformIgnorePatterns: [
         "node_modules/(?!(@react-native|react-native|expo|expo-font|expo-constants)/)",
     ],
+    testEnvironment: 'jsdom',
 };
 
 // "jest": {
