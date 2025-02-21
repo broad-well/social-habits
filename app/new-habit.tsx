@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet, ScrollView } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { Button, TextInput, Appbar } from "react-native-paper";
 import RadioButtonRN from "radio-buttons-react-native";
 import {
   MD3LightTheme as DefaultTheme,
@@ -91,6 +91,7 @@ export default function HabitCreation() {
   const styles = StyleSheet.create({
     divider: {
       width: "100%",
+      opacity: 0.3,
       height: 1,
       backgroundColor: theme.colors.onPrimary,
       marginVertical: 10,
@@ -204,6 +205,20 @@ export default function HabitCreation() {
   return (
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
+      <Appbar.Header
+        style={{
+          backgroundColor: theme.colors.primary,
+          height: 50,
+        }}
+      >
+        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.Content
+          title="New Habit"
+          titleStyle={{
+            fontSize: 18,
+          }}
+        />
+      </Appbar.Header>
       <ScrollView
         style={{
           flex: 1,
@@ -212,11 +227,11 @@ export default function HabitCreation() {
         }}
         contentContainerStyle={[
           styles.container,
-          { width: "100%", paddingTop: 60, paddingHorizontal: 35 },
+          { width: "100%", paddingTop: 20, paddingHorizontal: 35 },
         ]}
       >
         <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-          Habit Creation
+          New Habit
         </Text>
         <View style={styles.formContainer}>
           <TextInput
@@ -249,7 +264,7 @@ export default function HabitCreation() {
               initial={frequency === 0 ? 1 : 2}
               textStyle={{ color: theme.colors.onPrimary }}
               activeColor={theme.colors.onPrimary}
-              style={[styles.radioButtonGroup, { marginLeft: 20 }]}
+              style={{ ...styles.radioButtonGroup, marginLeft: 20 }}
             />
           </View>
           {frequency === 1 && (
@@ -309,7 +324,7 @@ export default function HabitCreation() {
               initial={timeType === 0 ? 1 : 2}
               textStyle={{ color: theme.colors.onPrimary }}
               activeColor={theme.colors.onPrimary}
-              style={[styles.radioButtonGroup, { marginLeft: 57 }]}
+              style={{ ...styles.radioButtonGroup, marginLeft: 57 }}
             />
           </View>
           {timeType === 1 && (
@@ -367,7 +382,7 @@ export default function HabitCreation() {
               }
               textStyle={{ color: theme.colors.onPrimary }}
               activeColor={theme.colors.onPrimary}
-              style={[styles.radioButtonGroup, { marginLeft: 40 }]}
+              style={{ ...styles.radioButtonGroup, marginLeft: 40 }}
             />
           </View>
           <Button

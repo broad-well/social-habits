@@ -1,5 +1,11 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
+import {
+  Button,
+  TextInput,
+  Portal,
+  Modal,
+  Text as PaperText,
+} from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -58,11 +64,16 @@ export default function SignIn() {
 
   const handleSignIn = async () => {
     try {
-      const cred = await signInWithEmailAndPassword(auth, username + "@ucsd.edu", password);
+      const cred = await signInWithEmailAndPassword(
+        auth,
+        username + "@ucsd.edu",
+        password
+      );
       if (!cred.user.emailVerified) {
-        throw new Error("You must verify your email before using this app! Please check your inbox.");
+        throw new Error(
+          "You must verify your email before using this app! Please check your inbox."
+        );
       }
-
     } catch (fail) {
       setError(fail);
     }
@@ -71,75 +82,74 @@ export default function SignIn() {
   return (
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
-        <View
-          style={[styles.container, { backgroundColor: theme.colors.primary }]}
-        >
-          <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-            Sign In to Cohabit
-          </Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              mode="outlined"
-              label="Username"
-              value={username}
-              onChangeText={setUsername}
-              inputMode="text"
-              style={styles.input}
-              placeholder="Enter your username"
-              placeholderTextColor={theme.colors.onBackground}
-              right={<TextInput.Affix text="@ucsd.edu" />}
-              textContentType="username"
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              mode="outlined"
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              placeholder="Enter your password"
-              passwordRules="minlength: 6; required: lower; required: digit;"
-              placeholderTextColor={theme.colors.onBackground}
-              secureTextEntry={!passwordVisible}
-              right={
-                <TextInput.Icon
-                  icon={passwordVisible ? "eye" : "eye-off"}
-                  onPress={() => setPasswordVisible(!passwordVisible)}
-                />
-              }
-            />
-          </View>
-          <Button
-            icon="login"
-            mode="contained"
-            onPress={handleSignIn}
-            style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
-            labelStyle={styles.buttonLabel}
-          >
-            Sign In
-          </Button>
-          <View style={styles.signupContainer}>
-            <Text style={{ color: theme.colors.onPrimary }}>
-              Don't have an account?{" "}
-              <Link
-                href="/(account)/sign-up"
-                style={[styles.signupLink, { color: theme.colors.onPrimary }]}
-              >
-                Sign Up!
-              </Link>
-            </Text>
-          </View>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+      >
+        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+          Sign In to Cohabit
+        </Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode="outlined"
+            label="Username"
+            value={username}
+            onChangeText={setUsername}
+            inputMode="text"
+            style={styles.input}
+            placeholder="Enter your username"
+            placeholderTextColor={theme.colors.onBackground}
+            right={<TextInput.Affix text="@ucsd.edu" />}
+            textContentType="username"
+          />
         </View>
-        <Portal>
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode="outlined"
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            placeholder="Enter your password"
+            passwordRules="minlength: 6; required: lower; required: digit;"
+            placeholderTextColor={theme.colors.onBackground}
+            secureTextEntry={!passwordVisible}
+            right={
+              <TextInput.Icon
+                icon={passwordVisible ? "eye" : "eye-off"}
+                onPress={() => setPasswordVisible(!passwordVisible)}
+              />
+            }
+          />
+        </View>
+        <Button
+          icon="login"
+          mode="contained"
+          onPress={handleSignIn}
+          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          labelStyle={styles.buttonLabel}
+        >
+          Sign In
+        </Button>
+        <View style={styles.signupContainer}>
+          <Text style={{ color: theme.colors.onPrimary }}>
+            Don't have an account?{" "}
+            <Link
+              href="/(account)/sign-up"
+              style={[styles.signupLink, { color: theme.colors.onPrimary }]}
+            >
+              Sign Up!
+            </Link>
+          </Text>
+        </View>
+      </View>
+      <Portal>
         <Modal
           visible={error !== null}
           contentContainerStyle={modalStyle.modal}
         >
           <PaperText variant="titleMedium">Sign-In Failed</PaperText>
           <PaperText>
-            {error instanceof FirebaseError ?
-              formatError(error) : `${error}`}
+            {error instanceof FirebaseError ? formatError(error) : `${error}`}
           </PaperText>
         </Modal>
       </Portal>
