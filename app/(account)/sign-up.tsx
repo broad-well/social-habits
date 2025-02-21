@@ -89,10 +89,12 @@ export default function SignUp() {
             placeholder="Enter your password"
             placeholderTextColor={theme.colors.onBackground}
             secureTextEntry={!passwordVisible}
+            testID="password-input"
             right={
               <TextInput.Icon
                 icon={passwordVisible ? "eye" : "eye-off"}
                 onPress={() => setPasswordVisible(!passwordVisible)}
+                accessibilityLabel="password-visibility-toggle"
               />
             }
           />
