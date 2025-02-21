@@ -10,7 +10,7 @@ import { useFonts } from "expo-font";
 import DarkThemeColors from "../../constants/DarkThemeColors.json";
 import LightThemeColors from "../../constants/LightThemeColors.json";
 import { useColorTheme } from "../../stores/useColorTheme";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -176,6 +176,7 @@ export default function Main() {
             ]}
             onPress={() => {
               // Handle new habit creation
+              router.push("/new-habit");
             }}
             small={false}
           />
