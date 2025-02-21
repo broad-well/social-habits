@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, cleanup } from '@testing-library/react-native';
-import SignIn from '../app/account/sign-in';
+import SignIn from '../app/(account)/sign-in';
 
 describe('SignIn Screen', () => {
 
