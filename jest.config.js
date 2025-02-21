@@ -5,6 +5,9 @@ module.exports = {
         "node_modules/(?!(@react-native|react-native|expo|expo-font|expo-constants)/)",
     ],
     testEnvironment: 'jsdom',
+    moduleNameMapper: {
+        "^@/(.*)$": "<rootDir>/$1" // Adjust based on actual project structure
+      },
 };
 
 // "jest": {
