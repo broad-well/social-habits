@@ -7,11 +7,11 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-import DarkThemeColors from "../../constants/DarkThemeColors.json";
-import LightThemeColors from "../../constants/LightThemeColors.json";
-import { useColorTheme } from "../../stores/useColorTheme";
+import DarkThemeColors from "@/constants/DarkThemeColors.json";
+import LightThemeColors from "@/constants/LightThemeColors.json";
+import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
-import { auth } from "@/backend/firebaseConfig";
+import { auth } from "@/config/firebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
 import { modalStyle } from "@/components/modalStyle";
@@ -127,10 +127,12 @@ export default function SignUp() {
             placeholder="Enter your password"
             placeholderTextColor={theme.colors.onBackground}
             secureTextEntry={!passwordVisible}
+            testID="password-input"
             right={
               <TextInput.Icon
                 icon={passwordVisible ? "eye" : "eye-off"}
                 onPress={() => setPasswordVisible(!passwordVisible)}
+                accessibilityLabel="password-visibility-toggle"
               />
             }
           />
@@ -174,7 +176,7 @@ export default function SignUp() {
           <Text style={{ color: theme.colors.onPrimary }}>
             Already have an account?{" "}
             <Link
-              href="/account/sign-in"
+              href="/(account)/sign-in"
               style={[styles.signupLink, { color: theme.colors.onPrimary }]}
             >
               Sign In!
