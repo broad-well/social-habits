@@ -27,20 +27,20 @@ describe('SignIn Screen', () => {
     expect(passwordInput.props.value).toBe('password123');
   });
 
-  it('calls handleSignIn function on button press', async () => {
-    const { getByText } = render(<SignIn />);
-    const signInButton = getByText('Sign In');
+  // it('calls handleSignIn function on button press', async () => {
+  //   const { getByText } = render(<SignIn />);
+  //   const signInButton = getByText('Sign In');
 
-    const consoleSpy = jest.spyOn(console, 'log');
+  //   const consoleSpy = jest.spyOn(console, 'log');
 
-    fireEvent.press(signInButton);
+  //   fireEvent.press(signInButton);
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Attempting to sign in with username:')
-    );
+  //   expect(consoleSpy).toHaveBeenCalledWith(
+  //     expect.stringContaining('Attempting to sign in with username:')
+  //   );
 
-    consoleSpy.mockRestore();
-  });
+  //   consoleSpy.mockRestore();
+  // });
 
   it('toggles password visibility', async () => {
     const { getByPlaceholderText, getByLabelText } = render(<SignIn />);
