@@ -1,43 +1,8 @@
 import React from 'react';
 import { render, fireEvent, cleanup } from '@testing-library/react-native';
 import SignIn from '../app/account/sign-in';
-// import { useColorTheme } from '../stores/useColorTheme';
-
-jest.mock('expo-router', () => ({
-  Link: jest.fn().mockImplementation(({ children }) => children),
-  Stack: {
-    Screen: jest.fn(),
-  },
-  router: {
-    push: jest.fn(),
-  }
-}));
-
-jest.mock('expo-font', () => ({
-  useFonts: () => [true],
-}));
-
-jest.mock('expo-splash-screen', () => ({
-  hideAsync: jest.fn(),
-}));
-
-jest.mock('../stores/useColorTheme', () => ({
-  useColorTheme: () => ({
-    colorTheme: 'light'
-  })
-}));
-
-jest.mock('../assets/fonts/Poppins/Poppins-Regular.ttf', () => '');
-jest.mock('../assets/fonts/Poppins/Poppins-Bold.ttf', () => '');
 
 describe('SignIn Screen', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    cleanup();
-  });
 
   it('renders correctly', async () => {
     const { getByText, getByPlaceholderText } = render(<SignIn />);
@@ -78,10 +43,10 @@ describe('SignIn Screen', () => {
   });
 
   it('toggles password visibility', async () => {
-    const { getByTestId } = render(<SignIn />);
+    const { getByPlaceholderText, getByLabelText } = render(<SignIn />);
 
-    const passwordInput = getByTestId('password-input');
-    const visibilityToggle = getByTestId('password-visibility-toggle');
+    const passwordInput = getByPlaceholderText('Enter your password');
+    const visibilityToggle = getByLabelText('password-visibility-toggle');
 
     expect(passwordInput.props.secureTextEntry).toBe(true);
 
