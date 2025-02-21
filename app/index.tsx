@@ -7,9 +7,9 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { useFonts } from "expo-font";
-import DarkThemeColors from "../constants/DarkThemeColors.json";
-import LightThemeColors from "../constants/LightThemeColors.json";
-import { useColorTheme } from "../stores/useColorTheme";
+import DarkThemeColors from "@/constants/DarkThemeColors.json";
+import LightThemeColors from "@/constants/LightThemeColors.json";
+import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
 
 export default function Index() {
@@ -56,7 +56,7 @@ export default function Index() {
         <Button
           icon="login"
           mode="contained"
-          onPress={() => router.push("/account/sign-in")}
+          onPress={() => router.push("/(account)/sign-in")}
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
           labelStyle={styles.buttonLabel}
         >
@@ -66,7 +66,7 @@ export default function Index() {
           <Text style={{ color: theme.colors.onPrimary }}>
             Don't have an account?{" "}
             <Link
-              href="/account/sign-up"
+              href="/(account)/sign-up"
               style={[styles.signupLink, { color: theme.colors.onPrimary }]}
             >
               Sign Up!
