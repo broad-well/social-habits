@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton } from "react-native-paper";
+import { Button, TextInput } from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -7,12 +7,12 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-import DarkThemeColors from "../../constants/DarkThemeColors.json";
-import LightThemeColors from "../../constants/LightThemeColors.json";
-import { useColorTheme } from "../../stores/useColorTheme";
+import DarkThemeColors from "@/constants/DarkThemeColors.json";
+import LightThemeColors from "@/constants/LightThemeColors.json";
+import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, Stack } from "expo-router";
 
-export default function SignIn() {
+export default function SignUp() {
   const screenOptions = {
     headerShown: false,
   };
@@ -27,6 +27,9 @@ export default function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [retypePassword, setRetypePassword] = useState("");
+  const [retypePasswordVisible, setRetypePasswordVisible] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
 
   useEffect(() => {
     if (loaded) {
@@ -51,6 +54,10 @@ export default function SignIn() {
     // Add authentication logic here
   };
 
+  const handleSendVerificationCode = () => {
+    console.log(`Attempting to send verification code to ${username}@ucsd.edu`);
+  };
+
   return (
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
@@ -58,7 +65,7 @@ export default function SignIn() {
         style={[styles.container, { backgroundColor: theme.colors.primary }]}
       >
         <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-          Sign In to Cohabit
+          Sign Up to Cohabit
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -92,6 +99,52 @@ export default function SignIn() {
             }
           />
         </View>
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode="outlined"
+            label="Retype Password"
+            value={retypePassword}
+            onChangeText={setRetypePassword}
+            style={styles.input}
+            placeholder="Retype your password"
+            placeholderTextColor={theme.colors.onBackground}
+            secureTextEntry={!retypePasswordVisible}
+            right={
+              <TextInput.Icon
+                icon={retypePasswordVisible ? "eye" : "eye-off"}
+                onPress={() => setRetypePasswordVisible(!retypePasswordVisible)}
+              />
+            }
+          />
+        </View>
+        <View
+          style={[
+            styles.inputContainer,
+            { flexDirection: "row", gap: 10, alignItems: "center" },
+          ]}
+        >
+          <TextInput
+            mode="outlined"
+            label="Verification Code"
+            value={verificationCode}
+            onChangeText={setVerificationCode}
+            style={[styles.input, { flex: 1 }]}
+            placeholder="Enter your verification code"
+            placeholderTextColor={theme.colors.onBackground}
+          />
+          <Button
+            icon="send"
+            mode="contained"
+            style={[
+              styles.verifyButton,
+              { backgroundColor: theme.colors.onPrimary },
+            ]}
+            onPress={handleSendVerificationCode}
+            labelStyle={styles.verifyButtonLabel}
+          >
+            Verify
+          </Button>
+        </View>
         <Button
           icon="login"
           mode="contained"
@@ -99,16 +152,16 @@ export default function SignIn() {
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
           labelStyle={styles.buttonLabel}
         >
-          Sign In
+          Sign Up
         </Button>
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimary }}>
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <Link
-              href="/account/sign-up"
+              href="/(account)/sign-in"
               style={[styles.signupLink, { color: theme.colors.onPrimary }]}
             >
-              Sign Up!
+              Sign In!
             </Link>
           </Text>
         </View>
@@ -156,5 +209,16 @@ const styles = StyleSheet.create({
   signupLink: {
     textDecorationLine: "underline",
     fontWeight: "bold",
+  },
+  verifyButton: {
+    height: 56,
+    justifyContent: "center",
+    borderRadius: 8,
+    elevation: 3,
+  },
+  verifyButtonLabel: {
+    fontSize: 14,
+    fontFamily: "Poppins",
+    color: "#fff",
   },
 });
