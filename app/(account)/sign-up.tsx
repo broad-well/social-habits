@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -10,7 +10,27 @@ import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
-import { Link, Stack } from "expo-router";
+import { Link, router, Stack } from "expo-router";
+import { auth } from "@/config/firebaseConfig";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { isEmailHandleValid } from "@/validation/account";
+import { modalStyle } from "@/components/modalStyle";
+import { FirebaseError } from "firebase/app";
+
+
+type RegistrationOutcome = {
+  type: 'success'
+} | {
+  type: 'error',
+  error: Error,
+};
+
+export function formatErrorMessage(error: FirebaseError) {
+  if (error.code === "auth/email-already-in-use") {
+    return "The email you entered is already in use. Did you mean to sign in?";
+  }
+  return error.message;
+}
 
 export default function SignUp() {
   const screenOptions = {
@@ -25,11 +45,22 @@ export default function SignUp() {
   const { colorTheme } = useColorTheme();
 
   const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [retypePassword, setRetypePassword] = useState("");
   const [retypePasswordVisible, setRetypePasswordVisible] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
+  const [outcome, setOutcome] = useState<RegistrationOutcome | null>(null);
+
+  const resetState = () => {
+    setUsername("");
+    setUsernameError(null);
+    setPassword("");
+    setPasswordVisible(false);
+    setRetypePassword("");
+    setRetypePasswordVisible(false);
+    setOutcome(null);
+  }
 
   useEffect(() => {
     if (loaded) {
@@ -47,15 +78,20 @@ export default function SignUp() {
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
 
-  const handleSignIn = () => {
-    console.log(
-      `Attempting to sign in with username: ${username}@ucsd.edu and password: ${password}`
-    );
-    // Add authentication logic here
-  };
+  const handleSignUp = async () => {
+    if (!isEmailHandleValid(username)) {
+      setUsernameError('Invalid username!');
+      return;
+    }
+    // TODO verify retyped password matches original password
 
-  const handleSendVerificationCode = () => {
-    console.log(`Attempting to send verification code to ${username}@ucsd.edu`);
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, username + '@ucsd.edu', password);
+      await sendEmailVerification(cred.user);
+      setOutcome({ type: 'success' });
+    } catch (prob) {
+      setOutcome({ type: 'error', error: prob as Error });
+    }
   };
 
   return (
@@ -73,11 +109,13 @@ export default function SignUp() {
             label="Username"
             value={username}
             onChangeText={setUsername}
+            error={usernameError !== null}
             style={styles.input}
             placeholder="Enter your username"
             placeholderTextColor={theme.colors.onBackground}
             right={<TextInput.Affix text="@ucsd.edu" />}
           />
+          {usernameError && <Text style={{ marginLeft: 8 }}>{usernameError}</Text>}
         </View>
         <View style={styles.inputContainer}>
           <TextInput
@@ -106,6 +144,7 @@ export default function SignUp() {
             value={retypePassword}
             onChangeText={setRetypePassword}
             style={styles.input}
+            error={retypePassword.length > 0 && retypePassword !== password}
             placeholder="Retype your password"
             placeholderTextColor={theme.colors.onBackground}
             secureTextEntry={!retypePasswordVisible}
@@ -116,39 +155,18 @@ export default function SignUp() {
               />
             }
           />
-        </View>
-        <View
-          style={[
-            styles.inputContainer,
-            { flexDirection: "row", gap: 10, alignItems: "center" },
-          ]}
-        >
-          <TextInput
-            mode="outlined"
-            label="Verification Code"
-            value={verificationCode}
-            onChangeText={setVerificationCode}
-            style={[styles.input, { flex: 1 }]}
-            placeholder="Enter your verification code"
-            placeholderTextColor={theme.colors.onBackground}
-          />
-          <Button
-            icon="send"
-            mode="contained"
-            style={[
-              styles.verifyButton,
-              { backgroundColor: theme.colors.onPrimary },
-            ]}
-            onPress={handleSendVerificationCode}
-            labelStyle={styles.verifyButtonLabel}
-          >
-            Verify
-          </Button>
+          {retypePassword.length > 0 && retypePassword !== password &&
+            <Text style={{ marginLeft: 8 }}>Passwords do not match</Text>}
         </View>
         <Button
           icon="login"
           mode="contained"
-          onPress={handleSignIn}
+          onPress={handleSignUp}
+          disabled={
+            username.trim().length === 0 ||
+            password.trim().length === 0 ||
+            (retypePassword !== password)
+          }
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
           labelStyle={styles.buttonLabel}
         >
@@ -166,6 +184,34 @@ export default function SignUp() {
           </Text>
         </View>
       </View>
+      <Portal>
+        <Modal
+          visible={outcome !== null}
+          contentContainerStyle={modalStyle.modal}
+          onDismiss={() => {
+            resetState();
+          }}
+        >
+          {outcome?.type === 'success' &&
+            <>
+              <PaperText variant="titleMedium">Verify your Email</PaperText>
+              <PaperText>
+                We have just sent you a verification email.
+                Please click on the link in the email to finish signing up!
+              </PaperText>
+            </>
+          }
+          {outcome?.type === 'error' &&
+            <>
+              <PaperText variant="titleMedium">Registration Failed</PaperText>
+              <PaperText>
+                {outcome.error instanceof FirebaseError ?
+                  formatErrorMessage(outcome.error) : outcome.error.message}
+              </PaperText>
+            </>
+          }
+        </Modal>
+      </Portal>
     </PaperProvider>
   );
 }
