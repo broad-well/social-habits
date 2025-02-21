@@ -20,6 +20,9 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '@/config/firebaseConfig';
 import { Alert } from 'react-native';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 type RegistrationOutcome = {
   type: 'success'
@@ -75,7 +78,6 @@ export default function SignUp() {
 
   useEffect(() => {
     GoogleSignin.configure({
-       
       webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
       offlineAccess: false,
       scopes: ['profile', 'email']
@@ -95,36 +97,49 @@ export default function SignUp() {
   const handleGoogleSignUp = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
       const userInfo = await GoogleSignin.signIn();
       const tokens = await GoogleSignin.getTokens();
       const idToken = tokens.idToken;
-  
+      
       if (!idToken) {
         throw new Error("No ID token returned from Google Sign-In");
       }
-  
+
+      
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(auth, googleCredential);
       const user = userCredential.user;
+      
   
       if (!user.email?.endsWith("@ucsd.edu")) {
         await auth.signOut();
         Alert.alert("Access Denied", "Only UCSD emails are allowed.");
         return;
       }
-  
-      const response = await fetch("http://localhost:5000/api/user/check", {
+
+      const response = await fetch("https://cohabit-server.vercel.app/api/users/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),
       });
-  
+
+      console.log(response);
+      // Check if response is OK and has correct content type
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server Error: ${response.status} - ${errorText}`);
+      }
+
+      console.log("TESTA");
       const data = await response.json();
+
+      console.log("TESTB");
   
       if (data.exists) {
         Alert.alert("Success", "User exists, please log in.");
       } else {
-        await fetch("http://localhost:5000/api/user/signup", {
+        await fetch("https://cohabit-server.vercel.app/api/users/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

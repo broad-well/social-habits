@@ -1,5 +1,9 @@
 # Contains our secrets for Firebase
+src/config/firebaseConfig.ts
+src/config/serviceAccountKey.json
 firebaseConfig.ts
 serviceAccountKey.json
 __tests__/
 node_modules/
+.env
+archive/

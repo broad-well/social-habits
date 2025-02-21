@@ -38,3 +38,7 @@ yarn-error.*
 app-example
 
 config/
+
+.env
+
+credentials.json
