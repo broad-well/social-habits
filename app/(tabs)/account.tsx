@@ -130,10 +130,10 @@ export default function Account() {
         <Button
           mode="contained"
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
-          labelStyle={[styles.buttonLabel, { fontSize: 14 }]}
+          labelStyle={[styles.buttonLabel]}
           onPress={() => {}}
         >
-          Update My Courses
+          Share My Streaks
         </Button>
 
         <Button
