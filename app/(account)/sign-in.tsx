@@ -1,3 +1,4 @@
+
 import { Text, View, StyleSheet } from "react-native";
 import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
 import {
@@ -17,10 +18,22 @@ import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
 
 export function formatError(error: FirebaseError) {
-  if (error.code === "auth/invalid-credential") {
-    return "Entered credentials do not match an existing user";
+  switch (error.code) {
+    case "auth/invalid-credential":
+      return "Entered credentials do not match an existing user";
+    case "auth/invalid-email":
+      return "Please enter a valid email address";
+    case "auth/user-disabled":
+      return "This account has been disabled";
+    case "auth/user-not-found":
+      return "No account found with these credentials";
+    case "auth/wrong-password":
+      return "Incorrect password";
+    case "auth/too-many-requests":
+      return "Too many failed attempts. Please try again later";
+    default:
+      return error.message;
   }
-  return error.message;
 }
 
 export default function SignIn() {
@@ -39,6 +52,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (loaded) {
@@ -56,91 +70,127 @@ export default function SignIn() {
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
 
+  const validateInputs = () => {
+    if (!username.trim()) {
+      setError(new Error("Please enter your username"));
+      return false;
+    }
+    if (!password.trim()) {
+      setError(new Error("Please enter your password"));
+      return false;
+    }
+    return true;
+  };
+
   const handleSignIn = async () => {
+    if (!validateInputs()) return;
+
     try {
-      const cred = await signInWithEmailAndPassword(auth, username + "@ucsd.edu", password);
+      setIsLoading(true);
+      setError(null);
+
+      const cred = await signInWithEmailAndPassword(auth, username.trim() + "@ucsd.edu", password);
+      
       if (!cred.user.emailVerified) {
-        throw new Error("You must verify your email before using this app! Please check your inbox.");
+        throw new Error("You must verify your email before using this app!");
       }
+
+      router.replace("/");
 
     } catch (fail) {
       setError(fail);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
-        <View
-          style={[styles.container, { backgroundColor: theme.colors.primary }]}
-        >
-          <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-            Sign In to Cohabit
-          </Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              mode="outlined"
-              label="Username"
-              value={username}
-              onChangeText={setUsername}
-              inputMode="text"
-              style={styles.input}
-              placeholder="Enter your username"
-              placeholderTextColor={theme.colors.onBackground}
-              right={<TextInput.Affix text="@ucsd.edu" />}
-              textContentType="username"
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              mode="outlined"
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              placeholder="Enter your password"
-              passwordRules="minlength: 6; required: lower; required: digit;"
-              placeholderTextColor={theme.colors.onBackground}
-              secureTextEntry={!passwordVisible}
-              right={
-                <TextInput.Icon
-                  icon={passwordVisible ? "eye" : "eye-off"}
-                  onPress={() => setPasswordVisible(!passwordVisible)}
-                />
-              }
-            />
-          </View>
-          <Button
-            icon="login"
-            mode="contained"
-            onPress={handleSignIn}
-            style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
-            labelStyle={styles.buttonLabel}
-          >
-            Sign In
-          </Button>
-          <View style={styles.signupContainer}>
-            <Text style={{ color: theme.colors.onPrimary }}>
-              Don't have an account?{" "}
-              <Link
-                href="/(account)/sign-up"
-                style={[styles.signupLink, { color: theme.colors.onPrimary }]}
-              >
-                Sign Up!
-              </Link>
-            </Text>
-          </View>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+      >
+        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+          Sign In to Cohabit
+        </Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode="outlined"
+            label="Username"
+            value={username}
+            onChangeText={(text) => {
+              setUsername(text);
+              setError(null);
+            }}
+            inputMode="text"
+            style={styles.input}
+            placeholder="Enter your username"
+            placeholderTextColor={theme.colors.onBackground}
+            right={<TextInput.Affix text="@ucsd.edu" />}
+            textContentType="username"
+            autoCapitalize="none"
+            disabled={isLoading}
+          />
         </View>
-        <Portal>
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode="outlined"
+            label="Password"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              setError(null);
+            }}
+            style={styles.input}
+            placeholder="Enter your password"
+            passwordRules="minlength: 6; required: lower; required: digit;"
+            placeholderTextColor={theme.colors.onBackground}
+            secureTextEntry={!passwordVisible}
+            right={
+              <TextInput.Icon
+                icon={passwordVisible ? "eye" : "eye-off"}
+                onPress={() => setPasswordVisible(!passwordVisible)}
+              />
+            }
+            disabled={isLoading}
+          />
+        </View>
+        <Button
+          icon="login"
+          mode="contained"
+          onPress={handleSignIn}
+          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          labelStyle={styles.buttonLabel}
+          loading={isLoading}
+          disabled={isLoading}
+        >
+          {isLoading ? "Signing In..." : "Sign In"}
+        </Button>
+        <View style={styles.signupContainer}>
+          <Text style={{ color: theme.colors.onPrimary }}>
+            Don't have an account?{" "}
+            <Link
+              href="/(account)/sign-up"
+              style={[styles.signupLink, { color: theme.colors.onPrimary }]}
+            >
+              Sign Up!
+            </Link>
+          </Text>
+        </View>
+      </View>
+      <Portal>
         <Modal
           visible={error !== null}
+          onDismiss={() => setError(null)}
           contentContainerStyle={modalStyle.modal}
         >
           <PaperText variant="titleMedium">Sign-In Failed</PaperText>
-          <PaperText>
-            {error instanceof FirebaseError ?
-              formatError(error) : `${error}`}
+          <PaperText style={styles.errorText}>
+            {error instanceof FirebaseError ? formatError(error) : `${error}`}
           </PaperText>
+          <Button onPress={() => setError(null)} style={styles.modalButton}>
+            OK
+          </Button>
         </Modal>
       </Portal>
     </PaperProvider>
@@ -186,5 +236,12 @@ const styles = StyleSheet.create({
   signupLink: {
     textDecorationLine: "underline",
     fontWeight: "bold",
+  },
+  errorText: {
+    marginVertical: 10,
+    textAlign: 'center',
+  },
+  modalButton: {
+    marginTop: 10,
   },
 });
