@@ -1,3 +1,4 @@
+import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
 import {
@@ -11,12 +12,29 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
-import { auth } from "@/config/firebaseConfig";
+import { auth } from "../../config/firebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
 
+interface PasswordValidation {
+  hasMinLength: boolean;
+  hasMaxLength: boolean;
+  hasUpperCase: boolean;
+  hasLowerCase: boolean;
+  hasSpecialChar: boolean;
+  isMatching: boolean;
+}
+
+const initialPasswordValidation: PasswordValidation = {
+  hasMinLength: false,
+  hasMaxLength: true,
+  hasUpperCase: false,
+  hasLowerCase: false,
+  hasSpecialChar: false,
+  isMatching: false,
+};
 
 type RegistrationOutcome = {
   type: 'success'
@@ -25,12 +43,28 @@ type RegistrationOutcome = {
   error: Error,
 };
 
+export function validatePassword(password: string): Omit<PasswordValidation, 'isMatching'> {
+  return {
+    hasMinLength: password.length >= 8,
+    hasMaxLength: password.length <= 15,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  };
+}
+
 export function formatErrorMessage(error: FirebaseError) {
   if (error.code === "auth/email-already-in-use") {
     return "The email you entered is already in use. Did you mean to sign in?";
   }
   return error.message;
 }
+
+const ValidationIcon: React.FC<{ isValid: boolean }> = ({ isValid }) => (
+  <Text style={{ color: isValid ? '#4CAF50' : '#FF5252', marginRight: 8 }}>
+    {isValid ? '✓' : '✗'}
+  </Text>
+);
 
 export default function SignUp() {
   const screenOptions = {
@@ -48,9 +82,19 @@ export default function SignUp() {
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [showPasswordCriteria, setShowPasswordCriteria] = useState(false);
   const [retypePassword, setRetypePassword] = useState("");
   const [retypePasswordVisible, setRetypePasswordVisible] = useState(false);
   const [outcome, setOutcome] = useState<RegistrationOutcome | null>(null);
+  const [validation, setValidation] = useState<PasswordValidation>(initialPasswordValidation);
+
+  const updatePasswordValidation = (newPassword: string, confirmPassword: string) => {
+    const validationResult = validatePassword(newPassword);
+    setValidation({
+      ...validationResult,
+      isMatching: newPassword === confirmPassword
+    });
+  };
 
   const resetState = () => {
     setUsername("");
@@ -60,13 +104,18 @@ export default function SignUp() {
     setRetypePassword("");
     setRetypePasswordVisible(false);
     setOutcome(null);
-  }
+    setValidation(initialPasswordValidation);
+  };
 
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  useEffect(() => {
+    updatePasswordValidation(password, retypePassword);
+  }, [password, retypePassword]);
 
   if (!loaded) {
     return null;
@@ -78,12 +127,21 @@ export default function SignUp() {
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
 
+  const isPasswordValid = Object.values(validation).every(Boolean);
+
   const handleSignUp = async () => {
     if (!isEmailHandleValid(username)) {
       setUsernameError('Invalid username!');
       return;
     }
-    // TODO verify retyped password matches original password
+
+    if (!isPasswordValid) {
+      setOutcome({
+        type: 'error',
+        error: new Error('Please ensure all password requirements are met.')
+      });
+      return;
+    }
 
     try {
       const cred = await createUserWithEmailAndPassword(auth, username + '@ucsd.edu', password);
@@ -115,18 +173,22 @@ export default function SignUp() {
             placeholderTextColor={theme.colors.onBackground}
             right={<TextInput.Affix text="@ucsd.edu" />}
           />
-          {usernameError && <Text style={{ marginLeft: 8 }}>{usernameError}</Text>}
+          {usernameError && <Text style={styles.errorText}>{usernameError}</Text>}
         </View>
         <View style={styles.inputContainer}>
           <TextInput
             mode="outlined"
             label="Password"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              updatePasswordValidation(text, retypePassword);
+            }}
             style={styles.input}
             placeholder="Enter your password"
             placeholderTextColor={theme.colors.onBackground}
             secureTextEntry={!passwordVisible}
+            onFocus={() => setShowPasswordCriteria(true)}
             testID="password-input"
             right={
               <TextInput.Icon
@@ -136,15 +198,42 @@ export default function SignUp() {
               />
             }
           />
+          {showPasswordCriteria && (
+            <View style={styles.criteriaContainer}>
+              <View style={styles.criteriaRow}>
+                <ValidationIcon isValid={validation.hasMinLength} />
+                <Text style={styles.criteriaText}>At least 8 characters</Text>
+              </View>
+              <View style={styles.criteriaRow}>
+                <ValidationIcon isValid={validation.hasMaxLength} />
+                <Text style={styles.criteriaText}>Maximum 15 characters</Text>
+              </View>
+              <View style={styles.criteriaRow}>
+                <ValidationIcon isValid={validation.hasUpperCase} />
+                <Text style={styles.criteriaText}>At least one uppercase letter</Text>
+              </View>
+              <View style={styles.criteriaRow}>
+                <ValidationIcon isValid={validation.hasLowerCase} />
+                <Text style={styles.criteriaText}>At least one lowercase letter</Text>
+              </View>
+              <View style={styles.criteriaRow}>
+                <ValidationIcon isValid={validation.hasSpecialChar} />
+                <Text style={styles.criteriaText}>At least one special character (!@#$%^&*)</Text>
+              </View>
+            </View>
+          )}
         </View>
         <View style={styles.inputContainer}>
           <TextInput
             mode="outlined"
             label="Retype Password"
             value={retypePassword}
-            onChangeText={setRetypePassword}
+            onChangeText={(text) => {
+              setRetypePassword(text);
+              updatePasswordValidation(password, text);
+            }}
             style={styles.input}
-            error={retypePassword.length > 0 && retypePassword !== password}
+            error={retypePassword.length > 0 && !validation.isMatching}
             placeholder="Retype your password"
             placeholderTextColor={theme.colors.onBackground}
             secureTextEntry={!retypePasswordVisible}
@@ -155,8 +244,9 @@ export default function SignUp() {
               />
             }
           />
-          {retypePassword.length > 0 && retypePassword !== password &&
-            <Text style={{ marginLeft: 8 }}>Passwords do not match</Text>}
+          {retypePassword.length > 0 && !validation.isMatching && (
+            <Text style={styles.errorText}>Passwords do not match</Text>
+          )}
         </View>
         <Button
           icon="login"
@@ -164,8 +254,7 @@ export default function SignUp() {
           onPress={handleSignUp}
           disabled={
             username.trim().length === 0 ||
-            password.trim().length === 0 ||
-            (retypePassword !== password)
+            !isPasswordValid
           }
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
           labelStyle={styles.buttonLabel}
@@ -256,15 +345,25 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     fontWeight: "bold",
   },
-  verifyButton: {
-    height: 56,
-    justifyContent: "center",
+  criteriaContainer: {
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 8,
-    elevation: 3,
   },
-  verifyButtonLabel: {
+  criteriaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 4,
+  },
+  criteriaText: {
     fontSize: 14,
     fontFamily: "Poppins",
-    color: "#fff",
+  },
+  errorText: {
+    color: '#FF5252',
+    marginLeft: 8,
+    marginTop: 4,
+    fontFamily: "Poppins",
   },
 });
