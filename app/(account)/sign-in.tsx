@@ -1,9 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
-import {
-  MD3LightTheme as DefaultTheme,
-  PaperProvider,
-} from "react-native-paper";
+import { Button, TextInput, Portal, Modal, Text as PaperText, MD3LightTheme as DefaultTheme, PaperProvider } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
