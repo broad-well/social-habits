@@ -106,7 +106,7 @@ export default function SignIn() {
                 <TextInput.Icon
                   icon={passwordVisible ? "eye" : "eye-off"}
                   onPress={() => setPasswordVisible(!passwordVisible)}
-                  aria-label="password-visibility-toggle"
+                  accessibilityLabel="password-visibility-toggle"
                 />
               }
             />
