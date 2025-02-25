@@ -21,8 +21,8 @@ export default function HabitCreation() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),
   });
   const { colorTheme } = useColorTheme();
 
@@ -96,8 +96,8 @@ export default function HabitCreation() {
       <Stack.Screen options={screenOptions} />
       <Appbar.Header
         style={{
-          backgroundColor: theme.colors.primary,
-          height: 50,
+          backgroundColor: theme.colors.background,
+          height: 40,
         }}
       >
         <Appbar.BackAction onPress={() => router.back()} />

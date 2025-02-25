@@ -1,11 +1,4 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  ScrollView,
-  Platform,
-  FlatList,
-} from "react-native";
+import { Text, View, ScrollView } from "react-native";
 import { FAB } from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
@@ -114,8 +107,7 @@ export default function Main() {
             },
           ]}
           onPress={() => {
-            // Handle new habit creation
-            router.push("/new-habit");
+            router.push("/(habit)/new-habit");
           }}
           small={false}
         />

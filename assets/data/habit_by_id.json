@@ -1,0 +1,35 @@
+{
+  "1": {
+    "id": "1",
+    "title": "Drink Water",
+    "description": "Drink 8 glasses of water every day.",
+    "startDate": "2025-02-17",
+    "endDate": "2025-02-26",
+    "startTime": "06:00",
+    "endTime": "07:00",
+    "streaks": ["2023-10-01", "2023-10-02", "2023-10-03"],
+    "privacy": "public"
+  },
+  "2": {
+    "id": "2",
+    "title": "Exercise",
+    "description": "Exercise for 30 minutes every day.",
+    "startDate": "2025-02-17",
+    "endDate": "2025-02-26",
+    "startTime": "06:00",
+    "endTime": "07:00",
+    "streaks": ["2023-10-01", "2023-10-02", "2023-10-03"],
+    "privacy": "public"
+  },
+  "3": {
+    "id": "3",
+    "title": "Read 10 pages",
+    "description": "Read 10 pages of a book every day.",
+    "startDate": "2025-02-17",
+    "endDate": "2025-02-26",
+    "startTime": "06:00",
+    "endTime": "07:00",
+    "streaks": ["2023-10-01", "2023-10-02", "2023-10-03"],
+    "privacy": "public"
+  }
+}
