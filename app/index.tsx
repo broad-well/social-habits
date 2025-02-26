@@ -48,7 +48,7 @@ export default function Index() {
         style={[styles.container, { backgroundColor: theme.colors.primary }]}
       >
         <Image
-          source={require("../assets/images/icon.png")}
+          source={require("../assets/images/icon.png")} // eslint-disable-line
           style={styles.logo}
           resizeMode="contain"
         />
