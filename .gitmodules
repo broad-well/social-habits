@@ -1,0 +1,3 @@
+[submodule "cohabit-server"]
+	path = backend
+	url = git@github.com:r800360/cohabit-server.git
