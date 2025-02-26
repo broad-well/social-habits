@@ -1,16 +1,14 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
-import {
-  MD3LightTheme as DefaultTheme,
-  PaperProvider,
-} from "react-native-paper";
+import { Button, TextInput, Portal, Modal, Text as PaperText, MD3LightTheme as DefaultTheme, PaperProvider } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
+import Poppins from "../../assets/fonts/Poppins/Poppins-Regular.ttf";
+import PoppinsBold from "../../assets/fonts/Poppins/Poppins-Bold.ttf";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
-import { Link, router, Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
@@ -38,8 +36,8 @@ export default function SignUp() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: Poppins,
+    PoppinsBold: PoppinsBold,
   });
 
   const { colorTheme } = useColorTheme();

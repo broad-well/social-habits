@@ -1,12 +1,10 @@
-import { Text, View, StyleSheet, ScrollView, Platform } from "react-native";
-import { FAB } from "react-native-paper";
-import {
-  MD3LightTheme as DefaultTheme,
-  PaperProvider,
-} from "react-native-paper";
+import { Text, View, StyleSheet, ScrollView } from "react-native";
+import { FAB, MD3LightTheme as DefaultTheme, PaperProvider } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
+import Poppins from "../../assets/fonts/Poppins/Poppins-Regular.ttf";
+import PoppinsBold from "../../assets/fonts/Poppins/Poppins-Bold.ttf";
 import DarkThemeColors from "../../constants/DarkThemeColors.json";
 import LightThemeColors from "../../constants/LightThemeColors.json";
 import { useColorTheme } from "../../stores/useColorTheme";
@@ -18,8 +16,8 @@ import {
 
 export default function Main() {
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: Poppins,
+    PoppinsBold: PoppinsBold,
   });
 
   const { colorTheme } = useColorTheme();
@@ -157,7 +155,7 @@ export default function Main() {
                   { color: theme.colors.onBackground },
                 ]}
               >
-                Today's Habits
+                Today&apos;s Habits
               </Text>
               {/* Add your habit list items here */}
             </View>

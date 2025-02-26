@@ -3,10 +3,12 @@ import { Button, TextInput, Portal, Modal, Text as PaperText, MD3LightTheme as D
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
+import Poppins from "../../assets/fonts/Poppins/Poppins-Regular.ttf";
+import PoppinsBold from "../../assets/fonts/Poppins/Poppins-Bold.ttf";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
-import { Link, router, Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebaseConfig";
 import { modalStyle } from "@/components/modalStyle";
@@ -25,8 +27,8 @@ export default function SignIn() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: Poppins,
+    PoppinsBold: PoppinsBold,
   });
 
   const { colorTheme } = useColorTheme();
@@ -118,7 +120,7 @@ export default function SignIn() {
           </Button>
           <View style={styles.signupContainer}>
             <Text style={{ color: theme.colors.onPrimary }}>
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/(account)/sign-up"
                 style={[styles.signupLink, { color: theme.colors.onPrimary }]}

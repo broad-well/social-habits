@@ -1,12 +1,11 @@
 import { Image, Text, View, StyleSheet } from "react-native";
-import { Button } from "react-native-paper";
-import {
-  MD3LightTheme as DefaultTheme,
-  PaperProvider,
-} from "react-native-paper";
+import { Button, MD3LightTheme as DefaultTheme, PaperProvider } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
+import Poppins from "../assets/fonts/Poppins/Poppins-Regular.ttf";
+import PoppinsBold from "../assets/fonts/Poppins/Poppins-Bold.ttf";
+import icon from "../assets/images/icon.png";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
@@ -18,8 +17,8 @@ export default function Index() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: Poppins,
+    PoppinsBold: PoppinsBold,
   });
   const { colorTheme } = useColorTheme();
 
@@ -46,7 +45,7 @@ export default function Index() {
         style={[styles.container, { backgroundColor: theme.colors.primary }]}
       >
         <Image
-          source={require("../assets/images/icon.png")}
+          source={icon}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -64,7 +63,7 @@ export default function Index() {
         </Button>
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimary }}>
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/(account)/sign-up"
               style={[styles.signupLink, { color: theme.colors.onPrimary }]}
