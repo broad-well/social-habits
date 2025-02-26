@@ -116,12 +116,12 @@ export default function Account() {
         >
           Update Profile
         </Button>
-
+        
         <Button
           mode="contained"
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => {}}
+          onPress={() => router.push("/(friends)/list")}
         >
           Friend List
         </Button>
