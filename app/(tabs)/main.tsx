@@ -1,3 +1,4 @@
+import React from "react";
 import { Text, View, StyleSheet, ScrollView, Platform } from "react-native";
 import { FAB } from "react-native-paper";
 import {
