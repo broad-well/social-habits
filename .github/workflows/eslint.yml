@@ -1,4 +1,4 @@
-name: Jest unit tests
+name: ESLint
 
 on:
   push:
@@ -24,6 +24,4 @@ jobs:
         cache: 'npm'
 
     - run: npm ci
-    - run: npm run test-ci
-      env:
-        FIREBASE_CLIENT_OPTIONS: ${{ secrets.FIREBASE_CLIENT_OPTIONS }}
+    - run: npm run lint

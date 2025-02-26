@@ -117,6 +117,7 @@ export default function SignIn() {
               <TextInput.Icon
                 icon={passwordVisible ? "eye" : "eye-off"}
                 onPress={() => setPasswordVisible(!passwordVisible)}
+                  accessibilityLabel="password-visibility-toggle"
               />
             }
           />
