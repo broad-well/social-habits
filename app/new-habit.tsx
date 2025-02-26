@@ -1,3 +1,4 @@
+import React from "react";
 import { Text, View, StyleSheet, ScrollView } from "react-native";
 import { Button, TextInput, Appbar } from "react-native-paper";
 import RadioButtonRN from "radio-buttons-react-native";

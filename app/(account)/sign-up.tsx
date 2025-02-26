@@ -1,3 +1,4 @@
+import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
 import {
@@ -10,7 +11,7 @@ import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
-import { Link, router, Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
