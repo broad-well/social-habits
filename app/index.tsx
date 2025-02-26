@@ -1,3 +1,4 @@
+import React from "react";
 import { Image, Text, View, StyleSheet } from "react-native";
 import { Button } from "react-native-paper";
 import {
@@ -18,8 +19,8 @@ export default function Index() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    PoppinsBold: require("../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
   const { colorTheme } = useColorTheme();
 
@@ -40,13 +41,14 @@ export default function Index() {
   };
 
   return (
+    /* eslint-disable react/no-unescaped-entities */
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
       <View
         style={[styles.container, { backgroundColor: theme.colors.primary }]}
       >
         <Image
-          source={require("../assets/images/icon.png")}
+          source={require("../assets/images/icon.png")} // eslint-disable-line
           style={styles.logo}
           resizeMode="contain"
         />

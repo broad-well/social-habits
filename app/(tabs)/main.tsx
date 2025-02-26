@@ -1,3 +1,4 @@
+import React from "react";
 import { Text, View, StyleSheet, ScrollView, Platform } from "react-native";
 import { FAB } from "react-native-paper";
 import {
@@ -10,7 +11,7 @@ import { useFonts } from "expo-font";
 import DarkThemeColors from "../../constants/DarkThemeColors.json";
 import LightThemeColors from "../../constants/LightThemeColors.json";
 import { useColorTheme } from "../../stores/useColorTheme";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -18,8 +19,8 @@ import {
 
 export default function Main() {
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
@@ -119,6 +120,7 @@ export default function Main() {
   };
 
   return (
+    /* eslint-disable react/no-unescaped-entities */
     <PaperProvider theme={theme}>
       <SafeAreaView style={styles.safeArea}>
         <Stack.Screen options={{ headerShown: false }} />
@@ -176,6 +178,7 @@ export default function Main() {
             ]}
             onPress={() => {
               // Handle new habit creation
+              router.push("/new-habit");
             }}
             small={false}
           />
