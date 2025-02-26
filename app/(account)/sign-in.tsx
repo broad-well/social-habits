@@ -62,7 +62,7 @@ export default function SignIn() {
       if (!cred.user.emailVerified) {
         throw new Error("You must verify your email before using this app! Please check your inbox.");
       }
-
+      router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);
     }
