@@ -8,15 +8,15 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { useFonts } from "expo-font";
-import DarkThemeColors from "../../constants/DarkThemeColors.json";
-import LightThemeColors from "../../constants/LightThemeColors.json";
-import { useColorTheme } from "../../stores/useColorTheme";
+import DarkThemeColors from "@/constants/DarkThemeColors.json";
+import LightThemeColors from "@/constants/LightThemeColors.json";
+import { useColorTheme } from "@/stores/useColorTheme";
 import { Stack, router } from "expo-router";
 
 export default function Account() {
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
@@ -92,9 +92,12 @@ export default function Account() {
 
   return (
     <PaperProvider theme={theme}>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen name="Account" options={{
+        headerShown: false,
+        title: "Account"
+      }} />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+        style={[styles.container, { backgroundColor: theme.colors.primaryContainer }]}
       >
         <View style={styles.avatarContainer}>
           <Image
@@ -105,13 +108,13 @@ export default function Account() {
           />
         </View>
 
-        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+        <Text style={[styles.title, { color: theme.colors.primary }]}>
           My Account
         </Text>
 
         <Button
           mode="contained"
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
           onPress={() => {}}
         >
@@ -120,16 +123,16 @@ export default function Account() {
         
         <Button
           mode="contained"
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => router.push("/(friends)/list")}
+          onPress={() => router.push("/(tabs)/account/friends")}
         >
           Friend List
         </Button>
 
         <Button
           mode="contained"
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={[styles.buttonLabel, { fontSize: 14 }]}
           onPress={() => {}}
         >

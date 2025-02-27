@@ -99,9 +99,9 @@ export default function SignUp() {
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+        style={[styles.container, { backgroundColor: theme.colors.primaryContainer }]}
       >
-        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+        <Text style={[styles.title, { color: theme.colors.onPrimaryContainer }]}>
           Sign Up to Cohabit
         </Text>
         <View style={styles.inputContainer}>
@@ -168,7 +168,7 @@ export default function SignUp() {
             password.trim().length === 0 ||
             (retypePassword !== password)
           }
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
         >
           Sign Up
