@@ -58,4 +58,37 @@ describe('SignUp Screen', () => {
       expect(retypePasswordInput.props.secureTextEntry).toBe(false);
     });
   });
+
+  it('provides a warning when retyped password does not match original password', async () => {
+    const { getByPlaceholderText, getByText } = render(<SignUp />);
+
+    const passwordInput = getByPlaceholderText('Enter your password');
+    const retypePasswordInput = getByPlaceholderText('Retype your password');
+
+    act(() => {
+      fireEvent.changeText(passwordInput, "password");
+      fireEvent.changeText(retypePasswordInput, "notthesamepassword");
+    });
+
+    await waitFor(() => {
+      expect(getByText("Passwords do not match")).toBeTruthy();
+    });
+  });
+
+  it('provides no warning when retyped password matches original password', async () => {
+    const { getByPlaceholderText, queryByText } = render(<SignUp />);
+
+    const passwordInput = getByPlaceholderText('Enter your password');
+    const retypePasswordInput = getByPlaceholderText('Retype your password');
+
+    act(() => {
+      fireEvent.changeText(passwordInput, "password");
+      fireEvent.changeText(retypePasswordInput, "password");
+    });
+
+    await waitFor(() => {
+      expect(queryByText("Passwords do not match")).toBeNull();
+    });
+  });
+
 });
