@@ -1,6 +1,7 @@
 import {jest} from '@jest/globals'
 import "@testing-library/jest-native/extend-expect";
 import "react-native-gesture-handler/jestSetup";
+import { NavigationContainer } from '@react-navigation/native';
 
 jest.mock("expo-font", () => ({
     isLoaded: jest.fn(() => true),
@@ -13,6 +14,16 @@ jest.mock("expo-constants", () => ({
         extra: {},
     },
 }));
+
+jest.mock("@react-navigation/native", () => {
+    const actualNav = jest.requireActual("@react-navigation/native");
+    return {
+      ...actualNav,
+      useNavigation: jest.fn(() => ({
+        navigate: jest.fn(),
+      })),
+    };
+  });
 
 jest.mock('expo-router', () => ({
     Link: jest.fn().mockImplementation(({ children }) => children),
