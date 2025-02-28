@@ -28,8 +28,6 @@ export function formatError(error: FirebaseError) {
   }
   return error.message;
 }
-import { sendLocalNotification } from "../utils/notifications";
-
 
 export default function SignIn() {
   const screenOptions = {

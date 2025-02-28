@@ -14,6 +14,7 @@ import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { scheduleDailyNotification } from "./utils/notifications";
 
 export default function HabitCreation() {
   const screenOptions = {
@@ -48,8 +49,10 @@ export default function HabitCreation() {
     setPrivacy("Public");
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Logic to save the habit
+    await scheduleDailyNotification();
+
     router.back();
   };
 
