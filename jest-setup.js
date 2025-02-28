@@ -1,7 +1,6 @@
 import {jest} from '@jest/globals'
 import "@testing-library/jest-native/extend-expect";
 import "react-native-gesture-handler/jestSetup";
-import { NavigationContainer } from '@react-navigation/native';
 
 jest.mock("expo-font", () => ({
     isLoaded: jest.fn(() => true),
