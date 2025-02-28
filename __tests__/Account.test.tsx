@@ -17,7 +17,7 @@ describe('Account Screen', () => {
     });
   });
 
-  it('takes us to Sign In screen when Sign Out button is pressed', async() => {
+  it('takes us to Index screen when Sign Out button is pressed', async() => {
     const { getByText } = render(<Account/>)
 
     act(() => {
