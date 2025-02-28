@@ -27,22 +27,30 @@ export async function sendLocalNotification(title: string, body:string) {
     });
 }
 
-export const scheduleDailyNotification = async () => {
+export const scheduleHabitNotification = async (habitName: string, habitTime: Date) => {
+
+    const hour = habitTime.getHours();
+    const minute = habitTime.getMinutes();
+
+    const notifContent = {
+        title: '${habitName} Reminder',
+        body: 'Time to work on your habit: ${habitName}!',
+        categoryIdentifier: 'habit-reminders',
+    };
+
+    const notifTrigger = {
+        type: 'calendar',
+        hour,
+        minute,
+        repeats: true,
+    } as Notifications.CalendarTriggerInput;
+
     await Notifications.scheduleNotificationAsync({
-        content: {
-            title: "Habit Reminder",
-            body: "Time to build your software engineering skills! Keep up your 5 day streak.",
-            categoryIdentifier: 'habit-reminders',
-        },
-        trigger: {
-            type: 'calendar',
-            hour: 13,
-            minute: 33,
-            repeats: true,
-        } as Notifications.CalendarTriggerInput,
+        content: notifContent,
+        trigger: notifTrigger,
     });
 
-    console.log("Daily notification scheduled!");
+    console.log("${habitName} notification scheduled!");
 }
 
 Notifications.setNotificationHandler({
