@@ -11,7 +11,7 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
-import { sendLocalNotification, requestNotificationPermissions, scheduleDailyNotification } from "../utils/notifications";
+import { sendLocalNotification } from "../utils/notifications";
 
 
 export default function SignIn() {
@@ -35,7 +35,6 @@ export default function SignIn() {
       SplashScreen.hideAsync();
     }
 
-    requestNotificationPermissions();
   }, [loaded]);
 
   if (!loaded) {
@@ -53,7 +52,7 @@ export default function SignIn() {
       `Attempting to sign in with username: ${username}@ucsd.edu and password: ${password}`
     );
 
-    await scheduleDailyNotification();
+    // await scheduleDailyNotification();
     await sendLocalNotification("Sign In Successful", `Welcome back to Cohabit, ${username}`)
 
     // TODO: Add authentication logic here
