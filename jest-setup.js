@@ -1,3 +1,4 @@
+import {jest} from '@jest/globals'
 import "@testing-library/jest-native/extend-expect";
 import "react-native-gesture-handler/jestSetup";
 
@@ -36,6 +37,6 @@ jest.mock('./stores/useColorTheme', () => ({
 jest.mock('./assets/fonts/Poppins/Poppins-Regular.ttf', () => '');
 jest.mock('./assets/fonts/Poppins/Poppins-Bold.ttf', () => '');
 
-global.setImmediate = (callback) => setTimeout(callback, 0);
+global.setImmediate = (callback) => setTimeout(callback, 0); // eslint-disable-line
 
 jest.setTimeout(30000); // 30 seconds

@@ -1,5 +1,11 @@
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton } from "react-native-paper";
+import {
+  Button,
+  TextInput,
+  Portal,
+  Modal,
+  Text as PaperText,
+} from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -11,6 +17,17 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/config/firebaseConfig";
+import { modalStyle } from "@/components/modalStyle";
+import { FirebaseError } from "firebase/app";
+
+export function formatError(error: FirebaseError) {
+  if (error.code === "auth/invalid-credential") {
+    return "Entered credentials do not match an existing user";
+  }
+  return error.message;
+}
 import { sendLocalNotification } from "../utils/notifications";
 
 
@@ -20,8 +37,8 @@ export default function SignIn() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
@@ -29,6 +46,7 @@ export default function SignIn() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [error, setError] = useState<unknown | null>(null);
 
   useEffect(() => {
     if (loaded) {
@@ -48,82 +66,99 @@ export default function SignIn() {
   };
 
   const handleSignIn = async () => {
-    console.log(
-      `Attempting to sign in with username: ${username}@ucsd.edu and password: ${password}`
-    );
-
-    // await scheduleDailyNotification();
-    await sendLocalNotification("Sign In Successful", `Welcome back to Cohabit, ${username}`)
-
-    // TODO: Add authentication logic here
-
-    // Go to main page
-    router.push("/(tabs)/main");
+    try {
+      const cred = await signInWithEmailAndPassword(
+        auth,
+        username + "@ucsd.edu",
+        password
+      );
+      if (!cred.user.emailVerified) {
+        throw new Error(
+          "You must verify your email before using this app! Please check your inbox."
+        );
+      }
+    } catch (fail) {
+      setError(fail);
+    }
   };
 
   return (
-    <>
+    /* eslint-disable react/no-unescaped-entities */
+    <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
-      <PaperProvider theme={theme}>
-        <View
-          style={[styles.container, { backgroundColor: theme.colors.primary }]}
-        >
-          <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-            Sign In to Cohabit
-          </Text>
-          <View style={styles.inputContainer}>
-            <TextInput
-              mode="outlined"
-              label="Username"
-              value={username}
-              onChangeText={setUsername}
-              style={styles.input}
-              placeholder="Enter your username"
-              placeholderTextColor={theme.colors.onBackground}
-              right={<TextInput.Affix text="@ucsd.edu" />}
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              mode="outlined"
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              placeholder="Enter your password"
-              placeholderTextColor={theme.colors.onBackground}
-              secureTextEntry={!passwordVisible}
-              right={
-                <TextInput.Icon
-                  icon={passwordVisible ? "eye" : "eye-off"}
-                  onPress={() => setPasswordVisible(!passwordVisible)}
-                />
-              }
-            />
-          </View>
-          <Button
-            icon="login"
-            mode="contained"
-            onPress={handleSignIn}
-            style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
-            labelStyle={styles.buttonLabel}
-          >
-            Sign In
-          </Button>
-          <View style={styles.signupContainer}>
-            <Text style={{ color: theme.colors.onPrimary }}>
-              Don't have an account?{" "}
-              <Link
-                href="/(account)/sign-up"
-                style={[styles.signupLink, { color: theme.colors.onPrimary }]}
-              >
-                Sign Up!
-              </Link>
-            </Text>
-          </View>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+      >
+        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+          Sign In to Cohabit
+        </Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode="outlined"
+            label="Username"
+            value={username}
+            onChangeText={setUsername}
+            inputMode="text"
+            style={styles.input}
+            placeholder="Enter your username"
+            placeholderTextColor={theme.colors.onBackground}
+            right={<TextInput.Affix text="@ucsd.edu" />}
+            textContentType="username"
+          />
         </View>
-      </PaperProvider>
-    </>
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode="outlined"
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            placeholder="Enter your password"
+            passwordRules="minlength: 6; required: lower; required: digit;"
+            placeholderTextColor={theme.colors.onBackground}
+            secureTextEntry={!passwordVisible}
+            right={
+              <TextInput.Icon
+                icon={passwordVisible ? "eye" : "eye-off"}
+                onPress={() => setPasswordVisible(!passwordVisible)}
+                  accessibilityLabel="password-visibility-toggle"
+              />
+            }
+          />
+        </View>
+        <Button
+          icon="login"
+          mode="contained"
+          onPress={handleSignIn}
+          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          labelStyle={styles.buttonLabel}
+        >
+          Sign In
+        </Button>
+        <View style={styles.signupContainer}>
+          <Text style={{ color: theme.colors.onPrimary }}>
+            Don't have an account?{" "}
+            <Link
+              href="/(account)/sign-up"
+              style={[styles.signupLink, { color: theme.colors.onPrimary }]}
+            >
+              Sign Up!
+            </Link>
+          </Text>
+        </View>
+      </View>
+      <Portal>
+        <Modal
+          visible={error !== null}
+          contentContainerStyle={modalStyle.modal}
+        >
+          <PaperText variant="titleMedium">Sign-In Failed</PaperText>
+          <PaperText>
+            {error instanceof FirebaseError ? formatError(error) : `${error}`}
+          </PaperText>
+        </Modal>
+      </Portal>
+    </PaperProvider>
   );
 }
 
