@@ -36,6 +36,11 @@ jest.mock('./stores/useColorTheme', () => ({
     })
 }));
 
+jest.mock('react-native-safe-area-context', () => ({
+    ...jest.requireActual('react-native-safe-area-context'),
+    useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
+}));
+
 jest.mock('./assets/fonts/Poppins/Poppins-Regular.ttf', () => '');
 jest.mock('./assets/fonts/Poppins/Poppins-Bold.ttf', () => '');
 
