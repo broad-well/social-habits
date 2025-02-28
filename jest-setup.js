@@ -15,16 +15,6 @@ jest.mock("expo-constants", () => ({
     },
 }));
 
-jest.mock("@react-navigation/native", () => {
-    const actualNav = jest.requireActual("@react-navigation/native");
-    return {
-      ...actualNav,
-      useNavigation: jest.fn(() => ({
-        navigate: jest.fn(),
-      })),
-    };
-  });
-
 jest.mock('expo-router', () => ({
     Link: jest.fn().mockImplementation(({ children }) => children),
     Stack: {
@@ -32,6 +22,7 @@ jest.mock('expo-router', () => ({
     },
     router: {
         push: jest.fn(),
+        replace: jest.fn(),
     }
 }));
 

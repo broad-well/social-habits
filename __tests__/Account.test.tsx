@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
 import Account from '../app/(tabs)/account';
-import { NavigationContainer } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 describe('Account Screen', () => {
 
@@ -18,15 +18,13 @@ describe('Account Screen', () => {
   });
 
   it('takes us to Sign In screen when Sign Out button is pressed', async() => {
-    const { getByText } = render(
-      <NavigationContainer>
-        <Account />
-      </NavigationContainer>
-    );
+    const { getByText } = render(<Account/>)
 
-    fireEvent.press(getByText("Sign Out"));
+    act(() => {
+      fireEvent.press(getByText("Sign Out"));
+    });
 
-    expect(require("@react-navigation/native").useNavigation().navigate).toHaveBeenCalledWith("SignIn");
+    expect(router.replace).toHaveBeenCalledWith("/");
   });
 
 });
