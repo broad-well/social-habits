@@ -20,9 +20,12 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '@/config/firebaseConfig';
 import { Alert } from 'react-native';
-import dotenv from "dotenv";
+// import { Logs } from 'expo';
 
-dotenv.config();
+// Logs.enableExpoCliLogging()
+// import dotenv from "dotenv";
+
+// dotenv.config();
 
 type RegistrationOutcome = {
   type: 'success'
@@ -78,7 +81,7 @@ export default function SignUp() {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+      webClientId: "884027047581-vro97mr4eg39fba7rla68uup2bd3jqoa.apps.googleusercontent.com",
       offlineAccess: false,
       scopes: ['profile', 'email']
     });
@@ -94,47 +97,110 @@ export default function SignUp() {
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
 
+  const checkUserExists = async (email: string) => {
+    try {
+      const response = await fetch("https://cohabit-server.vercel.app/api/users/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (!response.ok) throw new Error("Server error");
+  
+      const data = await response.json();
+      return data.exists;
+    } catch (error) {
+      console.error("Error checking user existence:", error);
+      return false;
+    }
+  };
+
   const handleGoogleSignUp = async () => {
+    
     try {
       await GoogleSignin.hasPlayServices();
       await GoogleSignin.signOut();
       const userInfo = await GoogleSignin.signIn();
-      const tokens = await GoogleSignin.getTokens();
-      const idToken = tokens.idToken;
+      //const tokens = await GoogleSignin.getTokens();
+      const idToken = userInfo.data?.idToken;
+      
+      console.warn("First Token" + idToken);
+      console.log("First Token" + idToken);
+      console.error("First Token" + idToken);
       
       if (!idToken) {
         throw new Error("No ID token returned from Google Sign-In");
       }
 
+
+      // signInWithPopup(auth, provider)
+      // .then((result) => {
+      //   // This gives you a Google Access Token. You can use it to access the Google API.
+      //   const credential = GoogleAuthProvider.credentialFromResult(result);
+      //   const token = credential.accessToken;
+      //   // The signed-in user info.
+      //   const user = result.user;
+      //   // IdP data available using getAdditionalUserInfo(result)
+      //   // ...
+      // }).catch((error) => {
+      //   // Handle Errors here.
+      //   const errorCode = error.code;
+      //   const errorMessage = error.message;
+      //   // The email of the user's account used.
+      //   const email = error.customData.email;
+      //   // The AuthCredential type that was used.
+      //   const credential = GoogleAuthProvider.credentialFromError(error);
+      //   // ...
+      // });
+
       
       const googleCredential = GoogleAuthProvider.credential(idToken);
       const userCredential = await signInWithCredential(auth, googleCredential);
       const user = userCredential.user;
-      
-  
-      if (!user.email?.endsWith("@ucsd.edu")) {
+      //userCredential.
+      // const user = userInfo.data?.user;
+      const firebaseIdToken = user.getIdToken(true);
+
+      console.warn("Second Token" + idToken);
+      console.log("Second Token" + idToken);
+      console.error("Second Token" + idToken);
+
+      if (!user?.email?.endsWith("@ucsd.edu")) {
         await auth.signOut();
         Alert.alert("Access Denied", "Only UCSD emails are allowed.");
         return;
       }
 
-      const response = await fetch("https://cohabit-server.vercel.app/api/users/check", {
+      // const response = await fetch("https://cohabit-server.vercel.app/api/users/check", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ email: user.email }),
+      // });
+      // Send the ID token to the backend
+      const responseA = await fetch("https://cohabit-server.vercel.app/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: user.email }),
+        body: JSON.stringify({ idToken }),
       });
 
-      console.log(response);
+      console.error("FIRST RAN PROPERLY")
+      const response = await fetch("https://cohabit-server.vercel.app/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firebaseIdToken }),
+      });
+      console.error("SUCCESS");
+
+      // console.log(response);
+      
       // Check if response is OK and has correct content type
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Server Error: ${response.status} - ${errorText}`);
       }
 
-      console.log("TESTA");
       const data = await response.json();
 
-      console.log("TESTB");
   
       if (data.exists) {
         Alert.alert("Success", "User exists, please log in.");
@@ -154,13 +220,6 @@ export default function SignUp() {
       console.error(error);
       Alert.alert("Login Failed", "Please try again.");
     }
-  };
-
-  const handleSignIn = () => {
-    console.log(
-      `Attempting to sign in with username: ${username}@ucsd.edu and password: ${password}`
-    );
-    // Add authentication logic here
   };
 
   const handleSignUp = async () => {
@@ -186,7 +245,7 @@ export default function SignUp() {
         style={[styles.container, { backgroundColor: theme.colors.primary }]}
       >
         <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-          Sign Up to Cohabit
+          Sign Up to Cohabit TEST
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
