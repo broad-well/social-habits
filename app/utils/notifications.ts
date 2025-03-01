@@ -33,8 +33,8 @@ export const scheduleHabitNotification = async (habitName: string, habitTime: Da
     const minute = habitTime.getMinutes();
 
     const notifContent = {
-        title: '${habitName} Reminder',
-        body: 'Time to work on your habit: ${habitName}!',
+        title: `${habitName} Reminder`,
+        body: `Time to work on your habit: ${habitName}!`,
         categoryIdentifier: 'habit-reminders',
     };
 
@@ -50,7 +50,7 @@ export const scheduleHabitNotification = async (habitName: string, habitTime: Da
         trigger: notifTrigger,
     });
 
-    console.log("${habitName} notification scheduled!");
+    console.log(`${habitName} notification scheduled!`);
 }
 
 Notifications.setNotificationHandler({
