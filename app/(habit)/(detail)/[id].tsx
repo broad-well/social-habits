@@ -26,13 +26,12 @@ export default function Detail() {
   };
 
   const getStreakImage = (streakCount: number) => {
-    streakCount = 10;
     if (streakCount === 0) {
-      return require("@/assets/images/deadfire.jpg");
+      return { uri: "/assets/images/deadfire.jpg" };
     } else if (streakCount < 5) {
-      return require("@/assets/images/smallfire.png");
+      return { uri: "/assets/images/smallfire.png" };
     } else {
-      return require("@/assets/images/largefire.jpg");
+      return { uri: "/assets/images/largefire.jpg" };
     }
   };
 
@@ -138,15 +137,9 @@ export default function Detail() {
             </View>
           </View>
           <MonthlyView streaks={habit.streaks} />
-          {true && (
-            <Button
-              mode="contained"
-              onPress={() => {}}
-              style={{ marginTop: 10 }}
-            >
-              Complete Habit!
-            </Button>
-          )}
+          <Button mode="contained" onPress={() => {}} style={{ marginTop: 10 }}>
+            Complete Habit!
+          </Button>
           <Button
             mode="contained"
             onPress={() => navigateToUpdatePage(id as string)}

@@ -1,4 +1,3 @@
-import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 import {
   Button,
@@ -6,8 +5,6 @@ import {
   Portal,
   Modal,
   Text as PaperText,
-} from "react-native-paper";
-import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
@@ -49,7 +46,7 @@ export default function SignUp() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
     PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
