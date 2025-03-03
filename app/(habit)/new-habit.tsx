@@ -1,4 +1,5 @@
-import { Text, View, StyleSheet, ScrollView } from "react-native";
+import React from "react";
+import { Text, View, ScrollView } from "react-native";
 import { Button, TextInput, Appbar } from "react-native-paper";
 import RadioButtonRN from "radio-buttons-react-native";
 import {
@@ -21,8 +22,8 @@ export default function HabitCreation() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
   const { colorTheme } = useColorTheme();
 
@@ -148,7 +149,7 @@ export default function HabitCreation() {
                 { label: "Every day", value: "everyDay" },
                 { label: "Set Dates", value: "setDates" },
               ]}
-              selectedBtn={(e: any) => handleEveryDayChange(e.value)}
+              selectedBtn={(e: any) => handleEveryDayChange(e.value)} // eslint-disable-line
               box={false}
               initial={frequency === 0 ? 1 : 2}
               textStyle={{ color: theme.colors.onPrimary }}
@@ -208,7 +209,7 @@ export default function HabitCreation() {
                 { label: "Any", value: "anyTime" },
                 { label: "Set time", value: "setTime" },
               ]}
-              selectedBtn={(e: any) => handleAnyTimeChange(e.value)}
+              selectedBtn={(e: any) => handleAnyTimeChange(e.value)} // eslint-disable-line
               box={false}
               initial={timeType === 0 ? 1 : 2}
               textStyle={{ color: theme.colors.onPrimary }}
@@ -264,7 +265,7 @@ export default function HabitCreation() {
                 { label: "Friend-Only", value: "Friend-Only" },
                 { label: "Private", value: "Private" },
               ]}
-              selectedBtn={(e: any) => handlePrivacyChange(e.value)}
+              selectedBtn={(e: any) => handlePrivacyChange(e.value)} // eslint-disable-line
               box={false}
               initial={
                 privacy === "Public" ? 1 : privacy === "Friend-Only" ? 2 : 3

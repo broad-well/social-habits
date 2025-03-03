@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View, ScrollView } from "react-native";
-import { FAB } from "react-native-paper";
 import {
+  FAB,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
 import { getDateLabel, getWeekDates } from "@/utils/dateConversion";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
@@ -23,8 +22,8 @@ import HabitList from "@/components/HabitList";
 
 export default function Main() {
   const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
