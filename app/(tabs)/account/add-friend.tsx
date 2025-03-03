@@ -1,8 +1,8 @@
 import { useColorTheme } from "@/stores/useColorTheme";
-import { DefaultTheme, PaperProvider, Text, ActivityIndicator, Card, Button, Icon, MD3Colors, FAB, Searchbar, TextInput, Divider, Appbar } from "react-native-paper";
+import { DefaultTheme, PaperProvider, Text, ActivityIndicator, Card, Button, Icon, TextInput, Appbar } from "react-native-paper";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
-import { StyleSheet, FlatList, Button as RNButton, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React from "react";
 import { useFonts } from "expo-font";
 import { router, SplashScreen, Stack } from "expo-router";
@@ -33,8 +33,8 @@ async function fetchUserByEmail(handle: string): Promise<FriendListItem | null> 
 
 export default function AddFriend() {
   const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),// eslint-disable-line
   });
 
   React.useEffect(() => {
@@ -43,9 +43,6 @@ export default function AddFriend() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
   const { colorTheme } = useColorTheme();
 
   const theme = {
@@ -101,6 +98,9 @@ export default function AddFriend() {
     React.useCallback(() => fetchUserByEmail(queryEmail), [queryEmail])
   );
 
+  if (!loaded) {
+    return null;
+  }
   return <PaperProvider theme={theme}>
     <Stack.Screen options={{
       title: "Add friend",
@@ -171,7 +171,7 @@ export default function AddFriend() {
           <View style={stylesheet.errorMessage}>
             <Icon source="account-question" color={theme.colors.error} size={48} />
             <Text>
-              Can't find this user
+              Can&apos;t find this user
             </Text>
           </View>}
       </View>

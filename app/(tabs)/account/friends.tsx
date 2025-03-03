@@ -1,9 +1,9 @@
 import { useColorTheme } from "@/stores/useColorTheme";
-import { DefaultTheme, PaperProvider, Text, List, ActivityIndicator, Card, Button, Icon, MD3Colors, Searchbar, FAB, Appbar } from "react-native-paper";
+import { DefaultTheme, PaperProvider, Text, ActivityIndicator, Card, Button, Icon, MD3Colors, FAB, Appbar } from "react-native-paper";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
-import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { StyleSheet, FlatList, Button as RNButton, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StyleSheet, FlatList, View } from "react-native";
 import React from "react";
 import { useFonts } from "expo-font";
 import { router, SplashScreen, Stack } from "expo-router";
@@ -41,8 +41,8 @@ async function fetchFriendList(): Promise<FriendListItem[]> {
 
 export default function FriendList() {
   const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),// eslint-disable-line
   });
 
   React.useEffect(() => {
@@ -51,9 +51,6 @@ export default function FriendList() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
   const { colorTheme } = useColorTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
@@ -118,6 +115,10 @@ export default function FriendList() {
       }
     })();
   }, []);
+
+  if (!loaded) {
+    return null;
+  }
 
   return <PaperProvider theme={theme}>
     <View style={stylesheet.container}>

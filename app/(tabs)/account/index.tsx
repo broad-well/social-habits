@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
-import { Button, TextInput, IconButton } from "react-native-paper";
-import {
+import { Button, TextInput, IconButton ,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";

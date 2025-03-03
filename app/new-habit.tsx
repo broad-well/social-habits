@@ -1,13 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, ScrollView } from "react-native";
-import { Button, TextInput, Appbar } from "react-native-paper";
-import RadioButtonRN from "radio-buttons-react-native";
-import {
+import { Button, TextInput, Appbar ,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
+import RadioButtonRN from "radio-buttons-react-native";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
