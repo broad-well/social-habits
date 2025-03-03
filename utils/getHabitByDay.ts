@@ -1,6 +1,21 @@
-// TODO: In the future, this will be replaced with a call to the database
+interface Habit {
+  id: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+  streaks: string[];
+  privacy: string;
+}
+
+interface HabitsByDay {
+  [date: string]: Habit[];
+}
+
+import habits from "@/assets/data/habits_by_day.json";
+
 export const getHabitByDay = (date: string) => {
-  const habits = require("@/assets/data/habits_by_day.json");
-  // if the date is not in the habits object, return an empty array
-  return habits[date] || [];
+  return (habits as HabitsByDay)[date] || [];
 };
