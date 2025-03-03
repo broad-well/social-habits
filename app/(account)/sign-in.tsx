@@ -50,6 +50,7 @@ export default function SignIn() {
     if (loaded) {
       SplashScreen.hideAsync();
     }
+
   }, [loaded]);
 
   if (!loaded) {
@@ -74,6 +75,7 @@ export default function SignIn() {
           "You must verify your email before using this app! Please check your inbox."
         );
       }
+      router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);
     }
@@ -134,7 +136,7 @@ export default function SignIn() {
         </Button>
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimary }}>
-            Don't have an account?{" "} 
+            Don't have an account?{" "}
             <Link
               href="/(account)/sign-up"
               style={[styles.signupLink, { color: theme.colors.onPrimary }]}
