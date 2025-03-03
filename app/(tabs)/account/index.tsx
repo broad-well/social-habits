@@ -12,6 +12,7 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Stack, router } from "expo-router";
+import Avatar from "@/components/accounts/Avatar";
 
 export default function Account() {
   const [loaded] = useFonts({
@@ -72,14 +73,6 @@ export default function Account() {
     },
   });
 
-  const avatarStyle = {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 3,
-    borderColor: theme.colors.onPrimary,
-  };
-
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -100,12 +93,7 @@ export default function Account() {
         style={[styles.container, { backgroundColor: theme.colors.primaryContainer }]}
       >
         <View style={styles.avatarContainer}>
-          <Image
-            source={{
-              uri: "https://i.pinimg.com/originals/ae/c6/2f/aec62fe5319733b32fde1a6a3ff28e7b.jpg",
-            }} // Placeholder image
-            style={avatarStyle}
-          />
+          <Avatar imageUrl="https://i.pinimg.com/originals/ae/c6/2f/aec62fe5319733b32fde1a6a3ff28e7b.jpg" />
         </View>
 
         <Text style={[styles.title, { color: theme.colors.primary }]}>

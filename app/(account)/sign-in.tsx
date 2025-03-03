@@ -138,7 +138,8 @@ export default function SignIn() {
             Don't have an account?{" "} 
             <Link
               href="/(account)/sign-up"
-              style={[styles.signupLink, { color: theme.colors.onPrimaryContainer }]}
+              style={styles.signupLink}
+              replace
             >
               Sign Up!
             </Link>

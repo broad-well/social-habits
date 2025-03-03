@@ -13,6 +13,7 @@ interface FriendListItem {
   id: string;
   profileLogo?: string;
   name: string;
+  requested: boolean;
   // Future: Maybe summary stats for habit completion
 }
 
@@ -23,14 +24,17 @@ async function fetchFriendList(): Promise<FriendListItem[]> {
     {
       id: 'abcdef',
       name: 'Michael Coblenz',
+      requested: true,
     },
     {
       id: 'fhhqhr',
       name: 'Antariksha Ray',
+      requested: false,
     },
     {
       id: 'qhrbaf',
       name: "Loris D'Antoni",
+      requested: false,
     },
   ];
 }
@@ -52,6 +56,7 @@ export default function FriendList() {
   }
   const { colorTheme } = useColorTheme();
   const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
 
   const theme = {
     ...DefaultTheme,
@@ -63,10 +68,11 @@ export default function FriendList() {
     page: {
       backgroundColor: theme.colors.primaryContainer,
       padding: 20,
-      height: '100%',
       fontFamily: "Poppins",
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: "column",
+      position: "relative",
+      flexGrow: 1,
     },
     bold: {
       fontFamily: "PoppinsBold",
@@ -90,9 +96,14 @@ export default function FriendList() {
       position: 'absolute',
       margin: 32,
       right: 0,
-      bottom: tabBarHeight,
+      bottom: insets.bottom + 32,
       backgroundColor: theme.colors.primary,
-    }
+    },
+    container: {
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+    },
   });
 
   const [friends, setFriends] = React.useState<FriendListItem[] | null>(null);
@@ -109,37 +120,53 @@ export default function FriendList() {
   }, []);
 
   return <PaperProvider theme={theme}>
-    <Stack.Screen name="Friends" options={{ title: "Friends" }} />
-    <View style={stylesheet.page}>
-      {friends !== null &&
-        <FlatList
-          data={friends}
-          renderItem={({ item }) => <Card style={stylesheet.friendCard}>
-            <Card.Title title={item.name} />
-            <Card.Actions>
-              <Button mode="text" textColor={MD3Colors.error40}>Remove</Button>
-              <Button buttonColor={theme.colors.primary}>View Profile</Button>
-            </Card.Actions>
-          </Card>}
-          style={{marginBottom: tabBarHeight}}
-          keyExtractor={(item) => item.id}
-        />}
-      {fetchError === null && friends === null &&
-        <ActivityIndicator animating={true} size="large" color={theme.colors.onPrimary} />}
-      {fetchError !== null &&
-        <View style={stylesheet.errorMessage}>
-          <Icon source="alert" color={theme.colors.onError} size={48} />
-          <Text>
-            Loading failed: {fetchError.message}. Try again?
-          </Text>
-        </View>}
-      <FAB
-        style={stylesheet.fab}
-        icon="plus"
-        label="Add friend"
-        color={theme.colors.onPrimary}
-        onPress={() => router.push("/(tabs)/account/add-friend")}
-      />
+    <View style={stylesheet.container}>
+      <Stack.Screen name="Friends" options={{ title: "Friends" }} />
+      <Appbar.Header
+        style={{
+          height: 50,
+          backgroundColor: theme.colors.primaryContainer,
+        }}
+      >
+        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.Content
+          title="Friends"
+          titleStyle={{
+            fontSize: 18,
+          }}
+        />
+      </Appbar.Header>
+      <View style={stylesheet.page}>
+        {friends !== null &&
+          <FlatList
+            data={friends}
+            renderItem={({ item }) => <Card style={stylesheet.friendCard}>
+              <Card.Title title={item.name} />
+              <Card.Actions>
+                <Button mode="text" textColor={MD3Colors.error40}>Remove</Button>
+                <Button buttonColor={theme.colors.primary}>View Profile</Button>
+              </Card.Actions>
+            </Card>}
+            style={{marginBottom: tabBarHeight}}
+            keyExtractor={(item) => item.id}
+          />}
+        {fetchError === null && friends === null &&
+          <ActivityIndicator animating={true} size="large" color={theme.colors.onPrimary} />}
+        {fetchError !== null &&
+          <View style={stylesheet.errorMessage}>
+            <Icon source="alert" color={theme.colors.onError} size={48} />
+            <Text>
+              Loading failed: {fetchError.message}. Try again?
+            </Text>
+          </View>}
+        <FAB
+          style={stylesheet.fab}
+          icon="plus"
+          label="Add friend"
+          color={theme.colors.onPrimary}
+          onPress={() => router.push("/(tabs)/account/add-friend")}
+        />
+      </View>
     </View>
   </PaperProvider>;
 }

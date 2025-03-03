@@ -174,11 +174,12 @@ export default function SignUp() {
           Sign Up
         </Button>
         <View style={styles.signupContainer}>
-          <Text style={{ color: theme.colors.onPrimary }}>
+          <Text style={{ color: theme.colors.onPrimaryContainer }}>
             Already have an account?{" "}
             <Link
               href="/(account)/sign-in"
-              style={[styles.signupLink, { color: theme.colors.onPrimary }]}
+              style={styles.signupLink}
+              replace
             >
               Sign In!
             </Link>
