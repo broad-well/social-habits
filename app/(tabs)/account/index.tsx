@@ -1,6 +1,11 @@
 import React, { useEffect } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
+<<<<<<< HEAD:app/(tabs)/account/index.tsx
 import { Button, TextInput, IconButton ,
+=======
+import {
+  Button,
+>>>>>>> 53416223fa03403dcfa11a8e3b21b3ac40123203:app/(tabs)/account.tsx
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
@@ -14,7 +19,11 @@ import Avatar from "@/components/accounts/Avatar";
 
 export default function Account() {
   const [loaded] = useFonts({
+<<<<<<< HEAD:app/(tabs)/account/index.tsx
     Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+=======
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+>>>>>>> 53416223fa03403dcfa11a8e3b21b3ac40123203:app/(tabs)/account.tsx
     PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
@@ -118,11 +127,16 @@ export default function Account() {
 
         <Button
           mode="contained"
+<<<<<<< HEAD:app/(tabs)/account/index.tsx
           style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={[styles.buttonLabel, { fontSize: 14 }]}
+=======
+          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          labelStyle={[styles.buttonLabel]}
+>>>>>>> 53416223fa03403dcfa11a8e3b21b3ac40123203:app/(tabs)/account.tsx
           onPress={() => {}}
         >
-          Update My Courses
+          Share My Streaks
         </Button>
 
         <Button

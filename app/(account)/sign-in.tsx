@@ -5,7 +5,6 @@ import {
   Portal,
   Modal,
   Text as PaperText,
-
   MD3LightTheme as DefaultTheme,
   PaperProvider} from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
@@ -232,7 +231,7 @@ export default function SignIn() {
               <TextInput.Icon
                 icon={passwordVisible ? "eye" : "eye-off"}
                 onPress={() => setPasswordVisible(!passwordVisible)}
-                  accessibilityLabel="password-visibility-toggle"
+                accessibilityLabel="password-visibility-toggle"
               />
             }
           />

@@ -1,28 +1,48 @@
+<<<<<<< HEAD
 import React, { useEffect } from "react";
 import { Text, View, StyleSheet, ScrollView, Platform } from "react-native";
 import { FAB ,
+=======
+import React, { useEffect, useState } from "react";
+import { Text, View, ScrollView } from "react-native";
+import {
+  FAB,
+>>>>>>> 53416223fa03403dcfa11a8e3b21b3ac40123203
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
+<<<<<<< HEAD
+=======
+import { getDateLabel, getWeekDates } from "@/utils/dateConversion";
+>>>>>>> 53416223fa03403dcfa11a8e3b21b3ac40123203
 import { useFonts } from "expo-font";
-import DarkThemeColors from "../../constants/DarkThemeColors.json";
-import LightThemeColors from "../../constants/LightThemeColors.json";
-import { useColorTheme } from "../../stores/useColorTheme";
+import DarkThemeColors from "@/constants/DarkThemeColors.json";
+import LightThemeColors from "@/constants/LightThemeColors.json";
+import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import createStyles from "@/styles/MainStyles";
+import { getHabitByDay } from "@/utils/getHabitByDay";
+import HabitList from "@/components/HabitList";
 
 export default function Main() {
   const [loaded] = useFonts({
+<<<<<<< HEAD
     Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+=======
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+>>>>>>> 53416223fa03403dcfa11a8e3b21b3ac40123203
     PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
   const insets = useSafeAreaInsets();
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     if (loaded) {
@@ -39,6 +59,7 @@ export default function Main() {
     colors:
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
+<<<<<<< HEAD
   const styles = StyleSheet.create({
     safeArea: {
       flex: 1,
@@ -104,23 +125,55 @@ export default function Main() {
       shadowRadius: 3.84,
     },
   });
+=======
+  const styles = createStyles(theme, insets);
+>>>>>>> 53416223fa03403dcfa11a8e3b21b3ac40123203
 
-  // Helper function to get dates for calendar
-  const getWeekDates = () => {
-    const today = new Date();
-    const dates = [];
-    for (let i = -3; i <= 3; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  };
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+      {/* Calendar Section */}
+      <View style={[styles.calendarContainer, { marginTop: insets.top - 50 }]}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {getWeekDates().map((date, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dateItem,
+                date.toDateString() === selectedDate.toDateString() &&
+                  styles.todayDateItem,
+              ]}
+              onTouchEnd={() => setSelectedDate(date)}
+            >
+              <Text style={[styles.dayText, { color: theme.colors.onPrimary }]}>
+                {getDateLabel(date)}
+              </Text>
+              <Text
+                style={[styles.dateText, { color: theme.colors.onPrimary }]}
+              >
+                {date.getDate()}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Section Title */}
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: theme.colors.onBackground, marginTop: 10, fontSize: 19 },
+        ]}
+      >
+        Habits for {getDateLabel(selectedDate, false)}
+      </Text>
+    </View>
+  );
 
   return (
-    /* eslint-disable react/no-unescaped-entities */
     <PaperProvider theme={theme}>
+      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea}>
+<<<<<<< HEAD
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.container}>
           {/* Calendar Section */}
@@ -181,6 +234,27 @@ export default function Main() {
             }}
           />
         </View>
+=======
+        {renderHeader()}
+        <HabitList
+          habits={getHabitByDay(selectedDate.toISOString().slice(0, 10))}
+        />
+        <FAB
+          icon="plus"
+          label="Add New Habit"
+          style={[
+            styles.fab,
+            {
+              bottom: insets.bottom + 60,
+              backgroundColor: theme.colors.primary,
+            },
+          ]}
+          onPress={() => {
+            router.push("/(habit)/new-habit");
+          }}
+          small={false}
+        />
+>>>>>>> 53416223fa03403dcfa11a8e3b21b3ac40123203
       </SafeAreaView>
     </PaperProvider>
   );

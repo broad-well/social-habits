@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, Portal, Modal, Text as PaperText ,
+import {
+  Button,
+  TextInput,
+  Portal,
+  Modal,
+  Text as PaperText,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
@@ -11,7 +16,10 @@ import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, Stack } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
@@ -20,13 +28,14 @@ import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { jwtDecode } from "jwt-decode";
 
 
-
-type RegistrationOutcome = {
-  type: 'success'
-} | {
-  type: 'error',
-  error: Error,
-};
+type RegistrationOutcome =
+  | {
+      type: "success";
+    }
+  | {
+      type: "error";
+      error: Error;
+    };
 
 export function formatErrorMessage(error: FirebaseError) {
   if (error.code === "auth/email-already-in-use") {
@@ -41,7 +50,7 @@ export default function SignUp() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
     PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
@@ -63,7 +72,7 @@ export default function SignUp() {
     setRetypePassword("");
     setRetypePasswordVisible(false);
     setOutcome(null);
-  }
+  };
 
   useEffect(() => {
     if (loaded) {
@@ -219,17 +228,21 @@ export default function SignUp() {
 
   const handleSignUp = async () => {
     if (!isEmailHandleValid(username)) {
-      setUsernameError('Invalid username!');
+      setUsernameError("Invalid username!");
       return;
     }
     // TODO verify retyped password matches original password
 
     try {
-      const cred = await createUserWithEmailAndPassword(auth, username + '@ucsd.edu', password);
+      const cred = await createUserWithEmailAndPassword(
+        auth,
+        username + "@ucsd.edu",
+        password
+      );
       await sendEmailVerification(cred.user);
-      setOutcome({ type: 'success' });
+      setOutcome({ type: "success" });
     } catch (prob) {
-      setOutcome({ type: 'error', error: prob as Error });
+      setOutcome({ type: "error", error: prob as Error });
     }
   };
 
@@ -254,7 +267,9 @@ export default function SignUp() {
             placeholderTextColor={theme.colors.onBackground}
             right={<TextInput.Affix text="@ucsd.edu" />}
           />
-          {usernameError && <Text style={{ marginLeft: 8 }}>{usernameError}</Text>}
+          {usernameError && (
+            <Text style={{ marginLeft: 8 }}>{usernameError}</Text>
+          )}
         </View>
         <View style={styles.inputContainer}>
           <TextInput
@@ -294,8 +309,9 @@ export default function SignUp() {
               />
             }
           />
-          {retypePassword.length > 0 && retypePassword !== password &&
-            <Text style={{ marginLeft: 8 }}>Passwords do not match</Text>}
+          {retypePassword.length > 0 && retypePassword !== password && (
+            <Text style={{ marginLeft: 8 }}>Passwords do not match</Text>
+          )}
         </View>
         <Button
           icon="login"
@@ -304,7 +320,7 @@ export default function SignUp() {
           disabled={
             username.trim().length === 0 ||
             password.trim().length === 0 ||
-            (retypePassword !== password)
+            retypePassword !== password
           }
           style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
@@ -341,24 +357,25 @@ export default function SignUp() {
             resetState();
           }}
         >
-          {outcome?.type === 'success' &&
+          {outcome?.type === "success" && (
             <>
               <PaperText variant="titleMedium">Verify your Email</PaperText>
               <PaperText>
-                We have just sent you a verification email.
-                Please click on the link in the email to finish signing up!
+                We have just sent you a verification email. Please click on the
+                link in the email to finish signing up!
               </PaperText>
             </>
-          }
-          {outcome?.type === 'error' &&
+          )}
+          {outcome?.type === "error" && (
             <>
               <PaperText variant="titleMedium">Registration Failed</PaperText>
               <PaperText>
-                {outcome.error instanceof FirebaseError ?
-                  formatErrorMessage(outcome.error) : outcome.error.message}
+                {outcome.error instanceof FirebaseError
+                  ? formatErrorMessage(outcome.error)
+                  : outcome.error.message}
               </PaperText>
             </>
-          }
+          )}
         </Modal>
       </Portal>
     </PaperProvider>
