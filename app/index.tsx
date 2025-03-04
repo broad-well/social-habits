@@ -10,6 +10,8 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
+import { requestNotificationPermissions } from "./utils/notifications";
+
 
 export default function Index() {
   const screenOptions = {
@@ -26,6 +28,8 @@ export default function Index() {
     if (loaded) {
       SplashScreen.hideAsync();
     }
+
+    requestNotificationPermissions();
   }, [loaded]);
 
   if (!loaded) {

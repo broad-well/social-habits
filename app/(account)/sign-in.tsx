@@ -53,6 +53,7 @@ export default function SignIn() {
     if (loaded) {
       SplashScreen.hideAsync();
     }
+
   }, [loaded]);
 
   if (!loaded) {
