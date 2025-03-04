@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Image, Text, View, StyleSheet } from "react-native";
-import { Button } from "react-native-paper";
-import {
+import { Button ,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
@@ -45,31 +43,31 @@ export default function Index() {
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+        style={[styles.container, { backgroundColor: theme.colors.primaryContainer }]}
       >
         <Image
           source={require("../assets/images/icon.png")} // eslint-disable-line
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+        <Text style={[styles.title, { color: theme.colors.onPrimaryContainer }]}>
           Welcome to Cohabit!
         </Text>
         <Button
           icon="login"
           mode="contained"
           onPress={() => router.push("/(account)/sign-in")}
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.onPrimaryContainer }]}
           labelStyle={styles.buttonLabel}
         >
           Sign In
         </Button>
         <View style={styles.signupContainer}>
-          <Text style={{ color: theme.colors.onPrimary }}>
+          <Text style={{ color: theme.colors.onPrimaryContainer }}>
             Don't have an account?{" "}
             <Link
               href="/(account)/sign-up"
-              style={[styles.signupLink, { color: theme.colors.onPrimary }]}
+              style={[styles.signupLink, { color: theme.colors.onPrimaryContainer }]}
             >
               Sign Up!
             </Link>
