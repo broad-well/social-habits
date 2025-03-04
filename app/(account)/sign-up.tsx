@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Alert, Text, View, StyleSheet } from "react-native";
 import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
@@ -17,6 +17,10 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/
 import { isEmailHandleValid } from "@/validation/account";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { jwtDecode } from "jwt-decode";
+
 
 
 type RegistrationOutcome = {
@@ -69,6 +73,14 @@ export default function SignUp() {
     }
   }, [loaded]);
 
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: "884027047581-vro97mr4eg39fba7rla68uup2bd3jqoa.apps.googleusercontent.com",
+      offlineAccess: false,
+      scopes: ['profile', 'email']
+    });
+  }, []);
+
   if (!loaded) {
     return null;
   }
@@ -78,6 +90,134 @@ export default function SignUp() {
     colors:
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
+
+  function checkTokenType(token: string): void {
+    if (!token) {
+      console.error("Invalid Token: Empty or Undefined");
+      return;
+    } try {
+      const decoded = jwtDecode(token);
+      console.error("Decoded Payload:", decoded);
+      if (decoded.iss?.includes("accounts.google.com")) {
+        console.error("This is a Google ID Token.");
+      } else if (decoded.iss?.includes("securetoken.google.com")) {
+        console.error("This is a Firebase ID Token.");
+      } else { 
+        console.error("Unknown Token Type.");
+      }
+    } catch (error) {
+      console.error("Invalid Token: Could not decode", error);
+    }
+  }
+
+  const handleGoogleSignUp = async () => {
+    
+    try {
+      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
+      const userInfo = await GoogleSignin.signIn();
+      //const tokens = await GoogleSignin.getTokens();
+      const idToken = userInfo.data?.idToken;
+      
+      console.error(idToken);
+      
+      if (!idToken) {
+        throw new Error("No ID token returned from Google Sign-In");
+      }
+
+
+      // signInWithPopup(auth, provider)
+      // .then((result) => {
+      //   // This gives you a Google Access Token. You can use it to access the Google API.
+      //   const credential = GoogleAuthProvider.credentialFromResult(result);
+      //   const token = credential.accessToken;
+      //   // The signed-in user info.
+      //   const user = result.user;
+      //   // IdP data available using getAdditionalUserInfo(result)
+      //   // ...
+      // }).catch((error) => {
+      //   // Handle Errors here.
+      //   const errorCode = error.code;
+      //   const errorMessage = error.message;
+      //   // The email of the user's account used.
+      //   const email = error.customData.email;
+      //   // The AuthCredential type that was used.
+      //   const credential = GoogleAuthProvider.credentialFromError(error);
+      //   // ...
+      // });
+
+      
+      const googleCredential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, googleCredential);
+      const user = userCredential.user;
+      //userCredential.
+      // const user = userInfo.data?.user;
+      const firebaseIdToken = await user.getIdToken(true);
+
+      console.error((idToken === firebaseIdToken));
+
+      console.error(idToken);
+
+      checkTokenType(idToken);
+      checkTokenType(firebaseIdToken);
+
+      if (!user?.email?.endsWith("@ucsd.edu")) {
+        await auth.signOut();
+        Alert.alert("Access Denied", "Only UCSD emails are allowed.");
+        return;
+      }
+
+      // const response = await fetch("https://cohabit-server.vercel.app/api/users/check", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ email: user.email }),
+      // });
+      // Send the ID token to the backend
+      // const responseA = await fetch("https://cohabit-server.vercel.app/api/auth/google", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ idToken }),
+      // });
+
+      // console.error("FIRST RAN PROPERLY")
+      const response = await fetch("https://cohabit-server.vercel.app/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ "idToken" : firebaseIdToken }),
+      });
+      console.error("SUCCESS");
+
+      // console.log(response);
+      
+      // Check if response is OK and has correct content type
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server Error: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+
+  
+      if (data.exists) {
+        Alert.alert("Success", "User exists, please log in.");
+      } else {
+        await fetch("https://cohabit-server.vercel.app/api/users/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firebaseId: user.uid,
+            name: user.displayName,
+            email: user.email,
+          }),
+        });
+        Alert.alert("Success", "User created, please log in.");
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Login Failed", "Please try again.");
+    }
+  };
+
 
   const handleSignUp = async () => {
     if (!isEmailHandleValid(username)) {
@@ -172,6 +312,15 @@ export default function SignUp() {
           labelStyle={styles.buttonLabel}
         >
           Sign Up
+        </Button>
+        <Button
+          icon="google"
+          mode="contained"
+          onPress={handleGoogleSignUp}
+          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          labelStyle={styles.buttonLabel}
+        >
+          Sign Up with Google
         </Button>
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimary }}>
