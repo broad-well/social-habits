@@ -14,12 +14,13 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithCredential,
+         signInWithEmailAndPassword,
+         GoogleAuthProvider} from "firebase/auth";
 import { auth } from "@/config/firebaseConfig";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { jwtDecode } from "jwt-decode";
 
 export function formatError(error: FirebaseError) {

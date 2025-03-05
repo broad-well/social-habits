@@ -19,12 +19,13 @@ import { auth } from "@/config/firebaseConfig";
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  signInWithCredential,
+  GoogleAuthProvider
 } from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 import { jwtDecode } from "jwt-decode";
 
 

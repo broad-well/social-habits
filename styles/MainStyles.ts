@@ -29,7 +29,7 @@ const createStyles = (
       backgroundColor: theme.colors.surface,
     },
     todayDateItem: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.onPrimary,
     },
     dayText: {
       fontSize: 14,

@@ -107,7 +107,7 @@ const createStyles = (
     },
     radioGroupLabel: {
       marginRight: 10,
-      color: theme.colors.onPrimary,
+      color: theme.colors.onPrimaryContainer,
       fontSize: 16,
     },
     radioButtonGroup: {
