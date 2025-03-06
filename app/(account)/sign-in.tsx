@@ -1,3 +1,4 @@
+
 import { Text, View, StyleSheet } from "react-native";
 import {
   Button,
@@ -23,10 +24,22 @@ import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
 
 export function formatError(error: FirebaseError) {
-  if (error.code === "auth/invalid-credential") {
-    return "Entered credentials do not match an existing user";
+  switch (error.code) {
+    case "auth/invalid-credential":
+      return "Entered credentials do not match an existing user";
+    case "auth/invalid-email":
+      return "Please enter a valid email address";
+    case "auth/user-disabled":
+      return "This account has been disabled";
+    case "auth/user-not-found":
+      return "No account found with these credentials";
+    case "auth/wrong-password":
+      return "Incorrect password";
+    case "auth/too-many-requests":
+      return "Too many failed attempts. Please try again later";
+    default:
+      return error.message;
   }
-  return error.message;
 }
 
 export default function SignIn() {
@@ -45,6 +58,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (loaded) {
@@ -62,8 +76,26 @@ export default function SignIn() {
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
 
+  const validateInputs = () => {
+    if (!username.trim()) {
+      setError(new Error("Please enter your username"));
+      return false;
+    }
+    if (!password.trim()) {
+      setError(new Error("Please enter your password"));
+      return false;
+    }
+    return true;
+  };
+
   const handleSignIn = async () => {
+    if (!validateInputs()) return;
+
     try {
+      
+      setIsLoading(true);
+      setError(null);
+
       const cred = await signInWithEmailAndPassword(
         auth,
         username + "@ucsd.edu",
@@ -74,8 +106,13 @@ export default function SignIn() {
           "You must verify your email before using this app! Please check your inbox."
         );
       }
+
+      router.replace("/");
+      
     } catch (fail) {
       setError(fail);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -94,13 +131,18 @@ export default function SignIn() {
             mode="outlined"
             label="Username"
             value={username}
-            onChangeText={setUsername}
+            onChangeText={(text) => {
+              setUsername(text);
+              setError(null);
+            }}
             inputMode="text"
             style={styles.input}
             placeholder="Enter your username"
             placeholderTextColor={theme.colors.onBackground}
             right={<TextInput.Affix text="@ucsd.edu" />}
             textContentType="username"
+            autoCapitalize="none"
+            disabled={isLoading}
           />
         </View>
         <View style={styles.inputContainer}>
@@ -108,7 +150,10 @@ export default function SignIn() {
             mode="outlined"
             label="Password"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              setError(null);
+            }}
             style={styles.input}
             placeholder="Enter your password"
             passwordRules="minlength: 6; required: lower; required: digit;"
@@ -118,7 +163,8 @@ export default function SignIn() {
               <TextInput.Icon
                 icon={passwordVisible ? "eye" : "eye-off"}
                 onPress={() => setPasswordVisible(!passwordVisible)}
-                  accessibilityLabel="password-visibility-toggle"
+                disabled={isLoading}
+                accessibilityLabel="password-visibility-toggle"
               />
             }
           />
@@ -129,12 +175,14 @@ export default function SignIn() {
           onPress={handleSignIn}
           style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
           labelStyle={styles.buttonLabel}
+          loading={isLoading}
+          disabled={isLoading}
         >
-          Sign In
+          {isLoading ? "Signing In..." : "Sign In"}
         </Button>
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimary }}>
-            Don't have an account?{" "} 
+            Don't have an account?{" "}
             <Link
               href="/(account)/sign-up"
               style={[styles.signupLink, { color: theme.colors.onPrimary }]}
@@ -147,12 +195,16 @@ export default function SignIn() {
       <Portal>
         <Modal
           visible={error !== null}
+          onDismiss={() => setError(null)}
           contentContainerStyle={modalStyle.modal}
         >
           <PaperText variant="titleMedium">Sign-In Failed</PaperText>
-          <PaperText>
+          <PaperText style={styles.errorText}>
             {error instanceof FirebaseError ? formatError(error) : `${error}`}
           </PaperText>
+          <Button onPress={() => setError(null)} style={styles.modalButton}>
+            OK
+          </Button>
         </Modal>
       </Portal>
     </PaperProvider>
@@ -198,5 +250,12 @@ const styles = StyleSheet.create({
   signupLink: {
     textDecorationLine: "underline",
     fontWeight: "bold",
+  },
+  errorText: {
+    marginVertical: 10,
+    textAlign: 'center',
+  },
+  modalButton: {
+    marginTop: 10,
   },
 });
