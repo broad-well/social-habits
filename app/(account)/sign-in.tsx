@@ -1,6 +1,12 @@
 
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
+import {
+  Button,
+  TextInput,
+  Portal,
+  Modal,
+  Text as PaperText,
+} from "react-native-paper";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -42,8 +48,8 @@ export default function SignIn() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
@@ -86,17 +92,23 @@ export default function SignIn() {
     if (!validateInputs()) return;
 
     try {
+      
       setIsLoading(true);
       setError(null);
 
-      const cred = await signInWithEmailAndPassword(auth, username.trim() + "@ucsd.edu", password);
-      
+      const cred = await signInWithEmailAndPassword(
+        auth,
+        username + "@ucsd.edu",
+        password
+      );
       if (!cred.user.emailVerified) {
-        throw new Error("You must verify your email before using this app!");
+        throw new Error(
+          "You must verify your email before using this app! Please check your inbox."
+        );
       }
 
       router.replace("/");
-
+      
     } catch (fail) {
       setError(fail);
     } finally {
@@ -105,6 +117,7 @@ export default function SignIn() {
   };
 
   return (
+    /* eslint-disable react/no-unescaped-entities */
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
       <View
@@ -150,9 +163,10 @@ export default function SignIn() {
               <TextInput.Icon
                 icon={passwordVisible ? "eye" : "eye-off"}
                 onPress={() => setPasswordVisible(!passwordVisible)}
+                disabled={isLoading}
+                accessibilityLabel="password-visibility-toggle"
               />
             }
-            disabled={isLoading}
           />
         </View>
         <Button

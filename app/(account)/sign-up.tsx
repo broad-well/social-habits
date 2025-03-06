@@ -12,7 +12,7 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
-import { auth } from "../../config/firebaseConfig";
+import { auth } from "@/config/firebaseConfig";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { isEmailHandleValid } from "@/validation/account";
 import { modalStyle } from "@/components/modalStyle";
@@ -72,8 +72,8 @@ export default function SignUp() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();

@@ -25,3 +25,5 @@ jobs:
 
     - run: npm ci
     - run: npm run test-ci
+      env:
+        FIREBASE_CLIENT_OPTIONS: ${{ secrets.FIREBASE_CLIENT_OPTIONS }}
