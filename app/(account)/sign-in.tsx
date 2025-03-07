@@ -22,6 +22,7 @@ import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { jwtDecode } from "jwt-decode";
+import useEmailStore from "@/stores/useEmail";
 
 export function formatError(error: FirebaseError) {
   if (error.code === "auth/invalid-credential") {
@@ -48,6 +49,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
+  const setEmail = useEmailStore((state) => state.setEmail);
 
   useEffect(() => {
     if (loaded) {
@@ -166,7 +168,8 @@ export default function SignIn() {
           //   }),
           // });
           // Alert.alert("Success", "User created, please log in.");
-          router.push("/(tabs)/main");
+          setEmail(user.email);
+          router.replace("/(tabs)/main");
         }
       } catch (error) {
         console.error(error);
@@ -177,9 +180,10 @@ export default function SignIn() {
 
   const handleSignIn = async () => {
     try {
+      const email = username + "@ucsd.edu";
       const cred = await signInWithEmailAndPassword(
         auth,
-        username + "@ucsd.edu",
+        email,
         password
       );
       if (!cred.user.emailVerified) {
@@ -187,6 +191,7 @@ export default function SignIn() {
           "You must verify your email before using this app! Please check your inbox."
         );
       }
+      setEmail(email);
       router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);
@@ -250,7 +255,7 @@ export default function SignIn() {
           icon="google"
           mode="contained"
           onPress={handleGoogleSignIn}
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
         >
           Sign In With Google

@@ -114,14 +114,14 @@ export default function Account() {
           mode="contained"
           style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => router.push("/(tabs)/account/friends")}
+          onPress={() => router.push("/friends")}
         >
           Friend List
         </Button>
 
         <Button
           mode="contained"
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={[styles.buttonLabel]}
           onPress={() => {}}
         >

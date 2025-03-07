@@ -64,11 +64,11 @@ export default function Main() {
               ]}
               onTouchEnd={() => setSelectedDate(date)}
             >
-              <Text style={[styles.dayText, { color: theme.colors.onPrimary }]}>
+              <Text style={[styles.dayText, { color: theme.colors.primary }]}>
                 {getDateLabel(date)}
               </Text>
               <Text
-                style={[styles.dateText, { color: theme.colors.onPrimary }]}
+                style={[styles.dateText, { color: theme.colors.primary }]}
               >
                 {date.getDate()}
               </Text>

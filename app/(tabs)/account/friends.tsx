@@ -165,7 +165,7 @@ export default function FriendList() {
           icon="plus"
           label="Add friend"
           color={theme.colors.onPrimary}
-          onPress={() => router.push("/(tabs)/account/add-friend")}
+          onPress={() => router.push("/add-friend")}
         />
       </View>
     </View>

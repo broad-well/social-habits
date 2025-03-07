@@ -332,7 +332,7 @@ export default function SignUp() {
           icon="google"
           mode="contained"
           onPress={handleGoogleSignUp}
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
         >
           Sign Up with Google

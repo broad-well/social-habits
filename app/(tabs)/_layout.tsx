@@ -35,7 +35,6 @@ export default function TabLayout() {
 
   return (
     <SafeAreaProvider>
-
       <Tabs screenOptions={myOptions}>
         <Tabs.Screen
           name="main"
@@ -48,7 +47,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="account"
+          name="Account"
           options={{
             title: "Account",
             headerShown: false,
