@@ -68,8 +68,8 @@ export default class CohabitServiceImpl implements CohabitService {
   fetchUserById(id: string): Promise<FriendListItem | null> {
     throw new Error("Method not implemented.");
   }
-  fetchFriends(): Promise<FriendListItem[]> {
-    throw new Error("Method not implemented.");
+  async fetchFriends(): Promise<FriendListItem[]> {
+    return await this.get("/api/friends"); // TODO fix delivery of credentials
   }
   sendFriendRequest(id: string): Promise<boolean> {
     throw new Error("Method not implemented.");
@@ -109,5 +109,14 @@ export default class CohabitServiceImpl implements CohabitService {
   }
   fetchHabitStreaks(id: string): Promise<string[]> {
     throw new Error("Method not implemented.");
+  }
+
+  private async get<T>(endpoint: string): Promise<T> {
+    const res = await fetch(this.backendUrl + endpoint);
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json.error);
+    }
+    return json as T;
   }
 }
