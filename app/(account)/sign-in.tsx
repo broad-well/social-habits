@@ -33,8 +33,8 @@ export default function SignIn() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
@@ -72,6 +72,7 @@ export default function SignIn() {
           "You must verify your email before using this app! Please check your inbox."
         );
       }
+      router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);
     }
@@ -82,9 +83,14 @@ export default function SignIn() {
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.primaryContainer },
+        ]}
       >
-        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+        <Text
+          style={[styles.title, { color: theme.colors.onPrimaryContainer }]}
+        >
           Sign In to Cohabit
         </Text>
         <View style={styles.inputContainer}>
@@ -125,18 +131,15 @@ export default function SignIn() {
           icon="login"
           mode="contained"
           onPress={handleSignIn}
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
         >
           Sign In
         </Button>
         <View style={styles.signupContainer}>
-          <Text style={{ color: theme.colors.onPrimary }}>
+          <Text style={{ color: theme.colors.onPrimaryContainer }}>
             Don't have an account?{" "}
-            <Link
-              href="/(account)/sign-up"
-              style={[styles.signupLink, { color: theme.colors.onPrimary }]}
-            >
+            <Link href="/(account)/sign-up" style={styles.signupLink} replace>
               Sign Up!
             </Link>
           </Text>

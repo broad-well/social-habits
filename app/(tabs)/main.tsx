@@ -106,10 +106,10 @@ export default function Main() {
               backgroundColor: theme.colors.primary,
             },
           ]}
+          color={theme.colors.onPrimary}
           onPress={() => {
             router.push("/(habit)/new-habit");
           }}
-          small={false}
         />
       </SafeAreaView>
     </PaperProvider>
