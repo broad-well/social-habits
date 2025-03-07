@@ -2,8 +2,6 @@ import React, { useEffect } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
 import {
   Button,
-  TextInput,
-  IconButton,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
@@ -120,7 +118,7 @@ export default function Account() {
           mode="contained"
           style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => router.push("/(tabs)/account/friends")}
+          onPress={() => router.push("/(account)/friend-list")}
         >
           Friend List
         </Button>

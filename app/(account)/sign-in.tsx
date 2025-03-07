@@ -14,7 +14,7 @@ import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
-import { Link, Stack } from "expo-router";
+import { Link, router, Stack } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebaseConfig";
 import { modalStyle } from "@/components/modalStyle";
@@ -62,16 +62,16 @@ export default function SignIn() {
 
   const handleSignIn = async () => {
     try {
-      const cred = await signInWithEmailAndPassword(
-        auth,
-        username + "@ucsd.edu",
-        password
-      );
-      if (!cred.user.emailVerified) {
-        throw new Error(
-          "You must verify your email before using this app! Please check your inbox."
-        );
-      }
+      // const cred = await signInWithEmailAndPassword(
+      //   auth,
+      //   username + "@ucsd.edu",
+      //   password
+      // );
+      // if (!cred.user.emailVerified) {
+      //   throw new Error(
+      //     "You must verify your email before using this app! Please check your inbox."
+      //   );
+      // }
       router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);

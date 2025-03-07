@@ -35,7 +35,6 @@ export default function TabLayout() {
 
   return (
     <SafeAreaProvider>
-
       <Tabs screenOptions={myOptions}>
         <Tabs.Screen
           name="main"

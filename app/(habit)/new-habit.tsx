@@ -8,7 +8,6 @@ import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
-import RadioButtonRN from "radio-buttons-react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
