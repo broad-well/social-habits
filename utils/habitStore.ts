@@ -46,11 +46,11 @@ const STORE_DB_NAME = "habits";
 
 export default class LocalHabitStore implements HabitStore {
 
-  constructor(
+  private constructor(
     private server: CohabitService,
   ) {}
 
-  static async init(server: CohabitService) {
+  static async init(server: CohabitService): Promise<LocalHabitStore> {
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
     await db.execAsync(`
       PRAGMA journal_mode = WAL;
@@ -68,8 +68,13 @@ export default class LocalHabitStore implements HabitStore {
         streaks TEXT,
         privacy TEXT NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS tombstone (
+        id TEXT PRIMARY KEY NOT NULL,
+        deleteTime REAL
+      );
     `);
     await db.closeAsync();
+    return new LocalHabitStore(server);
   }
 
   async updateHabit(habit: Habit): Promise<void> {
@@ -95,8 +100,15 @@ export default class LocalHabitStore implements HabitStore {
     // Ensure the habit is deleted both locally and on remote.
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
     const stmt = await db.prepareAsync("DELETE FROM habit WHERE id = $id");
+    const createTombstoneStmt = await db.prepareAsync(
+      "INSERT INTO tombstone (id, deleteTime) VALUES ($id, $deleteTime)"
+    );
     try {
       await stmt.executeAsync({ $id: id });
+      await createTombstoneStmt.executeAsync({
+        $id: id,
+        $deleteTime: Date.now(),
+      });
     } finally {
       await stmt.finalizeAsync();
       await db.closeAsync();
@@ -104,10 +116,63 @@ export default class LocalHabitStore implements HabitStore {
     await this.server.deleteHabit(id);
   }
 
-  syncWithBackend(): Promise<void> {
-    // Construct the set of local habits L vs remote habits R
-    // All habits h in L, not in R: 
-    // All habits h in R, not in L:
+  async syncWithBackend(): Promise<void> {
+    const localIds = new Set(await this.listLocalIDs());
+    const remoteHabits = await this.server.fetchUserHabits();
+    const remoteIds = new Set(remoteHabits.map(hb => hb.id));
+
+    const onlyLocalIds = localIds.difference(remoteIds);
+    const onlyRemoteIds = remoteIds.difference(localIds);
+    const remoteRemovals = onlyLocalIds.size === 0 ?
+      {} : await this.server.habitsRemoved(Array.from(onlyLocalIds));
+
+    const tasks: Promise<any>[] = [];
+    for (const localId of onlyLocalIds) {
+      if (remoteRemovals[localId] === undefined) {
+        tasks.push((async () => {
+          const habit = await this.readHabit(localId);
+          await this.server.createHabit(habit!);
+        })());
+      } else {
+        tasks.push(this.deleteHabit(localId));
+      }
+    }
+
+    const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
+    for (const remoteId of onlyRemoteIds) {
+      const localTombstone = await this.getLocalTombstone(remoteId, db);
+      if (localTombstone === null) {
+        // download it
+        tasks.push((async (id: string) => {
+          const remote = await this.server.fetchHabit(id);
+          if (remote === null) return null;
+          await this.runUpsertCommand(remote);
+        })(remoteId));
+      } else {
+        // remove it remotely
+        tasks.push(this.server.deleteHabit(remoteId));
+      }
+    }
+    await Promise.all(tasks);
+  }
+
+  async createHabit(habit: Omit<Habit, "id">): Promise<Habit> {
+    const habitData = await this.server.createHabit(habit);
+    await this.runUpsertCommand(habitData);
+    return habitData;
+  }
+
+  async setHabitNotificationId(habitId: string, notifyId: string | null): Promise<void> {
+    const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
+    const stmt = await db.prepareAsync(
+      "UPDATE habit SET reminderId = $notifyId WHERE id = $habitId"
+    );
+    try {
+      await stmt.executeAsync({ $notifyId: notifyId, $habitId: habitId });
+    } finally {
+      await stmt.finalizeAsync();
+      await db.closeAsync();
+    }
   }
 
   async runUpsertCommand(habit: Habit) {
@@ -168,6 +233,32 @@ export default class LocalHabitStore implements HabitStore {
     } finally {
       await stmt.finalizeAsync();
       await db.closeAsync();
+    }
+  }
+
+  async listLocalIDs(): Promise<string[]> {
+    const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
+    try {
+      const result = await db.getAllAsync<{ id: string }>("SELECT id FROM habit");
+      return result.map(r => r.id);
+    } finally {
+      await db.closeAsync();
+    }
+  }
+
+  private async getLocalTombstone(id: string, db: SQLite.SQLiteDatabase): Promise<Date | null> {
+    const stmt = await db.prepareAsync("SELECT * FROM tombstone WHERE id = $id");
+    try {
+      const result = await stmt.executeAsync<{
+        id: string,
+        deleteTime: number,
+      }>({ $id: id });
+      const tombstoneRow = await result.getFirstAsync();
+      if (tombstoneRow === null) return null;
+      return new Date(tombstoneRow.deleteTime);
+
+    } finally {
+      await stmt.finalizeAsync();
     }
   }
 
