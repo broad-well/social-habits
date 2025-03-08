@@ -14,6 +14,8 @@ export interface Habit {
   endDate: string;
   reminderTime: string;
   reminderDays: string[];
+  reminderId?: string;
+  lastModified: Date; // Stored as a UNIX epoch (millisecond precision)
   streaks: string[];
   privacy: "Private" | "Friends-Only" | "Public";
 }
@@ -34,6 +36,7 @@ export interface CohabitService {
   createHabit(habit: Omit<Habit, "id">): Promise<Habit>;
   updateHabit(id: string, updates: Partial<Habit>): Promise<Habit>;
   deleteHabit(id: string): Promise<boolean>;
+  fetchHabit(id: string): Promise<Habit>;
   fetchUserHabits(): Promise<Habit[]>;
 
   markHabitComplete(id: string, date: Date): Promise<boolean>;
