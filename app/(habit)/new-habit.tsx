@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, ScrollView } from "react-native";
-import { Button, TextInput, Appbar ,
+import {
+  Button,
+  TextInput,
+  Appbar,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
@@ -12,6 +15,7 @@ import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import createStyles from "@/styles/NewHabitStyles";
 
 export default function HabitCreation() {
   const screenOptions = {
@@ -19,7 +23,7 @@ export default function HabitCreation() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
     PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
   const { colorTheme } = useColorTheme();
@@ -87,116 +91,7 @@ export default function HabitCreation() {
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
   };
 
-  const styles = StyleSheet.create({
-    divider: {
-      width: "100%",
-      opacity: 0.3,
-      height: 1,
-      backgroundColor: theme.colors.primary,
-      marginVertical: 10,
-    },
-    container: {
-      paddingVertical: 40,
-      alignItems: "center",
-    },
-    formContainer: {
-      width: "100%",
-      alignItems: "center",
-    },
-    title: {
-      fontSize: 28,
-      fontFamily: "PoppinsBold",
-      textAlign: "center",
-      marginBottom: 30,
-    },
-    input: {
-      marginBottom: 20,
-      backgroundColor: "transparent",
-      width: "100%",
-    },
-    checkboxContainer: {
-      width: "100%",
-      flexDirection: "row",
-      justifyContent: "space-around",
-      marginBottom: 20,
-    },
-    checkboxItem: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    checkboxLabel: {
-      marginLeft: 8,
-    },
-    radioButtonContainer: {
-      width: "100%",
-      flexDirection: "row",
-      justifyContent: "space-around",
-      alignItems: "center",
-      marginBottom: 20,
-    },
-    button: {
-      width: "100%",
-      paddingVertical: 10,
-      borderRadius: 8,
-      marginBottom: 20,
-    },
-    logo: {
-      width: 150,
-      height: 150,
-      marginBottom: 30,
-    },
-    buttonLabel: {
-      fontSize: 18,
-      fontFamily: "Poppins",
-      color: "#fff",
-    },
-    link: {
-      textDecorationLine: "none",
-      color: "#fff",
-    },
-    signupContainer: {
-      marginTop: 10,
-    },
-    signupLink: {
-      textDecorationLine: "underline",
-      fontWeight: "bold",
-    },
-    datePickerContainer: {
-      display: "flex",
-      justifyContent: "space-around",
-      width: "110%",
-      flexDirection: "row",
-      alignItems: "center",
-      paddingRight: 10,
-      paddingLeft: 0,
-      marginBottom: 20,
-    },
-    timePickerContainer: {
-      width: "100%",
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginTop: 0,
-      marginBottom: 20,
-    },
-    radioGroupContainer: {
-      display: "flex",
-      justifyContent: "space-between",
-      width: "100%",
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: 20,
-    },
-    radioGroupLabel: {
-      marginRight: 10,
-      color: theme.colors.onPrimaryContainer,
-      fontSize: 16,
-    },
-    radioButtonGroup: {
-      flex: 1,
-      alignItems: "flex-end",
-    },
-  });
+  const styles = createStyles(theme);
 
   return (
     <PaperProvider theme={theme}>
@@ -291,7 +186,9 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>End Date:</Text>
+                <Text style={{ color: theme.colors.onPrimaryContainer }}>
+                  End Date:
+                </Text>
                 <DateTimePicker
                   value={endDate}
                   mode="date"
@@ -346,7 +243,9 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>End Time:</Text>
+                <Text style={{ color: theme.colors.onPrimaryContainer }}>
+                  End Time:
+                </Text>
                 <DateTimePicker
                   value={endTime}
                   mode="time"
@@ -374,7 +273,7 @@ export default function HabitCreation() {
                 privacy === "Public" ? 1 : privacy === "Friend-Only" ? 2 : 3
               }
               textStyle={{ color: theme.colors.onPrimaryContainer }}
-              activeColor={theme.colors.onPrimaryContainer }
+              activeColor={theme.colors.onPrimaryContainer}
               style={{ ...styles.radioButtonGroup, marginLeft: 40 }}
             />
           </View>

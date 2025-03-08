@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Text, View, StyleSheet, Image } from "react-native";
-import { Button, TextInput, IconButton ,
+import {
+  Button,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
@@ -14,7 +15,7 @@ import Avatar from "@/components/accounts/Avatar";
 
 export default function Account() {
   const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
     PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
@@ -83,12 +84,18 @@ export default function Account() {
 
   return (
     <PaperProvider theme={theme}>
-      <Stack.Screen name="Account" options={{
-        headerShown: false,
-        title: "Account"
-      }} />
+      <Stack.Screen
+        name="AccountScreen"
+        options={{
+          headerShown: false,
+          title: "Account",
+        }}
+      />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primaryContainer }]}
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.primaryContainer },
+        ]}
       >
         <View style={styles.avatarContainer}>
           <Avatar imageUrl="https://i.pinimg.com/originals/ae/c6/2f/aec62fe5319733b32fde1a6a3ff28e7b.jpg" />
@@ -106,12 +113,12 @@ export default function Account() {
         >
           Update Profile
         </Button>
-        
+
         <Button
           mode="contained"
           style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => router.push("/(tabs)/account/friends")}
+          onPress={() => router.push("/(tabs)/account/friends" as any)}
         >
           Friend List
         </Button>
@@ -119,10 +126,10 @@ export default function Account() {
         <Button
           mode="contained"
           style={[styles.button, { backgroundColor: theme.colors.primary }]}
-          labelStyle={[styles.buttonLabel, { fontSize: 14 }]}
+          labelStyle={[styles.buttonLabel]}
           onPress={() => {}}
         >
-          Update My Courses
+          Share My Streaks
         </Button>
 
         <Button
@@ -130,7 +137,7 @@ export default function Account() {
           style={[styles.button, { backgroundColor: "#ff4444" }]}
           labelStyle={styles.buttonLabel}
           onPress={() => {
-            router.replace("/");
+            router.replace("/(account)/login" as any);
           }}
         >
           Sign Out
