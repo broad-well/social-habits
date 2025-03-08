@@ -1,3 +1,5 @@
+import { fetch } from 'expo/fetch';
+
 
 export interface FriendListItem {
   id: string;
@@ -44,7 +46,7 @@ export interface CohabitService {
     createHabit(habit: Omit<Habit, 'id'>): Promise<Habit>;
     updateHabit(id: string, updates: Partial<Habit>): Promise<Habit>;
     deleteHabit(id: string): Promise<boolean>;
-    fetchUserHabits(): Promise<Habit[]>;
+    fetchUserHabits(email: string): Promise<Habit[]>;
 
     markHabitComplete(id: string, date: Date): Promise<boolean>;
     markHabitMissed(id: string, date: Date): Promise<boolean>;
@@ -59,8 +61,22 @@ export default class CohabitServiceImpl implements CohabitService {
     this.backendUrl = backendUrl ?? "https://cohabit-server.vercel.app/";
   }
 
-  fetchUserByEmail(handle: string): Promise<FriendListItem | null> {
-    throw new Error("Method not implemented.");
+  async fetchUserByEmail(handle: string): Promise<FriendListItem | null> {
+    try {
+      const resp = await fetch(`${this.backendUrl}/api/users/check`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: handle }),
+      });
+
+      if (resp.status === 404) return null;
+      if (!resp.ok) throw new Error(`Failed to fetch user (status: ${resp.status})`);
+
+      return await resp.json();
+    } catch (error) {
+      console.error("Error fetching user by email:", error);
+      return Promise.resolve(null);
+    }
   }
   fetchUserByName(name: string): Promise<FriendListItem | null> {
     throw new Error("Method not implemented.");
@@ -69,10 +85,33 @@ export default class CohabitServiceImpl implements CohabitService {
     throw new Error("Method not implemented.");
   }
   fetchFriends(): Promise<FriendListItem[]> {
-    throw new Error("Method not implemented.");
+    return fetch(`${this.backendUrl}/api/users`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((resp) => {
+        if (!resp.ok) throw new Error("Failed to fetch friends");
+        return resp.json();
+      })
+      .catch((error) => {
+        console.error("Error fetching friends:", error);
+        return [];
+      });
   }
   sendFriendRequest(id: string): Promise<boolean> {
-    throw new Error("Method not implemented.");
+    return fetch(`${this.backendUrl}/api/friends/request`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        senderId: "yourUserId", // Replace with actual senderId
+        receiverId: id,
+      }),
+    })
+      .then((resp) => resp.ok)
+      .catch((error) => {
+        console.error("Error sending friend request:", error);
+        return false;
+      });
   }
   cancelFriendRequest(id: string): Promise<boolean> {
     throw new Error("Method not implemented.");
@@ -90,24 +129,99 @@ export default class CohabitServiceImpl implements CohabitService {
     throw new Error("Method not implemented.");
   }
   createHabit(habit: Omit<Habit, "id">): Promise<Habit> {
-    throw new Error("Method not implemented.");
+    return fetch(`${this.backendUrl}/api/habits`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(habit),
+    })
+      .then((resp) => {
+        if (!resp.ok) throw new Error("Failed to create habit");
+        return resp.json();
+      })
+      .catch((error) => {
+        console.error("Error creating habit:", error);
+        throw error;
+      });
   }
   updateHabit(id: string, updates: Partial<Habit>): Promise<Habit> {
-    throw new Error("Method not implemented.");
+    return fetch(`${this.backendUrl}/api/habits`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ habitId: id, updates }),
+    })
+      .then((resp) => {
+        if (!resp.ok) throw new Error("Failed to update habit");
+        return resp.json();
+      })
+      .catch((error) => {
+        console.error("Error updating habit:", error);
+        throw error;
+      });
+
   }
   deleteHabit(id: string): Promise<boolean> {
-    throw new Error("Method not implemented.");
+    return fetch(`${this.backendUrl}/api/habits`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ habitId: id }),
+    })
+      .then((resp) => resp.ok)
+      .catch((error) => {
+        console.error("Error deleting habit:", error);
+        return false;
+      });
   }
-  fetchUserHabits(): Promise<Habit[]> {
-    throw new Error("Method not implemented.");
+  async fetchUserHabits(email: string): Promise<Habit[]> {
+    try {
+      const resp = await fetch(`${this.backendUrl}/api/getHabits`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!resp.ok) throw new Error("Failed to fetch habits");
+      return await resp.json();
+    } catch (error) {
+      console.error("Error fetching habits:", error);
+      return [];
+    }
   }
   markHabitComplete(id: string, date: Date): Promise<boolean> {
-    throw new Error("Method not implemented.");
+    return fetch(`${this.backendUrl}/api/habits/complete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ habitId: id, date: date.toISOString() }),
+    })
+      .then((resp) => resp.ok)
+      .catch((error) => {
+        console.error("Error marking habit complete:", error);
+        return false;
+      });
   }
   markHabitMissed(id: string, date: Date): Promise<boolean> {
-    throw new Error("Method not implemented.");
+    return fetch(`${this.backendUrl}/api/habits/missed`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ habitId: id, date: date.toISOString() }),
+    })
+      .then((resp) => resp.ok)
+      .catch((error) => {
+        console.error("Error marking habit missed:", error);
+        return false;
+      });
   }
   fetchHabitStreaks(id: string): Promise<string[]> {
-    throw new Error("Method not implemented.");
+    return fetch(`${this.backendUrl}/api/habits/streaks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ habitId: id }),
+    })
+      .then((resp) => {
+        if (!resp.ok) throw new Error("Failed to fetch habit streaks");
+        return resp.json();
+      })
+      .catch((error) => {
+        console.error("Error fetching habit streaks:", error);
+        return [];
+      });
   }
 }
