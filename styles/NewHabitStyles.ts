@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native";
-const createStyles = (theme: any) =>
+const createStyles = (
+  theme: any // eslint-disable-line
+) =>
   StyleSheet.create({
     divider: {
       width: "100%",

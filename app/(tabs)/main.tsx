@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, ScrollView, Platform } from "react-native";
+import { Text, View, ScrollView } from "react-native";
 import {
   FAB,
   MD3LightTheme as DefaultTheme,
@@ -101,7 +101,7 @@ export default function Main() {
           ]}
           color={theme.colors.onPrimary}
           onPress={() => {
-            router.push("/(habit)/new-habit" as any);
+            router.push("/(habit)/new-habit" as any); // eslint-disable-line
           }}
         />
       </SafeAreaView>

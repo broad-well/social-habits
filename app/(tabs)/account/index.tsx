@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Text, View, StyleSheet, Image } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import {
   Button,
   MD3LightTheme as DefaultTheme,
@@ -118,7 +118,7 @@ export default function Account() {
           mode="contained"
           style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => router.push("/(tabs)/account/friends" as any)}
+          onPress={() => router.push("/(tabs)/account/friends" as any)} // eslint-disable-line
         >
           Friend List
         </Button>
@@ -137,7 +137,7 @@ export default function Account() {
           style={[styles.button, { backgroundColor: "#ff4444" }]}
           labelStyle={styles.buttonLabel}
           onPress={() => {
-            router.replace("/(account)/login" as any);
+            router.replace("/(account)/login" as any); // eslint-disable-line
           }}
         >
           Sign Out

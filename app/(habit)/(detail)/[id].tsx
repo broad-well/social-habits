@@ -28,17 +28,17 @@ export default function Detail() {
   const getStreakImageUrl = (streakCount: number) => {
     if (streakCount === 0) {
       return {
-        uri: Image.resolveAssetSource(require("@/assets/images/deadfire.jpg"))
+        uri: Image.resolveAssetSource(require("@/assets/images/deadfire.jpg")) // eslint-disable-line
           .uri,
       };
     } else if (streakCount < 5) {
       return {
-        uri: Image.resolveAssetSource(require("@/assets/images/smallfire.png"))
+        uri: Image.resolveAssetSource(require("@/assets/images/smallfire.png")) // eslint-disable-line
           .uri,
       };
     } else {
       return {
-        uri: Image.resolveAssetSource(require("@/assets/images/largefire.jpg"))
+        uri: Image.resolveAssetSource(require("@/assets/images/largefire.jpg")) // eslint-disable-line
           .uri,
       };
     }
@@ -169,5 +169,5 @@ function calculateStreak(streaks: string[]): number {
 
 // Function to navigate to the update page
 function navigateToUpdatePage(id: string) {
-  router.push(`/(habit)/(detail)/${id}/update` as any);
+  router.push(`/(habit)/(detail)/${id}/update` as any); // eslint-disable-line
 }

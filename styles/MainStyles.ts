@@ -1,6 +1,9 @@
 import { StyleSheet } from "react-native";
 
-const createStyles = (theme: any, insets: any) =>
+const createStyles = (
+  theme: any, // eslint-disable-line
+  insets: any // eslint-disable-line
+) =>
   StyleSheet.create({
     safeArea: {
       flex: 1,
