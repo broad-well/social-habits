@@ -1,9 +1,6 @@
 // Syncing habits between the app and the backend
 // Use Expo SQLite to store habits offline/locally
 
-import * as SQLite from 'expo-sqlite';
-
-
 import { Habit } from "./service";
 
 export interface HabitStore {
