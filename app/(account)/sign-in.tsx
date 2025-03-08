@@ -5,9 +5,9 @@ import {
   Portal,
   Modal,
   Text as PaperText,
-
   MD3LightTheme as DefaultTheme,
-  PaperProvider} from "react-native-paper";
+  PaperProvider,
+} from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
@@ -33,7 +33,7 @@ export default function SignIn() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
     PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
@@ -62,16 +62,16 @@ export default function SignIn() {
 
   const handleSignIn = async () => {
     try {
-      const cred = await signInWithEmailAndPassword(
-        auth,
-        username + "@ucsd.edu",
-        password
-      );
-      if (!cred.user.emailVerified) {
-        throw new Error(
-          "You must verify your email before using this app! Please check your inbox."
-        );
-      }
+      // const cred = await signInWithEmailAndPassword(
+      //   auth,
+      //   username + "@ucsd.edu",
+      //   password
+      // );
+      // if (!cred.user.emailVerified) {
+      //   throw new Error(
+      //     "You must verify your email before using this app! Please check your inbox."
+      //   );
+      // }
       router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);
@@ -83,9 +83,14 @@ export default function SignIn() {
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primaryContainer }]}
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.primaryContainer },
+        ]}
       >
-        <Text style={[styles.title, { color: theme.colors.onPrimaryContainer }]}>
+        <Text
+          style={[styles.title, { color: theme.colors.onPrimaryContainer }]}
+        >
           Sign In to Cohabit
         </Text>
         <View style={styles.inputContainer}>
@@ -117,7 +122,7 @@ export default function SignIn() {
               <TextInput.Icon
                 icon={passwordVisible ? "eye" : "eye-off"}
                 onPress={() => setPasswordVisible(!passwordVisible)}
-                  accessibilityLabel="password-visibility-toggle"
+                accessibilityLabel="password-visibility-toggle"
               />
             }
           />
@@ -133,12 +138,8 @@ export default function SignIn() {
         </Button>
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimaryContainer }}>
-            Don't have an account?{" "} 
-            <Link
-              href="/(account)/sign-up"
-              style={styles.signupLink}
-              replace
-            >
+            Don't have an account?{" "}
+            <Link href="/(account)/sign-up" style={styles.signupLink} replace>
               Sign Up!
             </Link>
           </Text>

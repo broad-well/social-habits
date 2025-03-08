@@ -35,7 +35,6 @@ export default function TabLayout() {
 
   return (
     <SafeAreaProvider>
-
       <Tabs screenOptions={myOptions}>
         <Tabs.Screen
           name="main"
@@ -48,9 +47,9 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="account"
+          name="test"
           options={{
-            title: "Account",
+            title: "test",
             headerShown: false,
             tabBarIcon: ({ color }) => (
               <IconSymbol size={28} name="person.fill" color={color} />
