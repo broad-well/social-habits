@@ -1,22 +1,22 @@
-import React from "react";
-import { Text, View, StyleSheet, Image } from "react-native";
-import { Button, TextInput, IconButton } from "react-native-paper";
+import React, { useEffect } from "react";
+import { Text, View, StyleSheet } from "react-native";
 import {
+  Button,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
 import { useFonts } from "expo-font";
-import DarkThemeColors from "../../constants/DarkThemeColors.json";
-import LightThemeColors from "../../constants/LightThemeColors.json";
-import { useColorTheme } from "../../stores/useColorTheme";
+import DarkThemeColors from "@/constants/DarkThemeColors.json";
+import LightThemeColors from "@/constants/LightThemeColors.json";
+import { useColorTheme } from "@/stores/useColorTheme";
 import { Stack, router } from "expo-router";
+import Avatar from "@/components/accounts/Avatar";
 
 export default function Account() {
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
@@ -72,14 +72,6 @@ export default function Account() {
     },
   });
 
-  const avatarStyle = {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 3,
-    borderColor: theme.colors.onPrimary,
-  };
-
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -92,26 +84,30 @@ export default function Account() {
 
   return (
     <PaperProvider theme={theme}>
-      <Stack.Screen options={{ headerShown: false }} />
+      <Stack.Screen
+        name="AccountScreen"
+        options={{
+          headerShown: false,
+          title: "Account",
+        }}
+      />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.primaryContainer },
+        ]}
       >
         <View style={styles.avatarContainer}>
-          <Image
-            source={{
-              uri: "https://i.pinimg.com/originals/ae/c6/2f/aec62fe5319733b32fde1a6a3ff28e7b.jpg",
-            }} // Placeholder image
-            style={avatarStyle}
-          />
+          <Avatar imageUrl="https://i.pinimg.com/originals/ae/c6/2f/aec62fe5319733b32fde1a6a3ff28e7b.jpg" />
         </View>
 
-        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+        <Text style={[styles.title, { color: theme.colors.primary }]}>
           My Account
         </Text>
 
         <Button
           mode="contained"
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
           onPress={() => {}}
         >
@@ -120,20 +116,20 @@ export default function Account() {
 
         <Button
           mode="contained"
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => {}}
+          onPress={() => router.push("/(tabs)/account/friends" as any)} // eslint-disable-line
         >
           Friend List
         </Button>
 
         <Button
           mode="contained"
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
-          labelStyle={[styles.buttonLabel, { fontSize: 14 }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
+          labelStyle={[styles.buttonLabel]}
           onPress={() => {}}
         >
-          Update My Courses
+          Share My Streaks
         </Button>
 
         <Button
@@ -141,7 +137,7 @@ export default function Account() {
           style={[styles.button, { backgroundColor: "#ff4444" }]}
           labelStyle={styles.buttonLabel}
           onPress={() => {
-            router.replace("/");
+            router.replace("/(account)/login" as any); // eslint-disable-line
           }}
         >
           Sign Out

@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
-import { Button, TextInput, IconButton, Portal, Modal, Text as PaperText } from "react-native-paper";
-import {
+import { Button, TextInput, Portal, Modal, Text as PaperText ,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
@@ -156,9 +154,9 @@ export default function SignUp() {
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primary }]}
+        style={[styles.container, { backgroundColor: theme.colors.primaryContainer }]}
       >
-        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
+        <Text style={[styles.title, { color: theme.colors.onPrimaryContainer }]}>
           Sign Up to Cohabit
         </Text>
         <View style={styles.inputContainer}>
@@ -256,17 +254,18 @@ export default function SignUp() {
             username.trim().length === 0 ||
             !isPasswordValid
           }
-          style={[styles.button, { backgroundColor: theme.colors.onPrimary }]}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
         >
           Sign Up
         </Button>
         <View style={styles.signupContainer}>
-          <Text style={{ color: theme.colors.onPrimary }}>
+          <Text style={{ color: theme.colors.onPrimaryContainer }}>
             Already have an account?{" "}
             <Link
               href="/(account)/sign-in"
-              style={[styles.signupLink, { color: theme.colors.onPrimary }]}
+              style={styles.signupLink}
+              replace
             >
               Sign In!
             </Link>

@@ -9,6 +9,7 @@ import TabBarBackground from "@/components/ui/TabBarBackground";
 import { useColorTheme } from "@/stores/useColorTheme";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const { colorTheme } = useColorTheme();
@@ -19,8 +20,8 @@ export default function TabLayout() {
     headerStyle: { height: 0 },
     tabBarActiveTintColor:
       colorTheme === "light"
-        ? LightThemeColors.colors.onPrimary
-        : DarkThemeColors.colors.onPrimary,
+        ? LightThemeColors.colors.primary
+        : DarkThemeColors.colors.primary,
     tabBarButton: HapticTab,
     tabBarBackground: TabBarBackground,
     tabBarStyle: Platform.select({
@@ -33,27 +34,29 @@ export default function TabLayout() {
   };
 
   return (
-    <Tabs screenOptions={myOptions}>
-      <Tabs.Screen
-        name="main"
-        options={{
-          title: "Home",
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="account"
-        options={{
-          title: "Account",
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.fill" color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    <SafeAreaProvider>
+      <Tabs screenOptions={myOptions}>
+        <Tabs.Screen
+          name="main"
+          options={{
+            title: "Home",
+            headerShown: false,
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="house.fill" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="test"
+          options={{
+            title: "test",
+            headerShown: false,
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="person.fill" color={color} />
+            ),
+          }}
+        />
+      </Tabs>
+    </SafeAreaProvider>
   );
 }
