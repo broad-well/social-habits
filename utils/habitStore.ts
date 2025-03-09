@@ -126,7 +126,7 @@ export default class LocalHabitStore implements HabitStore {
     const remoteRemovals = onlyLocalIds.size === 0 ?
       {} : await this.server.habitsRemoved(Array.from(onlyLocalIds));
 
-    const tasks: Promise<any>[] = [];
+    const tasks: Promise<void | boolean>[] = [];
     for (const localId of onlyLocalIds) {
       if (remoteRemovals[localId] === undefined) {
         tasks.push((async () => {
@@ -145,7 +145,7 @@ export default class LocalHabitStore implements HabitStore {
         // download it
         tasks.push((async (id: string) => {
           const remote = await this.server.fetchHabit(id);
-          if (remote === null) return null;
+          if (remote === null) return;
           await this.runUpsertCommand(remote);
         })(remoteId));
       } else {

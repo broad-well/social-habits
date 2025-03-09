@@ -13,7 +13,6 @@ interface FriendListItem {
   id: string;
   profileLogo?: string;
   name: string;
-  requested: boolean;
   // Future: Maybe summary stats for habit completion
 }
 
@@ -26,7 +25,6 @@ async function fetchUserByEmail(handle: string): Promise<FriendListItem | null> 
       id: "hqhrb1",
       profileLogo: "https://i.pinimg.com/originals/ae/c6/2f/aec62fe5319733b32fde1a6a3ff28e7b.jpg",
       name: "Other user",
-      requested: false,
     } : null),
   1000));
 }

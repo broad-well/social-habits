@@ -2,7 +2,6 @@ export interface FriendListItem {
   id: string;
   name: string;
   profileLogo?: string;
-  requested: boolean;
 }
 
 export interface Habit {
@@ -36,10 +35,10 @@ export interface CohabitService {
   createHabit(habit: Omit<Habit, "id"> & { id?: string }): Promise<Habit>;
   updateHabit(id: string, updates: Partial<Habit>): Promise<Habit>;
   deleteHabit(id: string): Promise<boolean>;
-  fetchHabit(id: string): Promise<Habit>;
+  fetchHabit(id: string): Promise<Habit | null>;
   fetchUserHabits(): Promise<Habit[]>;
   habitsRemoved(id: string[]): Promise<{
-    [habitId: string]: Date // Time of removal
+    [habitId: string]: Date /* timestamp of removal */
   }>;
 
   markHabitComplete(id: string, date: Date): Promise<boolean>;
@@ -55,10 +54,13 @@ export default class CohabitServiceImpl implements CohabitService {
     this.backendUrl = backendUrl ?? "https://cohabit-server.vercel.app/api/";
   }
 
-  fetchHabit(id: string): Promise<Habit> {
-    throw new Error("Method not implemented.");
+  fetchHabit(id: string): Promise<Habit | null> {
+    return this.get<Habit | null>(`habits/${id}`);
   }
-  habitRemoved(id: string): Promise<Date | null> {
+
+  habitsRemoved(id: string[]): Promise<{
+    [habitId: string]: Date
+  }> {
     throw new Error("Method not implemented.");
   }
 
