@@ -4,9 +4,8 @@ import Main from '../app/(tabs)/main';
 import { ErrorBoundary } from 'react-error-boundary';
 import { router } from 'expo-router';
 import { View, Text } from 'react-native';
-import { VirtualizedList } from 'react-native';
 
-jest.mock("react-native/Libraries/Lists/VirtualizedList", () => {
+jest.mock("@react-native/virtualized-lists/Lists/VirtualizedList", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require("react");
   // eslint-disable-next-line @typescript-eslint/no-require-imports
