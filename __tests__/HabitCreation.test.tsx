@@ -45,7 +45,7 @@ describe('Habit Creation Screen', () => {
   });
 
   it('takes us back to Habit Creation screen when Save button is pressed', async() => {
-    render(<HabitCreation/>);
+    render(<HabitCreation />);
 
     act(() => {
       fireEvent.press(screen.getByText("Save"));
