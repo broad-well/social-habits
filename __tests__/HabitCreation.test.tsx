@@ -17,6 +17,14 @@ jest.mock("@react-native-community/datetimepicker", () => {
   );
 });
 
+jest.mock("react-native/Libraries/Components/ScrollView/ScrollView", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require("react");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View } = require("react-native");
+  return (props) => <View {...props} />;
+});
+
 
 describe('Habit Creation Screen', () => {
 
