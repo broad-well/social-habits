@@ -6,6 +6,36 @@ import { router } from 'expo-router';
 import { View, Text } from 'react-native';
 import { VirtualizedList } from 'react-native';
 
+jest.mock("react-native/Libraries/Lists/VirtualizedList", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require("react");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View } = require("react-native");
+  return (props) => <View {...props} />;
+});
+
+// jest.mock("react-native-safe-area-context", () => ({
+//   useSafeAreaInsets: jest.fn(() => ({
+//     top: 0,
+//     bottom: 0,
+//     left: 0,
+//     right: 0,
+//   })),
+//   SafeAreaView: (props) => <View {...props} />,
+// }));
+
+// jest.mock("react-native-paper", () => {
+//   // eslint-disable-next-line @typescript-eslint/no-require-imports
+//   const React = require("react");
+//   // eslint-disable-next-line @typescript-eslint/no-require-imports
+//   const { View } = require("react-native");
+//   return {
+//     ...jest.requireActual("react-native-paper"),
+//     FAB: (props) => <View testID="mock-fab" {...props} />,
+//   };
+// });
+
+
 
 jest.mock("react-native/Libraries/Components/ScrollView/ScrollView", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
