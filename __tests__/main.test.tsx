@@ -66,7 +66,8 @@ describe('Main Screen', () => {
     // Wait for elements to appear
     await waitFor(() => {
       expect(
-        screen.getByText("Today's Habits")
+        //screen.getByText("Today's Habits")
+        screen.getByText(/Habits for/i)
       ).toBeTruthy();
     });
   });
