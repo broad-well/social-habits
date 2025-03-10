@@ -1,7 +1,22 @@
+/* eslint-disable react/display-name */
 import React from 'react';
 import { render, fireEvent, act, waitFor, screen } from '@testing-library/react-native';
 import HabitCreation from '../app/(habit)/new-habit';
 import { router } from 'expo-router';
+
+jest.mock("@react-native-community/datetimepicker", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require("react");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { View, Text } = require("react-native");
+
+  return () => (
+    <View testID={"mock-datetime-picker"}>
+      <Text>DateTimePicker</Text>
+    </View>
+  );
+});
+
 
 describe('Habit Creation Screen', () => {
 

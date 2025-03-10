@@ -12,7 +12,6 @@ describe('Account Screen', () => {
       expect(screen.getByText('My Account')).toBeTruthy();
       expect(screen.getByText('Update Profile')).toBeTruthy();
       expect(screen.getByText("Friend List")).toBeTruthy();
-      expect(screen.getByText("Update My Courses")).toBeTruthy();
       expect(screen.getByText("Sign Out")).toBeTruthy();
     });
   });

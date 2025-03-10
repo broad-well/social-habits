@@ -4,6 +4,7 @@ import Main from '../app/(tabs)/main';
 import { ErrorBoundary } from 'react-error-boundary';
 import { router } from 'expo-router';
 import { View, Text } from 'react-native';
+import { VirtualizedList } from 'react-native';
 
 
 jest.mock("react-native/Libraries/Components/ScrollView/ScrollView", () => {
