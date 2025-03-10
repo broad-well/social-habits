@@ -5,7 +5,7 @@ module.exports = {
         "@testing-library/jest-native/extend-expect"
     ],
     transformIgnorePatterns: [
-        "node_modules/(?!(@react-native|react-native|expo|expo-font|expo-constants|radio-buttons-react-native|react-native-vector-icons|@babel/runtime)/)",
+        "node_modules/(?!(@react-native|react-native|expo|expo-font|expo-constants|radio-buttons-react-native|react-native-vector-icons|@babel/runtime|@react-native-community/datetimepicker)/)",
     ],
     testEnvironment: 'jsdom',
     moduleNameMapper: {
