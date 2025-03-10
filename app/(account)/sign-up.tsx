@@ -151,6 +151,7 @@ export default function SignUp() {
               <TextInput.Icon
                 icon={retypePasswordVisible ? "eye" : "eye-off"}
                 onPress={() => setRetypePasswordVisible(!retypePasswordVisible)}
+                accessibilityLabel="rt-password-visibility-toggle"
               />
             }
           />
