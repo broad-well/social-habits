@@ -17,7 +17,7 @@ module.exports = {
         "^.+\\.tsx?$": "babel-jest",
         "^.+\\.jsx?$": "babel-jest",
         "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
-        "^.+\\.png$": "<rootDir>/__mocks__/fileMock.js", // Mock PNG imports
+        "^.+\\.png$": "<rootDir>/__mocks__/fileMock.js"
     },
     resolver: undefined
 };
