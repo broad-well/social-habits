@@ -20,7 +20,7 @@ describe('Main Screen', () => {
       fireEvent.press(getByLabelText("Add New Habit"));
     });
 
-    expect(router.push).toHaveBeenCalledWith("/new-habit");
+    expect(router.push).toHaveBeenCalledWith("/(habit)/new-habit");
   });
 
 });

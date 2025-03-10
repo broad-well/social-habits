@@ -39,3 +39,5 @@ app-example
 
 # secrets
 .env
+google-services.json
+serviceAccountKey.json
