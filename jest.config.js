@@ -16,7 +16,8 @@ module.exports = {
     transform: {
         "^.+\\.tsx?$": "babel-jest",
         "^.+\\.jsx?$": "babel-jest",
-         "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
+        "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
+        "^.+\\.png$": "<rootDir>/__mocks__/fileMock.js", // Mock PNG imports
     },
     resolver: undefined
 };
