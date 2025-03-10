@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
-import HabitCreation from '../app/new-habit';
+import HabitCreation from '../app/(habit)/new-habit';
 import { router } from 'expo-router';
 
 describe('Habit Creation Screen', () => {
