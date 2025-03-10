@@ -24,7 +24,7 @@ describe('Account Screen', () => {
       fireEvent.press(getByText("Sign Out"));
     });
 
-    expect(router.replace).toHaveBeenCalledWith("/");
+    expect(router.replace).toHaveBeenCalledWith("/(account)/login");
   });
 
 });
