@@ -11,13 +11,13 @@ module.exports = {
     moduleNameMapper: {
         "^@/(.*)$": "<rootDir>/$1", // Adjust based on actual project structure
         "^react-native-vector-icons/(.*)$": "<rootDir>/node_modules/react-native-vector-icons/lib/$1",
-        "/^react-native-vector-icons/(.*)$/": "<rootDir>/node_modules/react-native-vector-icons/lib/$1"
+        "/^react-native-vector-icons/(.*)$/": "<rootDir>/node_modules/react-native-vector-icons/lib/$1",
+        "\\.(png|jpg|jpeg|gif|svg)$": "<rootDir>/__mocks__/fileMock.js"
     },
     transform: {
         "^.+\\.tsx?$": "babel-jest",
         "^.+\\.jsx?$": "babel-jest",
-        "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
-        "^.+\\.png$": "<rootDir>/__mocks__/fileMock.js"
+        "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
     },
     resolver: undefined
 };
