@@ -1,27 +1,27 @@
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, act, waitFor, screen } from '@testing-library/react-native';
 import Account from '../app/(tabs)/account';
 import { router } from 'expo-router';
 
 describe('Account Screen', () => {
 
   it('renders correctly', async () => {
-    const { getByText } = render(<Account />);
+    render(<Account />);
 
-    waitFor(() => {
-      expect(getByText('My Account')).toBeTruthy();
-      expect(getByText('Update Profile')).toBeTruthy();
-      expect(getByText("Friend List")).toBeTruthy();
-      expect(getByText("Update My Courses")).toBeTruthy();
-      expect(getByText("Sign Out")).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByText('My Account')).toBeTruthy();
+      expect(screen.getByText('Update Profile')).toBeTruthy();
+      expect(screen.getByText("Friend List")).toBeTruthy();
+      expect(screen.getByText("Update My Courses")).toBeTruthy();
+      expect(screen.getByText("Sign Out")).toBeTruthy();
     });
   });
 
-  it('takes us to Index screen when Sign Out button is pressed', async() => {
-    const { getByText } = render(<Account/>)
+  it('takes us to Index screen when Sign Out button is pressed', async () => {
+    render(<Account />);
 
-    act(() => {
-      fireEvent.press(getByText("Sign Out"));
+    await act(async () => {
+      fireEvent.press(screen.getByText("Sign Out"));
     });
 
     expect(router.replace).toHaveBeenCalledWith("/(account)/login");
