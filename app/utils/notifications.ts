@@ -45,12 +45,13 @@ export const scheduleHabitNotification = async (habitName: string, habitTime: Da
         repeats: true,
     } as Notifications.CalendarTriggerInput;
 
-    await Notifications.scheduleNotificationAsync({
+    const notificationId = await Notifications.scheduleNotificationAsync({
         content: notifContent,
         trigger: notifTrigger,
     });
 
-    console.log(`${habitName} notification scheduled!`);
+    console.log(`${habitName} notification scheduled with ID: ${notificationId}`);
+    return notificationId;
 }
 
 Notifications.setNotificationHandler({
@@ -62,3 +63,21 @@ Notifications.setNotificationHandler({
 });
 
 Notifications.setNotificationCategoryAsync('habit-reminders', actions);
+
+export const unscheduleHabitNotification = async (notificationId: string) => {
+    try {
+        await Notifications.cancelScheduledNotificationAsync(notificationId);
+        console.log(`Notification with ID ${notificationId} cancelled`)
+    } catch (error) {
+        console.error('Error cancelling notification:', error);
+    }
+}
+
+export const unscheduleAllScheduledNotifications = async () => {
+    try {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+        console.log(`All scheduled notifications cancelled`)
+    } catch (error) {
+        console.error('Error cancelling all notifications:', error);
+    }
+}

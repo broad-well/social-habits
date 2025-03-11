@@ -13,6 +13,7 @@ import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { scheduleHabitNotification, sendLocalNotification } from "./utils/notifications";
+import { HabitStore } from "../utils/habitStore"
 
 export default function HabitCreation() {
   const screenOptions = {
@@ -47,9 +48,13 @@ export default function HabitCreation() {
     setPrivacy("Public");
   };
 
+  const habitStore = new HabitStore();
+
   const handleSave = async () => {
     // Logic to save the habit
-    await scheduleHabitNotification(habitName, startTime);
+    const notificationId = await scheduleHabitNotification(habitName, startTime);
+
+    await HabitStore.setHabitNotificationId(habitId, notificationId);
 
     const hour = startTime.getHours();
     const minute = startTime.getMinutes();
