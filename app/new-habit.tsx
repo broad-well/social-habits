@@ -1,13 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, ScrollView } from "react-native";
-import { Button, TextInput, Appbar } from "react-native-paper";
-import RadioButtonRN from "radio-buttons-react-native";
-import {
+import { Button, TextInput, Appbar ,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
+import RadioButtonRN from "radio-buttons-react-native";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
@@ -22,8 +20,8 @@ export default function HabitCreation() {
   };
 
   const [loaded] = useFonts({
-    Poppins: require("../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
-    PoppinsBold: require("../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
   const { colorTheme } = useColorTheme();
 
@@ -103,7 +101,7 @@ export default function HabitCreation() {
       width: "100%",
       opacity: 0.3,
       height: 1,
-      backgroundColor: theme.colors.onPrimary,
+      backgroundColor: theme.colors.primary,
       marginVertical: 10,
     },
     container: {
@@ -181,7 +179,6 @@ export default function HabitCreation() {
       paddingRight: 10,
       paddingLeft: 0,
       marginBottom: 20,
-      backgroundColor: theme.colors.primary,
     },
     timePickerContainer: {
       width: "100%",
@@ -190,7 +187,6 @@ export default function HabitCreation() {
       alignItems: "center",
       marginTop: 0,
       marginBottom: 20,
-      backgroundColor: theme.colors.primary,
     },
     radioGroupContainer: {
       display: "flex",
@@ -199,11 +195,10 @@ export default function HabitCreation() {
       flexDirection: "row",
       alignItems: "center",
       marginBottom: 20,
-      backgroundColor: theme.colors.primary,
     },
     radioGroupLabel: {
       marginRight: 10,
-      color: theme.colors.onPrimary,
+      color: theme.colors.onPrimaryContainer,
       fontSize: 16,
     },
     radioButtonGroup: {
@@ -217,8 +212,8 @@ export default function HabitCreation() {
       <Stack.Screen options={screenOptions} />
       <Appbar.Header
         style={{
-          backgroundColor: theme.colors.primary,
           height: 50,
+          backgroundColor: theme.colors.primaryContainer,
         }}
       >
         <Appbar.BackAction onPress={() => router.back()} />
@@ -232,7 +227,7 @@ export default function HabitCreation() {
       <ScrollView
         style={{
           flex: 1,
-          backgroundColor: theme.colors.primary,
+          backgroundColor: theme.colors.primaryContainer,
           width: "100%",
         }}
         contentContainerStyle={[
@@ -240,16 +235,13 @@ export default function HabitCreation() {
           { width: "100%", paddingTop: 20, paddingHorizontal: 35 },
         ]}
       >
-        <Text style={[styles.title, { color: theme.colors.onPrimary }]}>
-          New Habit
-        </Text>
         <View style={styles.formContainer}>
           <TextInput
             label="Name of the Habit"
             value={habitName}
             onChangeText={setHabitName}
             style={styles.input}
-            textColor={theme.colors.onPrimary}
+            textColor={theme.colors.onPrimaryContainer}
             theme={theme}
           />
           <TextInput
@@ -259,7 +251,7 @@ export default function HabitCreation() {
             multiline
             numberOfLines={4}
             style={styles.input}
-            textColor={theme.colors.onBackground}
+            textColor={theme.colors.onPrimaryContainer}
             theme={theme}
           />
           <View style={styles.radioGroupContainer}>
@@ -272,8 +264,8 @@ export default function HabitCreation() {
               selectedBtn={(e: any) => handleEveryDayChange(e.value)} // eslint-disable-line
               box={false}
               initial={frequency === 0 ? 1 : 2}
-              textStyle={{ color: theme.colors.onPrimary }}
-              activeColor={theme.colors.onPrimary}
+              textStyle={{ color: theme.colors.onPrimaryContainer }}
+              activeColor={theme.colors.onPrimaryContainer}
               style={{ ...styles.radioButtonGroup, marginLeft: 20 }}
             />
           </View>
@@ -287,7 +279,7 @@ export default function HabitCreation() {
               >
                 <Text
                   style={{
-                    color: theme.colors.onPrimary,
+                    color: theme.colors.onPrimaryContainer,
                   }}
                 >
                   Start Date:
@@ -308,7 +300,7 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimary }}>End Date:</Text>
+                <Text style={{ color: theme.colors.onPrimaryContainer }}>End Date:</Text>
                 <DateTimePicker
                   value={endDate}
                   mode="date"
@@ -332,8 +324,8 @@ export default function HabitCreation() {
               selectedBtn={(e: any) => handleAnyTimeChange(e.value)} // eslint-disable-line
               box={false}
               initial={timeType === 0 ? 1 : 2}
-              textStyle={{ color: theme.colors.onPrimary }}
-              activeColor={theme.colors.onPrimary}
+              textStyle={{ color: theme.colors.onPrimaryContainer }}
+              activeColor={theme.colors.onPrimaryContainer}
               style={{ ...styles.radioButtonGroup, marginLeft: 57 }}
             />
           </View>
@@ -345,7 +337,7 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimary }}>
+                <Text style={{ color: theme.colors.onPrimaryContainer }}>
                   Start Time:
                 </Text>
                 <DateTimePicker
@@ -363,7 +355,7 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimary }}>End Time:</Text>
+                <Text style={{ color: theme.colors.onPrimaryContainer }}>End Time:</Text>
                 <DateTimePicker
                   value={endTime}
                   mode="time"
@@ -390,16 +382,16 @@ export default function HabitCreation() {
               initial={
                 privacy === "Public" ? 1 : privacy === "Friend-Only" ? 2 : 3
               }
-              textStyle={{ color: theme.colors.onPrimary }}
-              activeColor={theme.colors.onPrimary}
+              textStyle={{ color: theme.colors.onPrimaryContainer }}
+              activeColor={theme.colors.onPrimaryContainer }
               style={{ ...styles.radioButtonGroup, marginLeft: 40 }}
             />
           </View>
           <Button
             mode="outlined"
             onPress={handleReset}
-            style={[styles.button, { borderColor: theme.colors.onPrimary }]}
-            textColor={theme.colors.onPrimary}
+            style={[styles.button, { borderColor: theme.colors.error }]}
+            textColor={theme.colors.onErrorContainer}
           >
             Reset
           </Button>
@@ -407,8 +399,8 @@ export default function HabitCreation() {
             mode="contained"
             onPress={handleSave}
             style={styles.button}
-            buttonColor={theme.colors.onPrimary}
-            textColor={theme.colors.background}
+            buttonColor={theme.colors.primary}
+            textColor={theme.colors.onPrimary}
           >
             Save
           </Button>

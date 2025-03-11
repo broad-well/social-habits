@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Text, View, StyleSheet, ScrollView, Platform } from "react-native";
-import { FAB } from "react-native-paper";
-import {
+import { FAB ,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "../../constants/DarkThemeColors.json";
 import LightThemeColors from "../../constants/LightThemeColors.json";
@@ -19,8 +17,8 @@ import {
 
 export default function Main() {
   const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
+    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
+    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
 
   const { colorTheme } = useColorTheme();
@@ -66,7 +64,7 @@ export default function Main() {
       backgroundColor: theme.colors.surface,
     },
     todayDateItem: {
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.colors.onPrimary,
     },
     dayText: {
       fontSize: 14,
@@ -136,12 +134,12 @@ export default function Main() {
                   style={[styles.dateItem, index === 3 && styles.todayDateItem]}
                 >
                   <Text
-                    style={[styles.dayText, { color: theme.colors.onPrimary }]}
+                    style={[styles.dayText, { color: theme.colors.primary }]}
                   >
                     {date.toLocaleDateString("en-US", { weekday: "short" })}
                   </Text>
                   <Text
-                    style={[styles.dateText, { color: theme.colors.onPrimary }]}
+                    style={[styles.dateText, { color: theme.colors.primary }]}
                   >
                     {date.getDate()}
                   </Text>
@@ -176,11 +174,11 @@ export default function Main() {
                 backgroundColor: theme.colors.primary,
               },
             ]}
+            color={theme.colors.onPrimary}
             onPress={() => {
               // Handle new habit creation
               router.push("/new-habit");
             }}
-            small={false}
           />
         </View>
       </SafeAreaView>
