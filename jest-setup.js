@@ -21,6 +21,8 @@ jest.mock('expo-router', () => ({
     },
     router: {
         push: jest.fn(),
+        replace: jest.fn(),
+        back: jest.fn(),
     }
 }));
 
@@ -32,6 +34,11 @@ jest.mock('./stores/useColorTheme', () => ({
     useColorTheme: () => ({
         colorTheme: 'light'
     })
+}));
+
+jest.mock('react-native-safe-area-context', () => ({
+    ...jest.requireActual('react-native-safe-area-context'),
+    useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 }));
 
 jest.mock('./assets/fonts/Poppins/Poppins-Regular.ttf', () => '');

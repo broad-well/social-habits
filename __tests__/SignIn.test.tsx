@@ -1,26 +1,26 @@
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, act, waitFor, screen } from '@testing-library/react-native';
 import SignIn from '../app/(account)/sign-in';
 
 describe('SignIn Screen', () => {
 
   it('renders correctly', async () => {
-    const { getByText, getByPlaceholderText } = render(<SignIn />);
+    render(<SignIn />);
 
-    waitFor(() => {
-      expect(getByText('Sign In to Cohabit')).toBeTruthy();
-      expect(getByPlaceholderText('Enter your username')).toBeTruthy();
-      expect(getByPlaceholderText('Enter your password')).toBeTruthy();
-      expect(getByText('Sign In')).toBeTruthy();
-      expect(getByText("Don't have an account? Sign Up!")).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByText('Sign In to Cohabit')).toBeTruthy();
+      expect(screen.getByPlaceholderText('Enter your username')).toBeTruthy();
+      expect(screen.getByPlaceholderText('Enter your password')).toBeTruthy();
+      expect(screen.getByText('Sign In')).toBeTruthy();
+      expect(screen.getByText("Don't have an account? Sign Up!")).toBeTruthy();
     });
   });
 
   it('updates username and password fields', async () => {
-    const { getByPlaceholderText } = render(<SignIn />);
+    render(<SignIn />);
 
-    const usernameInput = getByPlaceholderText('Enter your username');
-    const passwordInput = getByPlaceholderText('Enter your password');
+    const usernameInput = screen.getByPlaceholderText('Enter your username');
+    const passwordInput = screen.getByPlaceholderText('Enter your password');
 
     act(() => {
       fireEvent.changeText(usernameInput, 'testuser');
@@ -49,10 +49,10 @@ describe('SignIn Screen', () => {
   // });
 
   it('toggles password visibility', async () => {
-    const { getByPlaceholderText, getByLabelText } = render(<SignIn />);
+    render(<SignIn />);
 
-    const passwordInput = getByPlaceholderText('Enter your password');
-    const visibilityToggle = getByLabelText('password-visibility-toggle');
+    const passwordInput = screen.getByPlaceholderText('Enter your password');
+    const visibilityToggle = screen.getByLabelText('password-visibility-toggle');
 
     expect(passwordInput.props.secureTextEntry).toBe(true);
 

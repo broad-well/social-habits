@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/datetimepicker": "^8.3.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
@@ -35,6 +36,7 @@
     "radio-buttons-react-native": "^1.0.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-error-boundary": "^5.0.0",
     "react-native": "0.76.7",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-linear-gradient": "^2.8.3",
@@ -49,6 +51,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
     "@eslint/js": "^9.20.0",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.0.1",
@@ -56,6 +61,7 @@
     "@types/react": "~18.3.18",
     "@types/react-native": "^0.72.8",
     "@types/react-test-renderer": "^18.3.1",
+    "babel-jest": "^29.7.0",
     "eslint": "^9.20.1",
     "eslint-config-expo": "canary",
     "eslint-plugin-react": "^7.37.4",

@@ -1,7 +1,7 @@
-import React from "react";
 import { Stack } from "expo-router";
+import React from "react";
 
-export default function AccountLayout() {
+export default function DetailLayout() {
   const screenOptions = {
     headerShown: false,
   };

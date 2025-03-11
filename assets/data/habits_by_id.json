@@ -1,0 +1,50 @@
+{
+  "1": {
+    "id": "1",
+    "title": "Drink Water",
+    "description": "Drink 8 glasses of water every day.",
+    "startDate": "2025-03-06",
+    "endDate": "2025-03-08",
+    "startTime": "06:00",
+    "endTime": "07:00",
+    "streaks": ["2025-03-06", "2025-03-07", "2025-03-08"],
+    "privacy": "public",
+    "lastUpdateTime": "0"
+  },
+  "2": {
+    "id": "2",
+    "title": "Exercise",
+    "description": "Exercise for 30 minutes every day.",
+    "startDate": "2025-03-06",
+    "endDate": "2025-03-08",
+    "startTime": "06:00",
+    "endTime": "07:00",
+    "streaks": ["2025-03-06", "2025-03-07", "2025-03-08"],
+    "privacy": "public",
+    "lastUpdateTime": "0"
+  },
+  "3": {
+    "id": "3",
+    "title": "Read 10 pages",
+    "description": "Read 10 pages of a book every day.",
+    "startDate": "2025-03-06",
+    "endDate": "2025-03-08",
+    "startTime": "06:00",
+    "endTime": "07:00",
+    "streaks": ["2025-03-06", "2025-03-07", "2025-03-08"],
+    "privacy": "public",
+    "lastUpdateTime": "0"
+  },
+  "4": {
+    "id": "4",
+    "title": "Yoga",
+    "description": "Do 10 minutes of yoga every day.",
+    "startDate": "2025-03-06",
+    "endDate": "2025-03-08",
+    "startTime": "06:00",
+    "endTime": "07:00",
+    "streaks": ["2025-03-06", "2025-03-07", "2025-03-08"],
+    "privacy": "public",
+    "lastUpdateTime": "0"
+  }
+}
