@@ -1,4 +1,3 @@
-
 import { Text, View, StyleSheet } from "react-native";
 import {
   Button,
@@ -251,7 +250,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginVertical: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalButton: {
     marginTop: 10,

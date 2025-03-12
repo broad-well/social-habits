@@ -1,5 +1,5 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -11,8 +11,8 @@ const firebaseConfig = {
   storageBucket: "cohabit-app-1fb32.firebasestorage.app",
   messagingSenderId: "884027047581",
   appId: "1:884027047581:web:62e3362afb734206185e74",
-  measurementId: "G-ETX9KB9R90"
+  measurementId: "G-ETX9KB9R90",
 };
 
-// export const app = initializeApp(firebaseConfig);
-// export const auth = getAuth(app);
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
