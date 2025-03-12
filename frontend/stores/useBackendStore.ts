@@ -9,7 +9,6 @@
 
 import LocalHabitStore, { HabitStore } from "@/utils/habitStore";
 import CohabitServiceImpl, { CohabitService } from "@/utils/service";
-import React from "react";
 import { create } from "zustand";
 
 export interface BackendStore {

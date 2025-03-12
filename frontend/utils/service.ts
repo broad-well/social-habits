@@ -1,3 +1,5 @@
+import { auth } from "@/config/firebaseConfig";
+
 export interface FriendListItem {
   id: string;
   name: string;
@@ -32,7 +34,7 @@ export interface CohabitService {
   removeFriend(id: string): Promise<boolean>;
   fetchPendingFriendRequests(): Promise<FriendListItem[]>;
 
-  createHabit(habit: Omit<Habit, "id"> & { id?: string }): Promise<Habit>;
+  createHabit(habit: Omit<Habit, "id" | "email"> & { id?: string }): Promise<Habit>;
   updateHabit(id: string, updates: Partial<Habit>): Promise<Habit>;
   deleteHabit(id: string): Promise<boolean>;
   fetchHabit(id: string): Promise<Habit | null>;
@@ -107,8 +109,8 @@ export default class CohabitServiceImpl implements CohabitService {
   }
 
   // Habit Functions
-  async createHabit(habit: Omit<Habit, "id">): Promise<Habit> {
-    return this.post<Omit<Habit, "id">, Habit>("habits", habit);
+  async createHabit(habit: Omit<Habit, "id" | "email">): Promise<Habit> {
+    return this.post<Omit<Habit, "id" | "email">, Habit>("habits", habit);
   }
 
   async updateHabit(id: string, updates: Partial<Habit>): Promise<Habit> {
@@ -137,7 +139,11 @@ export default class CohabitServiceImpl implements CohabitService {
 
   // Helper Methods
   private async get<T>(endpoint: string): Promise<T> {
-    const res = await fetch(this.backendUrl + endpoint);
+    const res = await fetch(this.backendUrl + endpoint, {
+      headers: {
+        Authorization: await this.getAuthorization(),
+      }
+    });
     const json = await res.json();
     if (!res.ok) {
       throw new Error(json.error || "Unknown API error");
@@ -151,6 +157,7 @@ export default class CohabitServiceImpl implements CohabitService {
       body: JSON.stringify(payload),
       headers: {
         "Content-Type": "application/json",
+        Authorization: await this.getAuthorization(),
       },
     });
     const json = await res.json();
@@ -158,5 +165,10 @@ export default class CohabitServiceImpl implements CohabitService {
       throw new Error(json.error || "Unknown API error");
     }
     return json as T;
+  }
+
+  private async getAuthorization(): Promise<string> {
+    const token = await auth.currentUser!.getIdToken(false);
+    return `Token ${token}`;
   }
 }
