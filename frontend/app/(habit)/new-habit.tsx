@@ -16,7 +16,9 @@ import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { scheduleHabitNotification, sendLocalNotification } from "../../../app/utils/notifications";
-import { HabitStore } from "../../utils/habitStore"
+import LocalHabitStore from "@/utils/habitStore";
+import { HabitStore } from "@/utils/habitStore";
+import CohabitService from "@/utils/service";
 import createStyles from "@/styles/NewHabitStyles";
 
 export default function HabitCreation() {
@@ -52,13 +54,23 @@ export default function HabitCreation() {
     setPrivacy("Public");
   };
 
-  // const habitStore = new HabitStore();
-
   const handleSave = async () => {
+
+    // const habitData = await habitStore.createHabit({
+    //   title: habitName,
+    //   description: habitDescription,
+    //   startDate: startDate,
+    //   endDate: endDate,
+    //   timeType: timeType,
+    //   startTime: startTime,
+    //   endTime: endTime,
+    //   privacy: privacy,
+    // });
+
     // Logic to save the habit
     const notificationId = await scheduleHabitNotification(habitName, startTime);
 
-    // await HabitStore.setHabitNotificationId(habitId, notificationId);
+    // await habitStore.setHabitNotificationId(habitData.id, notificationId);
 
     const hour = startTime.getHours();
     const minute = startTime.getMinutes();

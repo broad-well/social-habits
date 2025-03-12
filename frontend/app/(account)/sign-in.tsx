@@ -104,10 +104,6 @@ export default function SignIn() {
           "You must verify your email before using this app! Please check your inbox."
         );
       }
-<<<<<<< HEAD:app/(account)/sign-in.tsx
-=======
-
->>>>>>> 99f4df30b8d1f1c93ffda9c78065bf9efa5dd66b:frontend/app/(account)/sign-in.tsx
       router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);
@@ -188,15 +184,7 @@ export default function SignIn() {
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimaryContainer }}>
             Don't have an account?{" "}
-<<<<<<< HEAD:app/(account)/sign-in.tsx
-            <Link
-              href="/(account)/sign-up"
-              style={styles.signupLink}
-              replace
-            >
-=======
             <Link href="/(account)/sign-up" style={styles.signupLink} replace>
->>>>>>> 99f4df30b8d1f1c93ffda9c78065bf9efa5dd66b:frontend/app/(account)/sign-in.tsx
               Sign Up!
             </Link>
           </Text>
