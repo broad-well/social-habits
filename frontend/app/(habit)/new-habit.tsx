@@ -19,6 +19,7 @@ import { scheduleHabitNotification, sendLocalNotification } from "../../../app/u
 import LocalHabitStore from "@/utils/habitStore";
 import { HabitStore } from "@/utils/habitStore";
 import CohabitService from "@/utils/service";
+import useBackendStore from "@/stores/useBackendStore.ts"
 import createStyles from "@/styles/NewHabitStyles";
 
 export default function HabitCreation() {
@@ -55,6 +56,8 @@ export default function HabitCreation() {
   };
 
   const handleSave = async () => {
+
+    // const habitStore = await useBackendStore((state) => state.habits);
 
     // const habitData = await habitStore.createHabit({
     //   title: habitName,
