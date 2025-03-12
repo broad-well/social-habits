@@ -10,20 +10,18 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [22.x]
+    defaults:
+      run:
+        working-directory: ./frontend
 
     steps:
     - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 22.x
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 22.x
+        cache-dependency-path: ./frontend/package-lock.json
         cache: 'npm'
 
     - run: npm ci
     - run: npm run test-ci
-      env:
-        FIREBASE_CLIENT_OPTIONS: ${{ secrets.FIREBASE_CLIENT_OPTIONS }}
