@@ -37,11 +37,9 @@ describe("Habit Creation Screen", () => {
 
     await waitFor(() => {
       expect(screen.getByText("New Habit")).toBeTruthy();
-      expect(screen.getByText("Frequency:")).toBeTruthy();
-      // expect(screen.getByText("Start Date:")).toBeTruthy();
-      // expect(screen.getByText("End Date:")).toBeTruthy();
-      // expect(screen.getByText("Start Time:")).toBeTruthy();
-      // expect(screen.getByText("End Time:")).toBeTruthy();
+      expect(screen.getByText("Period:")).toBeTruthy();
+      expect(screen.getByText("Days of the week:")).toBeTruthy();
+      expect(screen.getByText("Reminder:")).toBeTruthy();
       expect(screen.getByText("Privacy:")).toBeTruthy();
       expect(screen.getByText("Reset")).toBeTruthy();
       expect(screen.getByText("Save")).toBeTruthy();
