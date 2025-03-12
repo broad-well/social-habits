@@ -1,8 +1,14 @@
 /* eslint-disable react/display-name */
-import React from 'react';
-import { render, fireEvent, act, waitFor, screen } from '@testing-library/react-native';
-import HabitCreation from '../app/(habit)/new-habit';
-import { router } from 'expo-router';
+import React from "react";
+import {
+  render,
+  fireEvent,
+  act,
+  waitFor,
+  screen,
+} from "@testing-library/react-native";
+import HabitCreation from "../app/(habit)/new-habit";
+import { router } from "expo-router";
 
 jest.mock("@react-native-community/datetimepicker", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -25,15 +31,13 @@ jest.mock("react-native/Libraries/Components/ScrollView/ScrollView", () => {
   return (props) => <View {...props} />;
 });
 
-
-describe('Habit Creation Screen', () => {
-
-  it('renders correctly', async () => {
+describe("Habit Creation Screen", () => {
+  it("renders correctly", async () => {
     render(<HabitCreation />);
 
     await waitFor(() => {
-      expect(screen.getByText('New Habit')).toBeTruthy();
-      expect(screen.getByText('Frequency:')).toBeTruthy();
+      expect(screen.getByText("New Habit")).toBeTruthy();
+      expect(screen.getByText("Frequency:")).toBeTruthy();
       // expect(screen.getByText("Start Date:")).toBeTruthy();
       // expect(screen.getByText("End Date:")).toBeTruthy();
       // expect(screen.getByText("Start Time:")).toBeTruthy();
@@ -44,7 +48,7 @@ describe('Habit Creation Screen', () => {
     });
   });
 
-  it('takes us back to Habit Creation screen when Save button is pressed', async() => {
+  it("takes us back to Habit Creation screen when Save button is pressed", async () => {
     render(<HabitCreation />);
 
     act(() => {
@@ -53,5 +57,4 @@ describe('Habit Creation Screen', () => {
 
     expect(router.back).toHaveBeenCalledWith();
   });
-
 });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Text, View, ScrollView } from "react-native";
 
 import {
@@ -87,19 +87,13 @@ export default function HabitCreation() {
     return null;
   }
 
-  const theme = useMemo(
-    // eslint-disable-line
-    () => ({
-      ...DefaultTheme,
-      colors:
-        colorTheme === "light"
-          ? LightThemeColors.colors
-          : DarkThemeColors.colors,
-    }),
-    [colorTheme]
-  );
+  const theme = {
+    ...DefaultTheme,
+    colors:
+      colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
+  };
 
-  const styles = useMemo(() => createStyles(theme), [theme]); // eslint-disable-line
+  const styles = createStyles(theme);
 
   return (
     <PaperProvider theme={theme}>
