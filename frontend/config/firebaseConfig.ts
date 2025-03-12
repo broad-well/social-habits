@@ -14,5 +14,5 @@ const firebaseConfig = {
   measurementId: "G-ETX9KB9R90"
 };
 
-// export const app = initializeApp(firebaseConfig);
-// export const auth = getAuth(app);
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);

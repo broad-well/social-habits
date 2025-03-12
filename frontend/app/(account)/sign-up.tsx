@@ -68,12 +68,6 @@ export default function SignUp() {
   const screenOptions = {
     headerShown: false,
   };
-
-  const [loaded] = useFonts({
-    Poppins: require("../../assets/fonts/Poppins/Poppins-Regular.ttf"),  // eslint-disable-line
-    PoppinsBold: require("../../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
-  });
-
   const { colorTheme } = useColorTheme();
 
   const [username, setUsername] = useState("");
@@ -106,18 +100,8 @@ export default function SignUp() {
   };
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  useEffect(() => {
     updatePasswordValidation(password, retypePassword);
   }, [password, retypePassword]);
-
-  if (!loaded) {
-    return null;
-  }
 
   const theme = {
     ...DefaultTheme,

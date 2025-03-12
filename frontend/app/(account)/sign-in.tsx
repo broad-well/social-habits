@@ -58,16 +58,6 @@ export default function SignIn() {
   const [error, setError] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   const theme = {
     ...DefaultTheme,
     colors:

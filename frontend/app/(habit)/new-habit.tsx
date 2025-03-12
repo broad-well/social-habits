@@ -22,10 +22,6 @@ export default function HabitCreation() {
     headerShown: false,
   };
 
-  const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
-  });
   const { colorTheme } = useColorTheme();
 
   const [habitName, setHabitName] = useState("");
@@ -74,16 +70,6 @@ export default function HabitCreation() {
   const handlePrivacyChange = (value: string) => {
     setPrivacy(value);
   };
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   const theme = {
     ...DefaultTheme,
