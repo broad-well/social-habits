@@ -156,8 +156,9 @@ export default class LocalHabitStore implements HabitStore {
     const remoteHabits = await this.server.fetchUserHabits();
     const remoteIds = new Set(remoteHabits.map(hb => hb.id));
 
-    const onlyLocalIds = localIds.difference(remoteIds);
-    const onlyRemoteIds = remoteIds.difference(localIds);
+    const onlyLocalIds = setDifference(localIds, remoteIds);
+    const onlyRemoteIds = setDifference(remoteIds, localIds);
+    console.debug({ onlyLocalIds, onlyRemoteIds });
     const remoteRemovals = onlyLocalIds.size === 0 ?
       {} : await this.server.habitsRemoved(Array.from(onlyLocalIds));
 
@@ -192,8 +193,8 @@ export default class LocalHabitStore implements HabitStore {
   }
 
   async createHabit(habit: Omit<LocalHabit, "id">): Promise<Habit> {
-    this.markModified(habit);
     const habitData = await this.server.createHabit(habit);
+    this.markModified(habitData);
     await this.runUpsertCommand(habitData);
     return habitData;
   }
@@ -297,4 +298,17 @@ export default class LocalHabitStore implements HabitStore {
   private markModified(habit: Omit<LocalHabit, "id">) {
     habit.lastModified = new Date();
   }
+}
+
+// All items in a that are not in b
+// This function is necessary here because Set.difference may not be available
+// in the React Native JS runtime. It was not the case on iOS.
+export function setDifference<T>(a: Set<T>, b: Set<T>): Set<T> {
+  const out = new Set<T>();
+  for (const item of a) {
+    if (!b.has(item)) {
+      out.add(item);
+    }
+  }
+  return out;
 }
