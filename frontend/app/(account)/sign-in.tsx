@@ -86,30 +86,29 @@ export default function SignIn() {
   };
 
   const handleSignIn = async () => {
-    router.replace("/(tabs)/main");
-    // if (!validateInputs()) return;
+    if (!validateInputs()) return;
 
-    // try {
-    //   setIsLoading(true);
-    //   setError(null);
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    //   const cred = await signInWithEmailAndPassword(
-    //     auth,
-    //     username + "@ucsd.edu",
-    //     password
-    //   );
-    //   if (!cred.user.emailVerified) {
-    //     throw new Error(
-    //       "You must verify your email before using this app! Please check your inbox."
-    //     );
-    //   }
+      const cred = await signInWithEmailAndPassword(
+        auth,
+        username + "@ucsd.edu",
+        password
+      );
+      if (!cred.user.emailVerified) {
+        throw new Error(
+          "You must verify your email before using this app! Please check your inbox."
+        );
+      }
 
-    //   router.replace("/(tabs)/main");
-    // } catch (fail) {
-    //   setError(fail);
-    // } finally {
-    //   setIsLoading(false);
-    // }
+      router.replace("/(tabs)/main");
+    } catch (fail) {
+      setError(fail);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

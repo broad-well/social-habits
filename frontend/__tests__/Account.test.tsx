@@ -6,7 +6,7 @@ import {
   waitFor,
   screen,
 } from "@testing-library/react-native";
-import Account from "../app/(tabs)/Account";
+import Account from "../app/(tabs)/account";
 import { router } from "expo-router";
 
 describe("Account Screen", () => {
