@@ -64,12 +64,12 @@ export default function HabitCreation() {
   }, []);
 
   const handleStartDateChange = useCallback(
-    (event: any, date: any) => setStartDate(date || startDate),
+    (event: any, date: Date) => setStartDate(date || startDate), // eslint-disable-line
     [startDate]
   );
 
   const handleEndDateChange = useCallback(
-    (event: any, date: any) => setEndDate(date || endDate),
+    (event: any, date: Date) => setEndDate(date || endDate), // eslint-disable-line
     [endDate]
   );
 
@@ -88,6 +88,7 @@ export default function HabitCreation() {
   }
 
   const theme = useMemo(
+    // eslint-disable-line
     () => ({
       ...DefaultTheme,
       colors:
@@ -98,7 +99,7 @@ export default function HabitCreation() {
     [colorTheme]
   );
 
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const styles = useMemo(() => createStyles(theme), [theme]); // eslint-disable-line
 
   return (
     <PaperProvider theme={theme}>
@@ -135,9 +136,7 @@ export default function HabitCreation() {
             mode="outlined"
             label="Name of the Habit"
             value={habitName}
-            onChangeText={(text) => {
-              setHabitName(text);
-            }}
+            onChangeText={handleHabitNameChange}
             inputMode="text"
             style={styles.input}
             textColor={theme.colors.onPrimaryContainer}

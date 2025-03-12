@@ -28,6 +28,6 @@ describe("Account Screen", () => {
       fireEvent.press(screen.getByText("Sign Out"));
     });
 
-    expect(router.replace).toHaveBeenCalledWith("/(account)/login");
+    expect(router.replace).toHaveBeenCalledWith("/(account)/sign-in");
   });
 });
