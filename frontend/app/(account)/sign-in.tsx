@@ -1,4 +1,3 @@
-
 import { Text, View, StyleSheet } from "react-native";
 import {
   Button,
@@ -87,29 +86,30 @@ export default function SignIn() {
   };
 
   const handleSignIn = async () => {
-    if (!validateInputs()) return;
+    router.replace("/(tabs)/main");
+    // if (!validateInputs()) return;
 
-    try {
-      setIsLoading(true);
-      setError(null);
+    // try {
+    //   setIsLoading(true);
+    //   setError(null);
 
-      const cred = await signInWithEmailAndPassword(
-        auth,
-        username + "@ucsd.edu",
-        password
-      );
-      if (!cred.user.emailVerified) {
-        throw new Error(
-          "You must verify your email before using this app! Please check your inbox."
-        );
-      }
+    //   const cred = await signInWithEmailAndPassword(
+    //     auth,
+    //     username + "@ucsd.edu",
+    //     password
+    //   );
+    //   if (!cred.user.emailVerified) {
+    //     throw new Error(
+    //       "You must verify your email before using this app! Please check your inbox."
+    //     );
+    //   }
 
-      router.replace("/(tabs)/main");
-    } catch (fail) {
-      setError(fail);
-    } finally {
-      setIsLoading(false);
-    }
+    //   router.replace("/(tabs)/main");
+    // } catch (fail) {
+    //   setError(fail);
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   return (
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginVertical: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalButton: {
     marginTop: 10,
