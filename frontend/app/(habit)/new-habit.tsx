@@ -63,11 +63,9 @@ export default function HabitCreation() {
     })
 
     // Logic to save the habit
-    const notificationId = await scheduleHabitNotification(habitName, reminderTime);
-    await backendStore.setHabitNotificationId(habitData.id, notificationId);
+    const notificationIds = await scheduleHabitNotification(habitName, reminderTime, selectedDays, startDate, endDate);
+    await backendStore.setHabitNotificationId(habitData.id, notificationIds);
 
-    const hour = reminderTime.getHours();
-    const minute = reminderTime.getMinutes();
     const title = "Notification scheduled!";
     const body = `Reminders for ${habitName} have been scheduled!`;
     await sendLocalNotification(title, body);
