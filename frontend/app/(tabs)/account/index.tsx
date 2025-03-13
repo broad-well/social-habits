@@ -70,7 +70,7 @@ export default function Account() {
   return (
     <PaperProvider theme={theme}>
       <Stack.Screen
-        name="AccountScreen"
+        name="account"
         options={{
           headerShown: false,
           title: "Account",
@@ -103,7 +103,7 @@ export default function Account() {
           mode="contained"
           style={[styles.button, { backgroundColor: theme.colors.primary }]}
           labelStyle={styles.buttonLabel}
-          onPress={() => router.push("/(tabs)/account/friends" as any)} // eslint-disable-line
+          onPress={() => router.push("/(friend)/friend-list" as any)} // eslint-disable-line
         >
           Friend List
         </Button>
@@ -122,7 +122,7 @@ export default function Account() {
           style={[styles.button, { backgroundColor: "#ff4444" }]}
           labelStyle={styles.buttonLabel}
           onPress={() => {
-            router.replace("/(account)/login" as any); // eslint-disable-line
+            router.replace("/(account)/sign-in" as any); // eslint-disable-line
           }}
         >
           Sign Out

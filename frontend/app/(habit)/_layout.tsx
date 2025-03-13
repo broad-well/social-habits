@@ -2,14 +2,9 @@ import { Stack } from "expo-router";
 import React from "react";
 
 export default function HabitLayout() {
-  const screenOptions = {
-    headerShown: false,
-  };
-
   return (
-    <>
-      <Stack.Screen options={screenOptions} />
-      <Stack />
-    </>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="new-habit" options={{ headerShown: false }} />
+    </Stack>
   );
 }
