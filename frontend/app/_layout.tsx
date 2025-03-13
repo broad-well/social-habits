@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { View, Text } from "react-native";
+import { View, Text, Alert } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useFonts } from "expo-font";
 import useBackendStore, { isStoreInitialized } from "@/stores/useBackendStore";
@@ -19,7 +19,10 @@ export default function RootLayout() {
   const initialize = React.useCallback(async () => {
     await backendStore.initHabitStore();
   }, [backendStore]);
-  React.useEffect(() => { initialize(); }, []);
+  React.useEffect(() => {
+    initialize()
+      .catch((error) => Alert.alert("Failed to initialize!", `${error}`));
+  }, []);
 
   React.useEffect(() => {
     if (fontsLoaded && isStoreInitialized(backendStore)) {

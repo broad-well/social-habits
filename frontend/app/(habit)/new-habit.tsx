@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, ScrollView } from "react-native";
+import { Text, View, StyleSheet, ScrollView, Alert } from "react-native";
 import {
   Button,
   TextInput,
   Appbar,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
+  Portal,
+  Dialog,
 } from "react-native-paper";
 import RadioButtonRN from "radio-buttons-react-native";
-import * as SplashScreen from "expo-splash-screen";
-import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import createStyles from "@/styles/NewHabitStyles";
+import { LocalHabit } from "@/utils/habitStore";
+import useBackendQuery from "@/utils/useBackendQuery";
+import useBackendStore from "@/stores/useBackendStore";
 
 export default function HabitCreation() {
   const screenOptions = {
@@ -46,10 +49,24 @@ export default function HabitCreation() {
     setPrivacy("Public");
   };
 
-  const handleSave = () => {
-    // Logic to save the habit
+  const habitStore = useBackendStore((s) => s.getHabitStore());
+  const handleSave = async () => {
+    // Build the habit object
+    const habit: Omit<LocalHabit, "id"> = {
+      title: habitName,
+      description: habitDescription,
+      startDate: startDate.toISOString().slice(0, 10),
+      endDate: endDate.toISOString().slice(0, 10),
+      reminderTime: startTime.toISOString(),
+      reminderDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      lastModified: new Date(),
+      streaks: [],
+      privacy: privacy as typeof habit.privacy,
+    };
+    await habitStore.createHabit(habit);
     router.back();
   };
+  const saver = useBackendQuery(handleSave);
 
   const handleEveryDayChange = (value: string) => {
     if (value === "everyDay") {
@@ -266,6 +283,7 @@ export default function HabitCreation() {
           <Button
             mode="outlined"
             onPress={handleReset}
+            disabled={saver.loading}
             style={[styles.button, { borderColor: theme.colors.error }]}
             textColor={theme.colors.onErrorContainer}
           >
@@ -273,7 +291,8 @@ export default function HabitCreation() {
           </Button>
           <Button
             mode="contained"
-            onPress={handleSave}
+            onPress={saver.send}
+            disabled={saver.loading}
             style={styles.button}
             buttonColor={theme.colors.primary}
             textColor={theme.colors.onPrimary}
@@ -282,6 +301,18 @@ export default function HabitCreation() {
           </Button>
         </View>
       </ScrollView>
+      <Portal>
+        <Dialog visible={!!saver.error} onDismiss={saver.clear}>
+          <Dialog.Title>Habit creation failed</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">{saver.error?.message}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={saver.clear}>Try again</Button>
+            <Button onPress={router.back}>Return</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </PaperProvider>
   );
 }
