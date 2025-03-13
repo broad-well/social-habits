@@ -16,10 +16,7 @@ import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { scheduleHabitNotification, sendLocalNotification } from "../../../app/utils/notifications";
-import LocalHabitStore from "@/utils/habitStore";
-import { HabitStore } from "@/utils/habitStore";
-import CohabitService from "@/utils/service";
-import useBackendStore from "@/stores/useBackendStore.ts"
+import useBackendStore from "@/stores/useBackendStore"
 import createStyles from "@/styles/NewHabitStyles";
 
 export default function HabitCreation() {
@@ -53,31 +50,31 @@ export default function HabitCreation() {
 
   const handleSave = async () => {
 
-    // const habitStore = await useBackendStore((state) => state.habits);
+    const backendStore = useBackendStore.getState().getHabitStore();
 
-    // const habitData = await habitStore.createHabit({
-    //   title: habitName,
-    //   description: habitDescription,
-    //   startDate: startDate,
-    //   endDate: endDate,
-    //   timeType: timeType,
-    //   startTime: startTime,
-    //   endTime: endTime,
-    //   privacy: privacy,
-    // });
+    const habitData = await backendStore.createHabit({
+        title: habitName,
+        description: habitDescription,
+        startDate: startDate,
+        endDate: endDate,
+        timeType: timeType,
+        startTime: startTime,
+        endTime: endTime,
+        privacy: privacy,
+    });
 
     // Logic to save the habit
     const notificationId = await scheduleHabitNotification(habitName, startTime);
-
-    // await habitStore.setHabitNotificationId(habitData.id, notificationId);
+    await backendStore.setHabitNotificationId(habitData.id, notificationId);
 
     const hour = startTime.getHours();
     const minute = startTime.getMinutes();
-    const title = "Notification scheduled!"
-    const body = `Daily reminders for ${habitName} will be sent at ${hour}:${minute}`
+    const title = "Notification scheduled!";
+    const body = `Daily reminders for ${habitName} will be sent at ${hour}:${minute}`;
     await sendLocalNotification(title, body);
 
     router.back();
+
   };
 
   const handleEveryDayChange = (value: string) => {
