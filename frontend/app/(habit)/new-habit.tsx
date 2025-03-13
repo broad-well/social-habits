@@ -17,7 +17,7 @@ import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { scheduleHabitNotification, sendLocalNotification } from "../../../app/utils/notifications";
+import { scheduleHabitNotification, sendLocalNotification } from "@/utils/notifications";
 import useBackendStore from "@/stores/useBackendStore"
 import createStyles from "@/styles/NewHabitStyles";
 import { LocalHabit } from "@/utils/habitStore";

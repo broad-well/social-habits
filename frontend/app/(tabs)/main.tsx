@@ -16,7 +16,6 @@ import {
 } from "react-native-safe-area-context";
 import createStyles from "@/styles/MainStyles";
 import { getDateLabel, getWeekDates } from "@/utils/dateConversion";
-import { getHabitByDay } from "@/utils/getHabitByDay";
 import HabitList from "@/components/HabitList";
 import useBackendStore from "@/stores/useBackendStore";
 import { Habit } from "@/utils/service";
@@ -98,7 +97,7 @@ export default function Main() {
           ]}
           color={theme.colors.onPrimary}
           onPress={() => {
-            router.push("/(habit)/new-habit" as any); // eslint-disable-line
+            router.push("/(habit)/new-habit"); // eslint-disable-line
           }}
         />
       </SafeAreaView>

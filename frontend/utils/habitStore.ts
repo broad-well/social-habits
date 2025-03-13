@@ -241,7 +241,7 @@ export default class LocalHabitStore implements HabitStore {
     const stmt = await db.prepareAsync(`
       INSERT OR REPLACE INTO habit (
         id, title, description, startDate, endDate, reminderTime,
-        reminderDays, reminderId, lastModified, streaks, privacy
+        reminderDays, reminderIds, lastModified, streaks, privacy
       ) VALUES (
         $id, $title, $description, $startDate, $endDate, $reminderTime,
         $reminderDays, $reminderId, $lastModified, $streaks, $privacy
