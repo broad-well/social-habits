@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Text, View, ScrollView } from "react-native";
-
 import {
   Button,
   TextInput,
@@ -48,42 +47,33 @@ export default function HabitCreation() {
     setSelectedDays([]);
   }, []);
 
-<<<<<<< HEAD
-  const handleSave = async () => {
-
+  const handleSave = useCallback(async () => {
     const backendStore = useBackendStore.getState().getHabitStore();
 
     const habitData = await backendStore.createHabit({
-        title: habitName,
-        description: habitDescription,
-        startDate: startDate,
-        endDate: endDate,
-        timeType: timeType,
-        startTime: startTime,
-        endTime: endTime,
-        privacy: privacy,
-    });
+      title: habitName,
+      description: habitDescription,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      privacy: privacy as "Private" | "Friends-Only" | "Public",
+      reminderTime: reminderTime.toISOString(),
+      reminderDays: selectedDays,
+      lastModified: new Date(),
+      streaks: [],
+    })
 
-=======
-  const handleSave = useCallback(() => {
->>>>>>> c28ff3bf3239368b6954fefbb0a53bb4bf4a931f
     // Logic to save the habit
-    const notificationId = await scheduleHabitNotification(habitName, startTime);
+    const notificationId = await scheduleHabitNotification(habitName, reminderTime);
     await backendStore.setHabitNotificationId(habitData.id, notificationId);
 
-    const hour = startTime.getHours();
-    const minute = startTime.getMinutes();
+    const hour = reminderTime.getHours();
+    const minute = reminderTime.getMinutes();
     const title = "Notification scheduled!";
-    const body = `Daily reminders for ${habitName} will be sent at ${hour}:${minute}`;
+    const body = `Reminders for ${habitName} have been scheduled!`;
     await sendLocalNotification(title, body);
 
     router.back();
-<<<<<<< HEAD
-
-  };
-=======
   }, []);
->>>>>>> c28ff3bf3239368b6954fefbb0a53bb4bf4a931f
 
   const handlePrivacyChange = useCallback((value: string) => {
     setPrivacy(value);
@@ -255,15 +245,15 @@ export default function HabitCreation() {
           <View style={styles.divider} />
           <View style={styles.groupContainer}>
             <Text style={styles.radioGroupLabel}>Reminder:</Text>
-            <DateTimePicker
+                <DateTimePicker
               value={reminderTime}
-              mode="time"
-              display="default"
-              design="material"
-              themeVariant={colorTheme}
+                  mode="time"
+                  display="default"
+                  design="material"
+                  themeVariant={colorTheme}
               onChange={(event, time) => setReminderTime(time || reminderTime)}
-            />
-          </View>
+                />
+              </View>
           <View style={styles.divider} />
           <View style={styles.radioGroupContainer}>
             <Text style={styles.radioGroupLabel}>Privacy:</Text>
