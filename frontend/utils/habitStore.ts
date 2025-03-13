@@ -1,6 +1,7 @@
 // Syncing habits between the app and the backend
 // Use Expo SQLite to store habits offline/locally
 
+import { resolveConflict } from "./conflict";
 import { CohabitService, Habit } from "./service";
 import * as SQLite from "expo-sqlite";
 
@@ -163,41 +164,30 @@ export default class LocalHabitStore implements HabitStore {
     const localIds = new Set(await this.listLocalIDs());
     const remoteHabits = await this.server.fetchUserHabits();
     const remoteIds = new Set(remoteHabits.map(hb => hb.id));
-
-    const onlyLocalIds = setDifference(localIds, remoteIds);
-    const onlyRemoteIds = setDifference(remoteIds, localIds);
-    console.debug({ onlyLocalIds, onlyRemoteIds });
-    const remoteRemovals = onlyLocalIds.size === 0 ?
-      {} : await this.server.habitsRemoved(Array.from(onlyLocalIds));
-
-    const tasks: Promise<void | boolean>[] = [];
-    for (const localId of onlyLocalIds) {
-      if (remoteRemovals[localId] === undefined) {
-        tasks.push((async () => {
-          const habit = await this.readHabit(localId);
-          await this.server.createHabit(habit!);
-        })());
-      } else {
-        tasks.push(this.deleteHabit(localId));
-      }
-    }
-
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
-    for (const remoteId of onlyRemoteIds) {
-      const localTombstone = await this.getLocalTombstone(remoteId, db);
-      if (localTombstone === null) {
-        // download it
-        tasks.push((async (id: string) => {
-          const remote = await this.server.fetchHabit(id);
-          if (remote === null) return;
-          await this.runUpsertCommand(remote);
-        })(remoteId));
-      } else {
-        // remove it remotely
-        tasks.push(this.server.deleteHabit(remoteId));
-      }
-    }
-    await Promise.all(tasks);
+
+    const actions = await resolveConflict(
+      localIds, remoteIds,
+      (habits) => this.server.habitsRemoved(Array.from(habits)),
+      (id) => this.getLocalTombstone(id, db),
+    );
+
+    const upload = async (localId: string) => {
+      const habit = await this.readHabit(localId);
+      await this.server.createHabit(habit!);
+    };
+    const download = async (id: string) => {
+      const remote = await this.server.fetchHabit(id);
+      if (remote === null) return;
+      await this.runUpsertCommand(remote);
+    };
+    
+    await Promise.all([
+      ...Array.from(actions.upload).map(upload),
+      ...Array.from(actions.download).map(download),
+      ...Array.from(actions.deleteLocal).map(this.deleteHabit.bind(this)),
+      ...Array.from(actions.deleteRemote).map(this.server.deleteHabit.bind(this)),
+    ]);
   }
 
   async createHabit(habit: Omit<LocalHabit, "id">): Promise<Habit> {
@@ -322,17 +312,4 @@ export default class LocalHabitStore implements HabitStore {
   private markModified(habit: Omit<LocalHabit, "id">) {
     habit.lastModified = new Date();
   }
-}
-
-// All items in a that are not in b
-// This function is necessary here because Set.difference may not be available
-// in the React Native JS runtime. It was not the case on iOS.
-export function setDifference<T>(a: Set<T>, b: Set<T>): Set<T> {
-  const out = new Set<T>();
-  for (const item of a) {
-    if (!b.has(item)) {
-      out.add(item);
-    }
-  }
-  return out;
 }

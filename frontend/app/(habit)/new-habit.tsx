@@ -20,7 +20,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { scheduleHabitNotification, sendLocalNotification } from "@/utils/notifications";
 import useBackendStore from "@/stores/useBackendStore"
 import createStyles from "@/styles/NewHabitStyles";
-import { LocalHabit } from "@/utils/habitStore";
 import useBackendQuery from "@/utils/useBackendQuery";
 import MultiSelectDropdown from "@/components/MultiSelectDropdown";
 
@@ -36,7 +35,7 @@ export default function HabitCreation() {
   const [isEveryDay, setIsEveryDay] = useState(true);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [privacy, setPrivacy] = useState("2");
+  const [privacy, setPrivacy] = useState("Private");
   const [reminderTime, setReminderTime] = useState(new Date());
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
@@ -46,7 +45,7 @@ export default function HabitCreation() {
     setIsEveryDay(true);
     setStartDate(new Date());
     setEndDate(new Date());
-    setPrivacy("2");
+    setPrivacy("Private");
     setReminderTime(new Date());
     setSelectedDays([]);
   }, []);
