@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, ScrollView, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import {
   Button,
   TextInput,
@@ -8,17 +8,21 @@ import {
   PaperProvider,
   Portal,
   Dialog,
+  Text,
 } from "react-native-paper";
 import RadioButtonRN from "radio-buttons-react-native";
+import RadioGroup from "react-native-radio-buttons-group";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { scheduleHabitNotification, sendLocalNotification } from "../../../app/utils/notifications";
+import useBackendStore from "@/stores/useBackendStore"
 import createStyles from "@/styles/NewHabitStyles";
 import { LocalHabit } from "@/utils/habitStore";
 import useBackendQuery from "@/utils/useBackendQuery";
-import useBackendStore from "@/stores/useBackendStore";
+import MultiSelectDropdown from "@/components/MultiSelectDropdown";
 
 export default function HabitCreation() {
   const screenOptions = {
@@ -29,64 +33,73 @@ export default function HabitCreation() {
 
   const [habitName, setHabitName] = useState("");
   const [habitDescription, setHabitDescription] = useState("");
-  const [frequency, setFrequency] = useState(0);
+  const [isEveryDay, setIsEveryDay] = useState(true);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [timeType, setTimeType] = useState(0);
-  const [startTime, setStartTime] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
-  const [privacy, setPrivacy] = useState("Public");
+  const [privacy, setPrivacy] = useState("2");
+  const [reminderTime, setReminderTime] = useState(new Date());
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
-  const handleReset = () => {
+  const handleReset = React.useCallback(() => {
     setHabitName("");
     setHabitDescription("");
-    setFrequency(0);
+    setIsEveryDay(true);
     setStartDate(new Date());
     setEndDate(new Date());
-    setTimeType(0);
-    setStartTime(new Date());
-    setEndTime(new Date());
-    setPrivacy("Public");
-  };
+    setPrivacy("2");
+    setReminderTime(new Date());
+    setSelectedDays([]);
+  }, []);
 
   const habitStore = useBackendStore((s) => s.getHabitStore());
+
   const handleSave = async () => {
-    // Build the habit object
-    const habit: Omit<LocalHabit, "id"> = {
+    const habitData = await habitStore.createHabit({
       title: habitName,
       description: habitDescription,
-      startDate: startDate.toISOString().slice(0, 10),
-      endDate: endDate.toISOString().slice(0, 10),
-      reminderTime: startTime.toISOString(),
-      reminderDays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      privacy: privacy as "Private" | "Friends-Only" | "Public",
+      reminderTime: reminderTime.toISOString(),
+      reminderDays: selectedDays,
       lastModified: new Date(),
       streaks: [],
-      privacy: privacy as typeof habit.privacy,
-    };
-    await habitStore.createHabit(habit);
+    })
+
+    // Logic to save the habit
+    const notificationIds = await scheduleHabitNotification(habitName, reminderTime, selectedDays, startDate, endDate);
+    await habitStore.setHabitNotificationId(habitData.id, notificationIds);
+
+    const title = "Notification scheduled!";
+    const body = `Reminders for ${habitName} have been scheduled!`;
+    await sendLocalNotification(title, body);
+
     router.back();
   };
+
   const saver = useBackendQuery(handleSave);
 
-  const handleEveryDayChange = (value: string) => {
-    if (value === "everyDay") {
-      setFrequency(0);
-    } else {
-      setFrequency(1);
-    }
-  };
-
-  const handleAnyTimeChange = (value: string) => {
-    if (value === "anyTime") {
-      setTimeType(0);
-    } else {
-      setTimeType(1);
-    }
-  };
-
-  const handlePrivacyChange = (value: string) => {
+  const handlePrivacyChange = React.useCallback((value: string) => {
     setPrivacy(value);
-  };
+  }, []);
+
+  const handlePeriodChange = React.useCallback((e: string) => {
+    setIsEveryDay(e === "0");
+  }, []);
+
+  const handleStartDateChange = React.useCallback(
+    (event: any, date?: Date) => setStartDate(date || startDate), // eslint-disable-line
+    [startDate]
+  );
+
+  const handleEndDateChange = React.useCallback(
+    (event: any, date?: Date) => setEndDate(date || endDate), // eslint-disable-line
+    [endDate]
+  );
+
+  const handleHabitNameChange = React.useCallback((text: string) => {
+    setHabitName(text);
+  }, []);
 
   const theme = {
     ...DefaultTheme,
@@ -105,7 +118,10 @@ export default function HabitCreation() {
           backgroundColor: theme.colors.primaryContainer,
         }}
       >
-        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.BackAction
+          color={theme.colors.onPrimaryContainer}
+          onPress={() => router.back()}
+        />
         <Appbar.Content
           title="New Habit"
           titleStyle={{
@@ -120,45 +136,54 @@ export default function HabitCreation() {
           width: "100%",
         }}
         contentContainerStyle={[
-          styles.container,
           { width: "100%", paddingTop: 20, paddingHorizontal: 35 },
         ]}
       >
         <View style={styles.formContainer}>
           <TextInput
+            mode="outlined"
             label="Name of the Habit"
             value={habitName}
-            onChangeText={setHabitName}
+            onChangeText={handleHabitNameChange}
+            inputMode="text"
             style={styles.input}
             textColor={theme.colors.onPrimaryContainer}
             theme={theme}
+            autoCapitalize="none"
           />
           <TextInput
+            mode="outlined"
             label="Description"
+            inputMode="text"
             value={habitDescription}
-            onChangeText={setHabitDescription}
+            onChangeText={(text) => {
+              setHabitDescription(text);
+            }}
             multiline
             numberOfLines={4}
             style={styles.input}
             textColor={theme.colors.onPrimaryContainer}
             theme={theme}
+            autoCapitalize="none"
           />
           <View style={styles.radioGroupContainer}>
-            <Text style={styles.radioGroupLabel}>Frequency:</Text>
-            <RadioButtonRN
-              data={[
-                { label: "Every day", value: "everyDay" },
-                { label: "Set Dates", value: "setDates" },
+            <Text style={styles.radioGroupLabel}>Period:</Text>
+
+            <RadioGroup
+              radioButtons={[
+                { id: "0", label: "Every day", value: "everyDay" },
+                { id: "1", label: "Set Dates", value: "setDates" },
               ]}
-              selectedBtn={(e: any) => handleEveryDayChange(e.value)} // eslint-disable-line
-              box={false}
-              initial={frequency === 0 ? 1 : 2}
-              textStyle={{ color: theme.colors.onPrimaryContainer }}
-              activeColor={theme.colors.onPrimaryContainer}
-              style={{ ...styles.radioButtonGroup, marginLeft: 20 }}
+              containerStyle={{
+                width: "60%",
+                alignItems: "flex-start",
+              }}
+              layout="column"
+              onPress={handlePeriodChange}
+              selectedId={isEveryDay ? "0" : "1"}
             />
           </View>
-          {frequency === 1 && (
+          {!isEveryDay && (
             <View style={styles.datePickerContainer}>
               <View
                 style={{
@@ -180,7 +205,7 @@ export default function HabitCreation() {
                   design="material"
                   themeVariant={colorTheme}
                   minimumDate={new Date()}
-                  onChange={(event, date) => setStartDate(date || startDate)}
+                  onChange={handleStartDateChange}
                 />
               </View>
               <View
@@ -199,85 +224,59 @@ export default function HabitCreation() {
                   design="material"
                   themeVariant={colorTheme}
                   minimumDate={startDate}
-                  onChange={(event, date) => setEndDate(date || endDate)}
+                  onChange={handleEndDateChange}
                 />
               </View>
             </View>
           )}
           <View style={styles.divider} />
-          <View style={styles.radioGroupContainer}>
-            <Text style={styles.radioGroupLabel}>Time:</Text>
-            <RadioButtonRN
-              data={[
-                { label: "Any", value: "anyTime" },
-                { label: "Set time", value: "setTime" },
+          <View style={styles.groupContainer}>
+            <MultiSelectDropdown
+              label="Days of the week:"
+              options={[
+                { value: "Monday", label: "Monday" },
+                { value: "Tuesday", label: "Tuesday" },
+                { value: "Wednesday", label: "Wednesday" },
+                { value: "Thursday", label: "Thursday" },
+                { value: "Friday", label: "Friday" },
+                { value: "Saturday", label: "Saturday" },
+                { value: "Sunday", label: "Sunday" },
               ]}
-              selectedBtn={(e: any) => handleAnyTimeChange(e.value)} // eslint-disable-line
-              box={false}
-              initial={timeType === 0 ? 1 : 2}
-              textStyle={{ color: theme.colors.onPrimaryContainer }}
-              activeColor={theme.colors.onPrimaryContainer}
-              style={{ ...styles.radioButtonGroup, marginLeft: 57 }}
+              value={selectedDays}
+              onChange={setSelectedDays}
             />
           </View>
-          {timeType === 1 && (
-            <View style={styles.timePickerContainer}>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>
-                  Start Time:
-                </Text>
+          <View style={styles.divider} />
+          <View style={styles.groupContainer}>
+            <Text style={styles.radioGroupLabel}>Reminder:</Text>
                 <DateTimePicker
-                  value={startTime}
+              value={reminderTime}
                   mode="time"
                   display="default"
                   design="material"
                   themeVariant={colorTheme}
-                  onChange={(event, time) => setStartTime(time || startTime)}
+              onChange={(event, time) => setReminderTime(time || reminderTime)}
                 />
               </View>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>
-                  End Time:
-                </Text>
-                <DateTimePicker
-                  value={endTime}
-                  mode="time"
-                  display="default"
-                  design="material"
-                  themeVariant={colorTheme}
-                  minimumDate={startTime}
-                  onChange={(event, time) => setEndTime(time || endTime)}
-                />
-              </View>
-            </View>
-          )}
           <View style={styles.divider} />
           <View style={styles.radioGroupContainer}>
             <Text style={styles.radioGroupLabel}>Privacy:</Text>
-            <RadioButtonRN
-              data={[
-                { label: "Public", value: "Public" },
-                { label: "Friend-Only", value: "Friend-Only" },
-                { label: "Private", value: "Private" },
+            <RadioGroup
+              radioButtons={[
+                { id: "0", label: "Public", value: "Public" },
+                {
+                  id: "1",
+                  label: "Friend-Only",
+                  value: "Friend-Only",
+                },
+                { id: "2", label: "Private", value: "Private" },
               ]}
-              selectedBtn={(e: any) => handlePrivacyChange(e.value)} // eslint-disable-line
-              box={false}
-              initial={
-                privacy === "Public" ? 1 : privacy === "Friend-Only" ? 2 : 3
-              }
-              textStyle={{ color: theme.colors.onPrimaryContainer }}
-              activeColor={theme.colors.onPrimaryContainer}
-              style={{ ...styles.radioButtonGroup, marginLeft: 40 }}
+              containerStyle={{
+                width: "60%",
+                alignItems: "flex-start",
+              }}
+              onPress={handlePrivacyChange}
+              selectedId={privacy.toString()}
             />
           </View>
           <Button

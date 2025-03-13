@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Image, Text, View, StyleSheet } from "react-native";
-import { Button ,
+import {
+  Button,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
@@ -10,11 +11,18 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
+import { requestNotificationPermissions } from "../../app/utils/notifications";
+
 
 export default function Index() {
   const screenOptions = {
     headerShown: false,
   };
+
+  const [loaded] = useFonts({
+    Poppins: require("../assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
+    PoppinsBold: require("../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
+  });
   const { colorTheme } = useColorTheme();
   const theme = {
     ...DefaultTheme,
@@ -27,21 +35,29 @@ export default function Index() {
     <PaperProvider theme={theme}>
       <Stack.Screen options={screenOptions} />
       <View
-        style={[styles.container, { backgroundColor: theme.colors.primaryContainer }]}
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.primaryContainer },
+        ]}
       >
         <Image
           source={require("../assets/images/icon.png")} // eslint-disable-line
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={[styles.title, { color: theme.colors.onPrimaryContainer }]}>
+        <Text
+          style={[styles.title, { color: theme.colors.onPrimaryContainer }]}
+        >
           Welcome to Cohabit!
         </Text>
         <Button
           icon="login"
           mode="contained"
           onPress={() => router.push("/(account)/sign-in")}
-          style={[styles.button, { backgroundColor: theme.colors.onPrimaryContainer }]}
+          style={[
+            styles.button,
+            { backgroundColor: theme.colors.onPrimaryContainer },
+          ]}
           labelStyle={styles.buttonLabel}
         >
           Sign In
@@ -51,7 +67,10 @@ export default function Index() {
             Don't have an account?{" "}
             <Link
               href="/(account)/sign-up"
-              style={[styles.signupLink, { color: theme.colors.onPrimaryContainer }]}
+              style={[
+                styles.signupLink,
+                { color: theme.colors.onPrimaryContainer },
+              ]}
             >
               Sign Up!
             </Link>

@@ -2,7 +2,6 @@ import React from "react";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { View, Text, Alert } from "react-native";
-import { ActivityIndicator } from "react-native-paper";
 import { useFonts } from "expo-font";
 import useBackendStore, { isStoreInitialized } from "@/stores/useBackendStore";
 
@@ -33,7 +32,15 @@ export default function RootLayout() {
   // Prevent the screens from rendering if backendStore is not initialized
   // because they assume that it is initialized
   if (fontsLoaded && isStoreInitialized(backendStore)) {
-    return <Stack screenOptions={{ headerShown: false }} />;
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(account)" options={{ headerShown: false }} />
+        <Stack.Screen name="(friend)" options={{ headerShown: false }} />
+        <Stack.Screen name="(habit)" options={{ headerShown: false }} />
+      </Stack>
+    );
   } else {
     return <View>
       <Text>Loading...</Text>

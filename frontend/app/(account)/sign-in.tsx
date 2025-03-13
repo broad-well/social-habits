@@ -1,4 +1,3 @@
-
 import { Text, View, StyleSheet } from "react-native";
 import {
   Button,
@@ -96,6 +95,7 @@ export default function SignIn() {
         );
       }
 
+      // TODO consider a more explicit loading screen for this
       await habitStore.syncWithBackend();
       router.replace("/(tabs)/main");
     } catch (fail) {
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginVertical: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalButton: {
     marginTop: 10,
