@@ -40,17 +40,6 @@ async function fetchFriendList(): Promise<FriendListItem[]> {
 }
 
 export default function FriendList() {
-  const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),// eslint-disable-line
-  });
-
-  React.useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
   const { colorTheme } = useColorTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
@@ -115,10 +104,6 @@ export default function FriendList() {
       }
     })();
   }, []);
-
-  if (!loaded) {
-    return null;
-  }
 
   return <PaperProvider theme={theme}>
     <View style={stylesheet.container}>
