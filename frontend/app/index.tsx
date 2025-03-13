@@ -11,6 +11,8 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
+import { requestNotificationPermissions } from "../../app/utils/notifications";
+
 
 export default function Index() {
   const screenOptions = {
@@ -22,17 +24,6 @@ export default function Index() {
     PoppinsBold: require("../assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
   });
   const { colorTheme } = useColorTheme();
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   const theme = {
     ...DefaultTheme,
     colors:

@@ -30,17 +30,6 @@ async function fetchUserByEmail(handle: string): Promise<FriendListItem | null> 
 }
 
 export default function AddFriend() {
-  const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"),// eslint-disable-line
-  });
-
-  React.useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
   const { colorTheme } = useColorTheme();
 
   const theme = {
@@ -96,9 +85,6 @@ export default function AddFriend() {
     React.useCallback(() => fetchUserByEmail(queryEmail), [queryEmail])
   );
 
-  if (!loaded) {
-    return null;
-  }
   return <PaperProvider theme={theme}>
     <Stack.Screen options={{
       title: "Add friend",

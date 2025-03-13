@@ -9,7 +9,7 @@ import React from "react";
  */
 export default function useBackendQuery<R>(query: () => Promise<R>) {
   const [result, setResult] = React.useState<R | undefined>(undefined);
-  const [sent, markSent] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<Error | undefined>(undefined);
 
   return {
@@ -21,22 +21,25 @@ export default function useBackendQuery<R>(query: () => Promise<R>) {
       setResult(undefined);
       setError(undefined);
       try {
-        markSent(true);
+        setLoading(true);
         setResult(await query());
         setError(undefined);
       } catch (e) {
+        console.trace("useBackendQuery detected error", e);
         setError(e as Error);
+      } finally {
+        setLoading(false);
       }
     },
     /**
      * Clear both the query and the error state variables
      */
     clear() {
-      markSent(false);
+      setLoading(false);
       setResult(undefined);
       setError(undefined);
     },
-    sent,
+    loading,
     result,
     error,
   };

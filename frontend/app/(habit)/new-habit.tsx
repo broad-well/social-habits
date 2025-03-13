@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Text, View, ScrollView } from "react-native";
-
 import {
   Button,
   TextInput,
@@ -16,6 +15,8 @@ import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { scheduleHabitNotification, sendLocalNotification } from "../../../app/utils/notifications";
+import useBackendStore from "@/stores/useBackendStore"
 import createStyles from "@/styles/NewHabitStyles";
 import MultiSelectDropdown from "@/components/MultiSelectDropdown";
 
@@ -24,10 +25,6 @@ export default function HabitCreation() {
     headerShown: false,
   };
 
-  const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
-  });
   const { colorTheme } = useColorTheme();
 
   const [habitName, setHabitName] = useState("");
@@ -50,8 +47,29 @@ export default function HabitCreation() {
     setSelectedDays([]);
   }, []);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
+    const backendStore = useBackendStore.getState().getHabitStore();
+
+    const habitData = await backendStore.createHabit({
+      title: habitName,
+      description: habitDescription,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      privacy: privacy as "Private" | "Friends-Only" | "Public",
+      reminderTime: reminderTime.toISOString(),
+      reminderDays: selectedDays,
+      lastModified: new Date(),
+      streaks: [],
+    })
+
     // Logic to save the habit
+    const notificationIds = await scheduleHabitNotification(habitName, reminderTime, selectedDays, startDate, endDate);
+    await backendStore.setHabitNotificationId(habitData.id, notificationIds);
+
+    const title = "Notification scheduled!";
+    const body = `Reminders for ${habitName} have been scheduled!`;
+    await sendLocalNotification(title, body);
+
     router.back();
   }, []);
 
@@ -76,16 +94,6 @@ export default function HabitCreation() {
   const handleHabitNameChange = useCallback((text: string) => {
     setHabitName(text);
   }, []);
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   const theme = {
     ...DefaultTheme,
@@ -235,15 +243,15 @@ export default function HabitCreation() {
           <View style={styles.divider} />
           <View style={styles.groupContainer}>
             <Text style={styles.radioGroupLabel}>Reminder:</Text>
-            <DateTimePicker
+                <DateTimePicker
               value={reminderTime}
-              mode="time"
-              display="default"
-              design="material"
-              themeVariant={colorTheme}
+                  mode="time"
+                  display="default"
+                  design="material"
+                  themeVariant={colorTheme}
               onChange={(event, time) => setReminderTime(time || reminderTime)}
-            />
-          </View>
+                />
+              </View>
           <View style={styles.divider} />
           <View style={styles.radioGroupContainer}>
             <Text style={styles.radioGroupLabel}>Privacy:</Text>

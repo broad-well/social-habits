@@ -14,11 +14,6 @@ import { Stack, router } from "expo-router";
 import Avatar from "@/components/accounts/Avatar";
 
 export default function Account() {
-  const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
-  });
-
   const { colorTheme } = useColorTheme();
 
   const theme = {
@@ -71,16 +66,6 @@ export default function Account() {
       fontWeight: "bold",
     },
   });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   return (
     <PaperProvider theme={theme}>

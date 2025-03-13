@@ -1,20 +1,30 @@
 // Syncing habits between the app and the backend
 // Use Expo SQLite to store habits offline/locally
 
+import { auth } from "@/config/firebaseConfig";
 import { CohabitService, Habit } from "./service";
 import * as SQLite from "expo-sqlite";
 
+export type LocalHabit = Omit<Habit, "email">;
+
 export interface HabitStore {
 
-  createHabit(habit: Omit<Habit, "id">): Promise<Habit>;
-  updateHabit(habit: Habit): Promise<void>;
+  createHabit(habit: Omit<LocalHabit, "id">): Promise<Habit>;
+  updateHabit(habit: LocalHabit): Promise<void>;
 
   /**
    * First, check if the habit with the given ID is stored locally
    * If stored locally, read the local copy
    * Otherwise, fetch from backend, store locally, and return the local copy
    */
-  readHabit(id: string): Promise<Habit | null>;
+  readHabit(id: string): Promise<LocalHabit | null>;
+
+  /**
+   * List all habits that should be completed on particular date.
+   * @param isoDate The date on which the habits should be performed in "YYYY-MM-DD" format
+   */
+  listHabits(isoDate: string): Promise<LocalHabit[]>;
+
   /**
    * If stored locally, remove local copy
    * Remove copy from backend
@@ -43,6 +53,13 @@ export interface HabitStore {
 }
 
 const STORE_DB_NAME = "habits";
+
+type LocalHabitRow = Omit<LocalHabit, "reminderDays" | "reminderId" | "lastModified" | "streaks"> & {
+  reminderDays: string, // JSON
+  reminderId: string | null,
+  lastModified: number,
+  streaks: string, // JSON
+}
 
 export default class LocalHabitStore implements HabitStore {
 
@@ -77,14 +94,14 @@ export default class LocalHabitStore implements HabitStore {
     return new LocalHabitStore(server);
   }
 
-  async updateHabit(habit: Habit): Promise<void> {
+  async updateHabit(habit: LocalHabit): Promise<void> {
     // Save the new habit both locally and on the server.
     this.markModified(habit);
     await this.runUpsertCommand(habit);
     await this.server.updateHabit(habit.id, habit);
   }
 
-  async readHabit(id: string): Promise<Habit | null> {
+  async readHabit(id: string): Promise<LocalHabit | null> {
     // Read from local. If local doesn't have it, read from remote.
     const local = await this.runReadCommand(id);
     if (local !== null) return local;
@@ -94,6 +111,24 @@ export default class LocalHabitStore implements HabitStore {
     // Save the un-cached version locally.
     await this.runUpsertCommand(remote);
     return remote;
+  }
+
+  async listHabits(isoDate: string): Promise<LocalHabit[]> {
+    console.assert(/^\d\d\d\d-\d\d-\d\d$/.test(isoDate));
+    const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
+    const stmt = await db.prepareAsync(
+      `SELECT * FROM habit WHERE
+        unixepoch(startDate) <= unixepoch($queryDate) AND
+        unixepoch($queryDate) <= unixepoch(endDate)`
+    );
+    try {
+      const results = await stmt.executeAsync<LocalHabitRow>({ $queryDate: isoDate });
+      const habits = (await results.getAllAsync()).map(this.parseHabit);
+      return habits;
+    } finally {
+      await stmt.finalizeAsync();
+      await db.closeAsync();
+    }
   }
 
   async deleteHabit(id: string): Promise<void> {
@@ -121,8 +156,9 @@ export default class LocalHabitStore implements HabitStore {
     const remoteHabits = await this.server.fetchUserHabits();
     const remoteIds = new Set(remoteHabits.map(hb => hb.id));
 
-    const onlyLocalIds = localIds.difference(remoteIds);
-    const onlyRemoteIds = remoteIds.difference(localIds);
+    const onlyLocalIds = setDifference(localIds, remoteIds);
+    const onlyRemoteIds = setDifference(remoteIds, localIds);
+    console.debug({ onlyLocalIds, onlyRemoteIds });
     const remoteRemovals = onlyLocalIds.size === 0 ?
       {} : await this.server.habitsRemoved(Array.from(onlyLocalIds));
 
@@ -156,8 +192,9 @@ export default class LocalHabitStore implements HabitStore {
     await Promise.all(tasks);
   }
 
-  async createHabit(habit: Omit<Habit, "id">): Promise<Habit> {
+  async createHabit(habit: Omit<LocalHabit, "id">): Promise<Habit> {
     const habitData = await this.server.createHabit(habit);
+    this.markModified(habitData);
     await this.runUpsertCommand(habitData);
     return habitData;
   }
@@ -175,7 +212,7 @@ export default class LocalHabitStore implements HabitStore {
     }
   }
 
-  async runUpsertCommand(habit: Habit) {
+  async runUpsertCommand(habit: LocalHabit) {
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
     const stmt = await db.prepareAsync(`
       INSERT OR REPLACE INTO habit (
@@ -206,30 +243,26 @@ export default class LocalHabitStore implements HabitStore {
     }
   }
 
-  async runReadCommand(habitId: string): Promise<Habit | null> {
+  private parseHabit(row: LocalHabitRow): LocalHabit {
+    return {
+      ...row,
+      reminderDays: JSON.parse(row.reminderDays),
+      reminderId: row.reminderId ?? undefined,
+      streaks: JSON.parse(row.streaks),
+      lastModified: new Date(row.lastModified),
+    };
+  }
+
+  async runReadCommand(habitId: string): Promise<LocalHabit | null> {
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
     const stmt = await db.prepareAsync("SELECT * FROM habit WHERE id = $id");
     try {
-      const res = await stmt.executeAsync<
-        Omit<Habit, "reminderDays" | "reminderId" | "lastModified" | "streaks"> &
-        {
-          reminderDays: string, // JSON
-          reminderId: string | null,
-          lastModified: number,
-          streaks: string, // JSON
-        }
-      >({ $id: habitId });
+      const res = await stmt.executeAsync<LocalHabitRow>({ $id: habitId });
       const firstRow = await res.getFirstAsync();
       if (firstRow === null || firstRow === undefined) {
         return null;
       }
-      return {
-        ...firstRow,
-        reminderDays: JSON.parse(firstRow.reminderDays),
-        reminderId: firstRow.reminderId ?? undefined,
-        streaks: JSON.parse(firstRow.streaks),
-        lastModified: new Date(firstRow.lastModified),
-      };
+      return this.parseHabit(firstRow);
     } finally {
       await stmt.finalizeAsync();
       await db.closeAsync();
@@ -262,7 +295,20 @@ export default class LocalHabitStore implements HabitStore {
     }
   }
 
-  private markModified(habit: Omit<Habit, "id">) {
+  private markModified(habit: Omit<LocalHabit, "id">) {
     habit.lastModified = new Date();
   }
+}
+
+// All items in a that are not in b
+// This function is necessary here because Set.difference may not be available
+// in the React Native JS runtime. It was not the case on iOS.
+export function setDifference<T>(a: Set<T>, b: Set<T>): Set<T> {
+  const out = new Set<T>();
+  for (const item of a) {
+    if (!b.has(item)) {
+      out.add(item);
+    }
+  }
+  return out;
 }

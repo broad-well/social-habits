@@ -5,8 +5,6 @@ import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
-import * as SplashScreen from "expo-splash-screen";
-import { useFonts } from "expo-font";
 import DarkThemeColors from "../../constants/DarkThemeColors.json";
 import LightThemeColors from "../../constants/LightThemeColors.json";
 import { useColorTheme } from "../../stores/useColorTheme";
@@ -21,24 +19,9 @@ import { getHabitByDay } from "@/utils/getHabitByDay";
 import HabitList from "@/components/HabitList";
 
 export default function Main() {
-  const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
-  });
-
   const { colorTheme } = useColorTheme();
   const insets = useSafeAreaInsets();
   const [selectedDate, setSelectedDate] = useState(new Date());
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   const theme = {
     ...DefaultTheme,
