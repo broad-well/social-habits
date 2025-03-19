@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 
+// Interact with notifications
 const actions = [
     {
         identifier: 'done',
@@ -13,6 +14,7 @@ const actions = [
     },
 ];
 
+// Request notification permissions for the first time
 export async function requestNotificationPermissions() {
     const { status } = await Notifications.getPermissionsAsync();
     if (status !== 'granted') {
@@ -20,6 +22,7 @@ export async function requestNotificationPermissions() {
     }
 }
 
+// Send immediate local notification to user
 export async function sendLocalNotification(title: string, body:string) {
     await Notifications.scheduleNotificationAsync({
         content: { title, body },
@@ -27,6 +30,7 @@ export async function sendLocalNotification(title: string, body:string) {
     });
 }
 
+// Schedule a notification for a habit according to the details set by the user
 export const scheduleHabitNotification = async (habitName: string, habitTime: Date, reminderDays: string[], startDate: Date, endDate: Date) => {
 
     const hour = habitTime.getHours();
@@ -50,13 +54,17 @@ export const scheduleHabitNotification = async (habitName: string, habitTime: Da
         categoryIdentifier: 'habit-reminders',
     };
 
+    // Initialize list of notification IDs
+    // One for each day that the habit repeats on
     const notificationIds: string[] = [];
     const startTime = startDate.getTime();
     const endTime = endDate.getTime();
     const currentTime = new Date().getTime();
 
+    // Account for case when start date is in the future
     const delayTime = startTime > currentTime ? startTime - currentTime: 0;
 
+    // Need different notification ID for each day that habit repeats
     for (const day of daysToRepeat) {
 
         const notifTrigger = {
@@ -67,6 +75,7 @@ export const scheduleHabitNotification = async (habitName: string, habitTime: Da
             weekday: day,
         } as Notifications.CalendarTriggerInput;
 
+        // Only create notification IDs after start date
         if (delayTime > 0) {
             setTimeout(async () => {
                 const notificationId = await Notifications.scheduleNotificationAsync({
@@ -85,6 +94,7 @@ export const scheduleHabitNotification = async (habitName: string, habitTime: Da
 
     }
 
+    // Cancel scheduled notifications after end date set by user
     const stopNotifs = () => {
         const currentTime = new Date().getTime();
         if (currentTime >= endTime) {
@@ -94,11 +104,13 @@ export const scheduleHabitNotification = async (habitName: string, habitTime: Da
         }
     }
 
+    // Repeat cancel function once a day to check whether notifications need to be cancelled
     setInterval(stopNotifs, 86400000);
 
     return notificationIds;
 };
 
+// Notification format
 Notifications.setNotificationHandler({
     handleNotification: async() => ({
         shouldShowAlert: true,
@@ -109,15 +121,7 @@ Notifications.setNotificationHandler({
 
 Notifications.setNotificationCategoryAsync('habit-reminders', actions);
 
-export const unscheduleHabitNotification = async (notificationId: string) => {
-    try {
-        await Notifications.cancelScheduledNotificationAsync(notificationId);
-        console.log(`Notification with ID ${notificationId} cancelled`)
-    } catch (error) {
-        console.error('Error cancelling notification:', error);
-    }
-}
-
+// Function to cancel all scheduled notifications
 export const unscheduleAllScheduledNotifications = async () => {
     try {
         await Notifications.cancelAllScheduledNotificationsAsync();
