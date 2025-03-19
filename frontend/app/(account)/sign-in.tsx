@@ -19,6 +19,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebaseConfig";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
+import useBackendStore from "@/stores/useBackendStore";
 
 export function formatError(error: FirebaseError) {
   switch (error.code) {
@@ -75,6 +76,7 @@ export default function SignIn() {
     return true;
   };
 
+  const habitStore = useBackendStore((s) => s.getHabitStore());
   const handleSignIn = async () => {
     if (!validateInputs()) return;
 
@@ -92,6 +94,9 @@ export default function SignIn() {
           "You must verify your email before using this app! Please check your inbox."
         );
       }
+
+      // TODO consider a more explicit loading screen for this
+      await habitStore.syncWithBackend();
       router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);

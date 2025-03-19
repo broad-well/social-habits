@@ -1,23 +1,26 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Text, View, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import {
   Button,
   TextInput,
   Appbar,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
+  Portal,
+  Dialog,
+  Text,
 } from "react-native-paper";
+import RadioButtonRN from "radio-buttons-react-native";
 import RadioGroup from "react-native-radio-buttons-group";
-import * as SplashScreen from "expo-splash-screen";
-import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { scheduleHabitNotification, sendLocalNotification } from "../../../app/utils/notifications";
+import { scheduleHabitNotification, sendLocalNotification } from "@/utils/notifications";
 import useBackendStore from "@/stores/useBackendStore"
 import createStyles from "@/styles/NewHabitStyles";
+import useBackendQuery from "@/utils/useBackendQuery";
 import MultiSelectDropdown from "@/components/MultiSelectDropdown";
 
 export default function HabitCreation() {
@@ -32,25 +35,25 @@ export default function HabitCreation() {
   const [isEveryDay, setIsEveryDay] = useState(true);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [privacy, setPrivacy] = useState("2");
+  const [privacy, setPrivacy] = useState("Private");
   const [reminderTime, setReminderTime] = useState(new Date());
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
-  const handleReset = useCallback(() => {
+  const handleReset = React.useCallback(() => {
     setHabitName("");
     setHabitDescription("");
     setIsEveryDay(true);
     setStartDate(new Date());
     setEndDate(new Date());
-    setPrivacy("2");
+    setPrivacy("Private");
     setReminderTime(new Date());
     setSelectedDays([]);
   }, []);
 
-  const handleSave = useCallback(async () => {
-    const backendStore = useBackendStore.getState().getHabitStore();
+  const habitStore = useBackendStore((s) => s.getHabitStore());
 
-    const habitData = await backendStore.createHabit({
+  const handleSave = async () => {
+    const habitData = await habitStore.createHabit({
       title: habitName,
       description: habitDescription,
       startDate: startDate.toISOString(),
@@ -64,34 +67,36 @@ export default function HabitCreation() {
 
     // Logic to save the habit
     const notificationIds = await scheduleHabitNotification(habitName, reminderTime, selectedDays, startDate, endDate);
-    await backendStore.setHabitNotificationId(habitData.id, notificationIds);
+    await habitStore.setHabitNotificationId(habitData.id, notificationIds);
 
     const title = "Notification scheduled!";
     const body = `Reminders for ${habitName} have been scheduled!`;
     await sendLocalNotification(title, body);
 
     router.back();
-  }, []);
+  };
 
-  const handlePrivacyChange = useCallback((value: string) => {
+  const saver = useBackendQuery(handleSave);
+
+  const handlePrivacyChange = React.useCallback((value: string) => {
     setPrivacy(value);
   }, []);
 
-  const handlePeriodChange = useCallback((e: string) => {
+  const handlePeriodChange = React.useCallback((e: string) => {
     setIsEveryDay(e === "0");
   }, []);
 
-  const handleStartDateChange = useCallback(
-    (event: any, date: Date) => setStartDate(date || startDate), // eslint-disable-line
+  const handleStartDateChange = React.useCallback(
+    (event: any, date?: Date) => setStartDate(date || startDate), // eslint-disable-line
     [startDate]
   );
 
-  const handleEndDateChange = useCallback(
-    (event: any, date: Date) => setEndDate(date || endDate), // eslint-disable-line
+  const handleEndDateChange = React.useCallback(
+    (event: any, date?: Date) => setEndDate(date || endDate), // eslint-disable-line
     [endDate]
   );
 
-  const handleHabitNameChange = useCallback((text: string) => {
+  const handleHabitNameChange = React.useCallback((text: string) => {
     setHabitName(text);
   }, []);
 
@@ -276,6 +281,7 @@ export default function HabitCreation() {
           <Button
             mode="outlined"
             onPress={handleReset}
+            disabled={saver.loading}
             style={[styles.button, { borderColor: theme.colors.error }]}
             textColor={theme.colors.onErrorContainer}
           >
@@ -283,7 +289,8 @@ export default function HabitCreation() {
           </Button>
           <Button
             mode="contained"
-            onPress={handleSave}
+            onPress={saver.send}
+            disabled={saver.loading}
             style={styles.button}
             buttonColor={theme.colors.primary}
             textColor={theme.colors.onPrimary}
@@ -292,6 +299,18 @@ export default function HabitCreation() {
           </Button>
         </View>
       </ScrollView>
+      <Portal>
+        <Dialog visible={!!saver.error} onDismiss={saver.clear}>
+          <Dialog.Title>Habit creation failed</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">{saver.error?.message}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={saver.clear}>Try again</Button>
+            <Button onPress={router.back}>Return</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </PaperProvider>
   );
 }

@@ -1,11 +1,11 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import { Card, Title, Paragraph } from "react-native-paper";
-import { Habit } from "@/utils/service";
 import { router } from "expo-router";
+import { LocalHabit } from "@/utils/habitStore";
 
 interface HabitPanelProps {
-  habit: Habit;
+  habit: LocalHabit;
 }
 
 const HabitPanel: React.FC<HabitPanelProps> = ({ habit }) => {
@@ -26,10 +26,7 @@ const HabitPanel: React.FC<HabitPanelProps> = ({ habit }) => {
             <Text style={styles.bold}>End Date:</Text> {habit.endDate}
           </Paragraph>
           <Paragraph>
-            <Text style={styles.bold}>Start Time:</Text> {habit.starttime}
-          </Paragraph>
-          <Paragraph>
-            <Text style={styles.bold}>End Time:</Text> {habit.endtime}
+            <Text style={styles.bold}>Reminder Time:</Text> {habit.reminderTime}
           </Paragraph>
           <Paragraph>
             <Text style={styles.bold}>Streaks:</Text> {habit.streaks.join(", ")}

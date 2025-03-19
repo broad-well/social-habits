@@ -4,6 +4,7 @@ import {
   FAB,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
+  ActivityIndicator,
 } from "react-native-paper";
 import DarkThemeColors from "../../constants/DarkThemeColors.json";
 import LightThemeColors from "../../constants/LightThemeColors.json";
@@ -15,13 +16,16 @@ import {
 } from "react-native-safe-area-context";
 import createStyles from "@/styles/MainStyles";
 import { getDateLabel, getWeekDates } from "@/utils/dateConversion";
-import { getHabitByDay } from "@/utils/getHabitByDay";
 import HabitList from "@/components/HabitList";
+import useBackendStore from "@/stores/useBackendStore";
+import { Habit } from "@/utils/service";
+import { LocalHabit } from "@/utils/habitStore";
 
 export default function Main() {
   const { colorTheme } = useColorTheme();
   const insets = useSafeAreaInsets();
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const habitStore = useBackendStore((s) => s.getHabitStore());
 
   const theme = {
     ...DefaultTheme,
@@ -64,14 +68,23 @@ export default function Main() {
     </View>
   );
 
+  const [currentDateHabits, setCurrentDateHabits] = React.useState<LocalHabit[] | null>(null);
+  React.useEffect(() => {
+    setCurrentDateHabits(null);
+    (async () => {
+      const habits = await habitStore.listHabits(selectedDate.toISOString().slice(0, 10));
+      setCurrentDateHabits(habits);
+    })();
+  }, [selectedDate]);
+
   return (
     <PaperProvider theme={theme}>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea}>
         {renderHeader()}
-        <HabitList
-          habits={getHabitByDay(selectedDate.toISOString().slice(0, 10))}
-        />
+        {currentDateHabits !== null ?
+          <HabitList habits={currentDateHabits} /> :
+          <ActivityIndicator animating size="large" />}
         <FAB
           icon="plus"
           label="Add New Habit"
@@ -84,7 +97,7 @@ export default function Main() {
           ]}
           color={theme.colors.onPrimary}
           onPress={() => {
-            router.push("/(habit)/new-habit" as any); // eslint-disable-line
+            router.push("/(habit)/new-habit"); // eslint-disable-line
           }}
         />
       </SafeAreaView>
