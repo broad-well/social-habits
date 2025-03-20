@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, ScrollView, Alert } from "react-native";
 import {
   Button,
   TextInput,
@@ -10,52 +10,69 @@ import {
   Dialog,
   Text,
 } from "react-native-paper";
-import RadioButtonRN from "radio-buttons-react-native";
 import RadioGroup from "react-native-radio-buttons-group";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
-import { router, Stack } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { requestNotificationPermissions, scheduleHabitNotification, sendLocalNotification } from "@/utils/notifications";
+import { scheduleHabitNotification, sendLocalNotification, unscheduleHabitNotification } from "@/utils/notifications";
 import useBackendStore from "@/stores/useBackendStore"
 import createStyles from "@/styles/NewHabitStyles";
 import useBackendQuery from "@/utils/useBackendQuery";
 import MultiSelectDropdown from "@/components/MultiSelectDropdown";
+import { LocalHabit } from "@/utils/habitStore";
 
-export default function HabitCreation() {
+export default function HabitUpdate() {
   const screenOptions = {
     headerShown: false,
   };
 
   const { colorTheme } = useColorTheme();
+  const { id } = useLocalSearchParams();
+  const store = useBackendStore((u) => u.getHabitStore());
+  const notifyUIHabitUpdated = useBackendStore((s) => s.markHabitStoreUpdated);
+
+  const prevHabit = useBackendQuery(() => store.readHabit(id as string));
+  React.useEffect(() => {
+    console.log("retrieving prevHabit");
+    prevHabit.send()
+      .then((result) => {
+        if (result) {
+          handleReset(result);
+        } else {
+          Alert.alert("Failed to read habit", "Habit no longer exists?");
+          router.back();
+        }
+      })
+      .catch(console.error);
+  }, [store, id]);
 
   const [habitName, setHabitName] = useState("");
   const [habitDescription, setHabitDescription] = useState("");
-  const [isEveryDay, setIsEveryDay] = useState(true);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [privacy, setPrivacy] = useState("Private");
   const [reminderTime, setReminderTime] = useState(new Date());
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
-  const handleReset = React.useCallback(() => {
-    setHabitName("");
-    setHabitDescription("");
-    setIsEveryDay(true);
-    setStartDate(new Date());
-    setEndDate(new Date());
-    setPrivacy("Private");
-    setReminderTime(new Date());
-    setSelectedDays([]);
+  const handleReset = React.useCallback((habit: LocalHabit) => {
+    setHabitName(habit.title);
+    setHabitDescription(habit.description);
+    setStartDate(new Date(habit.startDate));
+    setEndDate(new Date(habit.endDate));
+    setPrivacy(habit.privacy);
+    setReminderTime(new Date(habit.reminderTime));
+    setSelectedDays(habit.reminderDays);
   }, []);
 
-  const habitStore = useBackendStore((s) => s.getHabitStore());
-  const notifyUIHabitUpdated = useBackendStore((s) => s.markHabitStoreUpdated);
-
   const handleSave = async () => {
-    await requestNotificationPermissions();
-    const habitData = await habitStore.createHabit({
+    if (prevHabit.result) {
+      const existingIds = await store.getHabitNotificationId(id as string);
+      await Promise.all((existingIds ?? []).map((id) => unscheduleHabitNotification(id)));
+    }
+    await store.updateHabit({
+      id: id as string,
       title: habitName,
       description: habitDescription,
       startDate: startDate.toISOString(),
@@ -68,25 +85,25 @@ export default function HabitCreation() {
     });
     notifyUIHabitUpdated();
 
-    // Logic to save the habit
     const notificationIds = await scheduleHabitNotification(habitName, reminderTime, selectedDays, startDate, endDate);
-    await habitStore.setHabitNotificationId(habitData.id, notificationIds);
+    await store.setHabitNotificationId(id as string, notificationIds);
 
     const title = "Notification scheduled!";
-    const body = `Reminders for ${habitName} have been scheduled!`;
+    const body = `Reminders for ${habitName} have been rescheduled!`;
     await sendLocalNotification(title, body);
 
     router.back();
   };
 
   const saver = useBackendQuery(handleSave);
+  const deleter = useBackendQuery(async () => {
+    await store.deleteHabit(id as string);
+    notifyUIHabitUpdated();
+    return router.replace("/(tabs)/main");
+  });
 
   const handlePrivacyChange = React.useCallback((value: string) => {
     setPrivacy(value);
-  }, []);
-
-  const handlePeriodChange = React.useCallback((e: string) => {
-    setIsEveryDay(e === "0");
   }, []);
 
   const handleStartDateChange = React.useCallback(
@@ -125,7 +142,7 @@ export default function HabitCreation() {
           onPress={() => router.back()}
         />
         <Appbar.Content
-          title="New Habit"
+          title="Update Habit"
           titleStyle={{
             fontSize: 18,
           }}
@@ -168,69 +185,50 @@ export default function HabitCreation() {
             theme={theme}
             autoCapitalize="none"
           />
-          <View style={styles.radioGroupContainer}>
-            <Text style={styles.radioGroupLabel}>Period:</Text>
-
-            <RadioGroup
-              radioButtons={[
-                { id: "0", label: "Every day", value: "everyDay" },
-                { id: "1", label: "Set Dates", value: "setDates" },
-              ]}
-              containerStyle={{
-                width: "60%",
-                alignItems: "flex-start",
+          <View style={styles.datePickerContainer}>
+            <View
+              style={{
+                flexDirection: "column",
+                alignItems: "center",
               }}
-              layout="column"
-              onPress={handlePeriodChange}
-              selectedId={isEveryDay ? "0" : "1"}
-            />
-          </View>
-          {!isEveryDay && (
-            <View style={styles.datePickerContainer}>
-              <View
+            >
+              <Text
                 style={{
-                  flexDirection: "column",
-                  alignItems: "center",
+                  color: theme.colors.onPrimaryContainer,
                 }}
               >
-                <Text
-                  style={{
-                    color: theme.colors.onPrimaryContainer,
-                  }}
-                >
-                  Start Date:
-                </Text>
-                <DateTimePicker
-                  value={startDate}
-                  mode="date"
-                  display="default"
-                  design="material"
-                  themeVariant={colorTheme}
-                  minimumDate={new Date()}
-                  onChange={handleStartDateChange}
-                />
-              </View>
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>
-                  End Date:
-                </Text>
-                <DateTimePicker
-                  value={endDate}
-                  mode="date"
-                  display="default"
-                  design="material"
-                  themeVariant={colorTheme}
-                  minimumDate={startDate}
-                  onChange={handleEndDateChange}
-                />
-              </View>
+                Start Date:
+              </Text>
+              <DateTimePicker
+                value={startDate}
+                mode="date"
+                display="default"
+                design="material"
+                themeVariant={colorTheme}
+                minimumDate={new Date()}
+                onChange={handleStartDateChange}
+              />
             </View>
-          )}
+            <View
+              style={{
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: theme.colors.onPrimaryContainer }}>
+                End Date:
+              </Text>
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display="default"
+                design="material"
+                themeVariant={colorTheme}
+                minimumDate={startDate}
+                onChange={handleEndDateChange}
+              />
+            </View>
+          </View>
           <View style={styles.divider} />
           <View style={styles.groupContainer}>
             <MultiSelectDropdown
@@ -283,12 +281,12 @@ export default function HabitCreation() {
           </View>
           <Button
             mode="outlined"
-            onPress={handleReset}
-            disabled={saver.loading}
+            onPress={deleter.send}
+            disabled={deleter.loading}
             style={[styles.button, { borderColor: theme.colors.error }]}
             textColor={theme.colors.onErrorContainer}
           >
-            Reset
+            Delete
           </Button>
           <Button
             mode="contained"
@@ -304,12 +302,22 @@ export default function HabitCreation() {
       </ScrollView>
       <Portal>
         <Dialog visible={!!saver.error} onDismiss={saver.clear}>
-          <Dialog.Title>Habit creation failed</Dialog.Title>
+          <Dialog.Title>Habit update failed</Dialog.Title>
           <Dialog.Content>
             <Text variant="bodyMedium">{saver.error?.message}</Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={saver.clear}>Try again</Button>
+            <Button onPress={router.back}>Return</Button>
+          </Dialog.Actions>
+        </Dialog>
+        <Dialog visible={!!deleter.error} onDismiss={deleter.clear}>
+          <Dialog.Title>Habit deletion failed</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">{deleter.error?.message}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={deleter.clear}>Try again</Button>
             <Button onPress={router.back}>Return</Button>
           </Dialog.Actions>
         </Dialog>

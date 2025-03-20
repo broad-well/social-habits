@@ -3,12 +3,10 @@ import { FlatList, StyleSheet } from "react-native";
 import HabitPanel from "@/components/HabitPanel";
 import { LocalHabit } from "@/utils/habitStore";
 
-// Define the props for the HabitList component
 type HabitListProps = {
   habits: LocalHabit[];
 };
 
-// Define the HabitList component
 const HabitList: React.FC<HabitListProps> = ({ habits }) => {
   return (
     <FlatList
@@ -20,7 +18,6 @@ const HabitList: React.FC<HabitListProps> = ({ habits }) => {
   );
 };
 
-// Define styles
 const styles = StyleSheet.create({
   listContainer: {
     width: "90%",

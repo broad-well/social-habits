@@ -1,17 +1,15 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Image, Text, View, StyleSheet } from "react-native";
 import {
   Button,
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
-import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
-import { requestNotificationPermissions } from "../../app/utils/notifications";
 
 
 export default function Index() {

@@ -15,14 +15,17 @@ export interface BackendStore {
   server: CohabitService;
   _habits: HabitStore | null;
   getHabitStore(): HabitStore;
+  lastHabitUpdate: Date;
   initHabitStore(): Promise<void>;
+  markHabitStoreUpdated(): void;
 }
 
 const useBackendStore = create<BackendStore>((set, get) => ({
   server: new CohabitServiceImpl(),
   _habits: null,
+  lastHabitUpdate: new Date(),
   getHabitStore() {
-    let store = get()._habits;
+    const store = get()._habits;
     if (store === null)
       throw new RangeError("Programming error: Global habit store dependency found it uninitialized. The dependency should not be have been rendered!");
     return store;
@@ -31,6 +34,9 @@ const useBackendStore = create<BackendStore>((set, get) => ({
     const store = await LocalHabitStore.init(get().server);
     set(() => ({ _habits: store }));
   },
+  markHabitStoreUpdated() {
+    set({ lastHabitUpdate: new Date() });
+  }
 }));
 
 export function isStoreInitialized(store: BackendStore): boolean {

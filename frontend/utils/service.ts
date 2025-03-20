@@ -43,7 +43,7 @@ export interface CohabitService {
     [habitId: string]: Date /* timestamp of removal */
   }>;
 
-  markHabitComplete(id: string, date: Date): Promise<boolean>;
+  markHabitComplete(id: string, date: string): Promise<boolean>;
   markHabitMissed(id: string, date: Date): Promise<boolean>;
 
   fetchHabitStreaks(id: string): Promise<string[]>;
@@ -60,10 +60,16 @@ export default class CohabitServiceImpl implements CohabitService {
     return this.fetch<Habit | null>(`habits/${id}`);
   }
 
-  habitsRemoved(id: string[]): Promise<{
+  async habitsRemoved(id: string[]): Promise<{
     [habitId: string]: Date
   }> {
-    throw new Error("Method not implemented.");
+    const removals: {[habitId: string]: number} =
+      await this.fetchWithBody("habits/deleted", { ids: id });
+    const out: {[habitId: string]: Date} = {};
+    for (const id in removals) {
+      out[id] = new Date(removals[id] * 1000);
+    }
+    return out;
   }
 
   // User Functions
@@ -123,7 +129,7 @@ export default class CohabitServiceImpl implements CohabitService {
 
   async updateHabit(id: string, updates: Partial<Habit>): Promise<Habit> {
     return this.fetchWithBody<{ updates: Partial<Habit> }, Habit>(
-      `habits/${encodeURIComponent(id)}`, { updates }
+      `habits/${encodeURIComponent(id)}`, { updates }, "PATCH",
     );
   }
 
@@ -137,8 +143,11 @@ export default class CohabitServiceImpl implements CohabitService {
     });
   }
 
-  async markHabitComplete(id: string, date: Date): Promise<boolean> {
-    return this.fetchWithBody<{ id: string; date: string }, boolean>("habits/complete", { id, date: date.toISOString() });
+  async markHabitComplete(id: string, date: string): Promise<boolean> {
+    return this.fetchWithBody<{ id: string; date: string }, boolean>("habits/complete", {
+      id,
+      date,
+    });
   }
 
   async markHabitMissed(id: string, date: Date): Promise<boolean> {
@@ -178,11 +187,17 @@ export default class CohabitServiceImpl implements CohabitService {
         Authorization: await this.getAuthorization(),
       },
     });
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.error || "Unknown API error");
+    try {
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Unknown API error");
+      }
+      return json as T;
+    } catch (nonJson) {
+      console.error({ endpoint, payload, res: res.statusText });
+      console.error(nonJson);
+      throw new Error("Server did not respond with JSON");
     }
-    return json as T;
   }
 
   private async getAuthorization(): Promise<string> {
