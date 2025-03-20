@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, ScrollView, Alert } from "react-native";
 import {
   Button,
   TextInput,
@@ -10,7 +10,6 @@ import {
   Dialog,
   Text,
 } from "react-native-paper";
-import RadioButtonRN from "radio-buttons-react-native";
 import RadioGroup from "react-native-radio-buttons-group";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";

@@ -25,7 +25,7 @@ const useBackendStore = create<BackendStore>((set, get) => ({
   _habits: null,
   lastHabitUpdate: new Date(),
   getHabitStore() {
-    let store = get()._habits;
+    const store = get()._habits;
     if (store === null)
       throw new RangeError("Programming error: Global habit store dependency found it uninitialized. The dependency should not be have been rendered!");
     return store;

@@ -4,8 +4,7 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { StyleSheet, View } from "react-native";
 import React from "react";
-import { useFonts } from "expo-font";
-import { router, SplashScreen, Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import Avatar from "@/components/accounts/Avatar";
 import useBackendQuery from "@/utils/useBackendQuery";
 

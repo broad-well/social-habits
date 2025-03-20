@@ -1,9 +1,7 @@
 import React from "react";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, View, Image, Alert } from "react-native";
-import { Habit } from "@/utils/service";
 import MonthlyView from "@/components/ui/MonthlyView";
-import getHabitById from "@/utils/getHabitById";
 import { useColorTheme } from "@/stores/useColorTheme";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
