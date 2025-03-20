@@ -42,14 +42,14 @@ export interface CohabitService {
   fetchUserByName(name: string): Promise<FriendListItem | null>;
   fetchUserById(id: string): Promise<FriendListItem | null>;
 
-  fetchFriends(): Promise<FriendListItem[]>;
+  fetchFriends(): Promise<string[]>;
   sendFriendRequest(id: string): Promise<boolean>;
   fetchFriendRequest(receiverId: string): Promise<FriendRequest | null>;
   cancelFriendRequest(id: string): Promise<boolean>;
   acceptFriendRequest(id: string): Promise<boolean>;
   rejectFriendRequest(id: string): Promise<boolean>;
   removeFriend(id: string): Promise<boolean>;
-  fetchPendingFriendRequests(): Promise<FriendListItem[]>;
+  fetchPendingFriendRequests(): Promise<string[]>;
 
   createHabit(habit: Omit<Habit, "id" | "email"> & { id?: string }): Promise<Habit>;
   updateHabit(id: string, updates: Partial<Habit>): Promise<Habit>;
@@ -110,8 +110,8 @@ export default class CohabitServiceImpl implements CohabitService {
   }
 
   // Friend Functions
-  async fetchFriends(): Promise<FriendListItem[]> {
-    return (await this.fetch<{ friends: FriendListItem[] }>("friends")).friends;
+  async fetchFriends(): Promise<string[]> {
+    return (await this.fetch<{ friends: string[] }>("friends")).friends;
   }
 
   async fetchFriendRequest(receiverId: string): Promise<FriendRequest | null> {
@@ -137,11 +137,11 @@ export default class CohabitServiceImpl implements CohabitService {
   }
 
   async removeFriend(id: string): Promise<boolean> {
-    return this.fetchWithBody<{ friendId: string }, boolean>("friends/remove", { friendId: id });
+    return this.fetch<boolean>(`friends/${encodeURIComponent(id)}`, "DELETE");
   }
 
-  async fetchPendingFriendRequests(): Promise<FriendListItem[]> {
-    return this.fetch<FriendListItem[]>("friends/pending");
+  async fetchPendingFriendRequests(): Promise<string[]> {
+    return (await this.fetch<{ pending: string[] }>("friends/pending")).pending;
   }
 
   // Habit Functions
