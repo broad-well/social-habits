@@ -19,6 +19,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebaseConfig";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
+import useBackendStore from "@/stores/useBackendStore";
 
 export function formatError(error: FirebaseError) {
   switch (error.code) {
@@ -57,16 +58,6 @@ export default function SignIn() {
   const [error, setError] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   const theme = {
     ...DefaultTheme,
     colors:
@@ -85,6 +76,7 @@ export default function SignIn() {
     return true;
   };
 
+  const habitStore = useBackendStore((s) => s.getHabitStore());
   const handleSignIn = async () => {
     if (!validateInputs()) return;
 
@@ -103,6 +95,8 @@ export default function SignIn() {
         );
       }
 
+      // TODO consider a more explicit loading screen for this
+      await habitStore.syncWithBackend();
       router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);

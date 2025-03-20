@@ -1,3 +1,5 @@
+import { auth } from "@/config/firebaseConfig";
+
 export interface FriendListItem {
   id: string;
   name: string;
@@ -32,7 +34,7 @@ export interface CohabitService {
   removeFriend(id: string): Promise<boolean>;
   fetchPendingFriendRequests(): Promise<FriendListItem[]>;
 
-  createHabit(habit: Omit<Habit, "id"> & { id?: string }): Promise<Habit>;
+  createHabit(habit: Omit<Habit, "id" | "email"> & { id?: string }): Promise<Habit>;
   updateHabit(id: string, updates: Partial<Habit>): Promise<Habit>;
   deleteHabit(id: string): Promise<boolean>;
   fetchHabit(id: string): Promise<Habit | null>;
@@ -55,7 +57,7 @@ export default class CohabitServiceImpl implements CohabitService {
   }
 
   fetchHabit(id: string): Promise<Habit | null> {
-    return this.get<Habit | null>(`habits/${id}`);
+    return this.fetch<Habit | null>(`habits/${id}`);
   }
 
   habitsRemoved(id: string[]): Promise<{
@@ -66,91 +68,114 @@ export default class CohabitServiceImpl implements CohabitService {
 
   // User Functions
   async fetchUserByEmail(handle: string): Promise<FriendListItem | null> {
-    return this.get<FriendListItem | null>(`users/email/${handle}`);
+    return this.fetch<FriendListItem | null>(`users/email/${handle}`);
   }
 
   async fetchUserByName(name: string): Promise<FriendListItem | null> {
-    return this.get<FriendListItem | null>(`users/name/${name}`);
+    return this.fetch<FriendListItem | null>(`users/name/${name}`);
   }
 
   async fetchUserById(id: string): Promise<FriendListItem | null> {
-    return this.get<FriendListItem | null>(`users/${id}`);
+    return this.fetch<FriendListItem | null>(`users/${id}`);
   }
 
   // Friend Functions
   async fetchFriends(): Promise<FriendListItem[]> {
-    return this.get<FriendListItem[]>("friends");
+    return this.fetch<FriendListItem[]>("friends");
   }
 
   async sendFriendRequest(id: string): Promise<boolean> {
-    return this.post<{ receiverId: string }, boolean>("friends/request", { receiverId: id });
+    return this.fetchWithBody<{ receiverId: string }, boolean>("friends/request", { receiverId: id });
   }
 
   async cancelFriendRequest(id: string): Promise<boolean> {
-    return this.post<{ receiverId: string }, boolean>("friends/cancel", { receiverId: id });
+    return this.fetchWithBody<{ receiverId: string }, boolean>("friends/cancel", { receiverId: id });
   }
 
   async acceptFriendRequest(id: string): Promise<boolean> {
-    return this.post<{ senderId: string }, boolean>("friends/accept", { senderId: id });
+    return this.fetchWithBody<{ senderId: string }, boolean>("friends/accept", { senderId: id });
   }
 
   async rejectFriendRequest(id: string): Promise<boolean> {
-    return this.post<{ senderId: string }, boolean>("friends/reject", { senderId: id });
+    return this.fetchWithBody<{ senderId: string }, boolean>("friends/reject", { senderId: id });
   }
 
   async removeFriend(id: string): Promise<boolean> {
-    return this.post<{ friendId: string }, boolean>("friends/remove", { friendId: id });
+    return this.fetchWithBody<{ friendId: string }, boolean>("friends/remove", { friendId: id });
   }
 
   async fetchPendingFriendRequests(): Promise<FriendListItem[]> {
-    return this.get<FriendListItem[]>("friends/pending");
+    return this.fetch<FriendListItem[]>("friends/pending");
   }
 
   // Habit Functions
-  async createHabit(habit: Omit<Habit, "id">): Promise<Habit> {
-    return this.post<Omit<Habit, "id">, Habit>("habits", habit);
+  async createHabit(habit: Omit<Habit, "id" | "email">): Promise<Habit> {
+    type T = {
+      habit: Omit<Habit, "id"> & { firebaseId: string },
+    };
+    const rawResult = await this.fetchWithBody<Omit<Habit, "id" | "email">, T>("habits", habit);
+    
+    return {
+      ...rawResult.habit,
+      id: rawResult.habit.firebaseId,
+    };
   }
 
   async updateHabit(id: string, updates: Partial<Habit>): Promise<Habit> {
-    return this.post<{ id: string; updates: Partial<Habit> }, Habit>("habits/update", { id, updates });
+    return this.fetchWithBody<{ updates: Partial<Habit> }, Habit>(
+      `habits/${encodeURIComponent(id)}`, { updates }
+    );
   }
 
   async deleteHabit(id: string): Promise<boolean> {
-    return this.post<{ id: string }, boolean>("habits/delete", { id });
+    return this.fetch(`habits/${encodeURIComponent(id)}`, "DELETE");
   }
 
   async fetchUserHabits(): Promise<Habit[]> {
-    return this.get<Habit[]>("habits");
+    return this.fetch<Habit[]>("habits?email=" + encodeURIComponent(auth.currentUser!.email!), "GET", {
+      on404: [],
+    });
   }
 
   async markHabitComplete(id: string, date: Date): Promise<boolean> {
-    return this.post<{ id: string; date: string }, boolean>("habits/complete", { id, date: date.toISOString() });
+    return this.fetchWithBody<{ id: string; date: string }, boolean>("habits/complete", { id, date: date.toISOString() });
   }
 
   async markHabitMissed(id: string, date: Date): Promise<boolean> {
-    return this.post<{ id: string; date: string }, boolean>("habits/missed", { id, date: date.toISOString() });
+    return this.fetchWithBody<{ id: string; date: string }, boolean>("habits/missed", { id, date: date.toISOString() });
   }
 
   async fetchHabitStreaks(id: string): Promise<string[]> {
-    return this.get<string[]>(`habits/${id}/streaks`);
+    return this.fetch<string[]>(`habits/${id}/streaks`);
   }
 
   // Helper Methods
-  private async get<T>(endpoint: string): Promise<T> {
-    const res = await fetch(this.backendUrl + endpoint);
+  private async fetch<T>(endpoint: string, method: string = "GET", options?: {
+    on404?: T,
+  }): Promise<T> {
+    const res = await fetch(this.backendUrl + endpoint, {
+      method,
+      headers: {
+        Authorization: await this.getAuthorization(),
+      }
+    });
     const json = await res.json();
     if (!res.ok) {
+      if (options?.on404 && res.status === 404) {
+        return options.on404;
+      }
       throw new Error(json.error || "Unknown API error");
     }
     return json as T;
   }
 
-  private async post<P, T>(endpoint: string, payload: P): Promise<T> {
+  private async fetchWithBody<P, T>(endpoint: string, payload: P, method: string = "POST"): Promise<T> {
     const res = await fetch(this.backendUrl + endpoint, {
-      method: "POST",
+      method,
       body: JSON.stringify(payload),
       headers: {
         "Content-Type": "application/json",
+        Authorization: await this.getAuthorization(),
       },
     });
     const json = await res.json();
@@ -158,5 +183,10 @@ export default class CohabitServiceImpl implements CohabitService {
       throw new Error(json.error || "Unknown API error");
     }
     return json as T;
+  }
+
+  private async getAuthorization(): Promise<string> {
+    const token = await auth.currentUser?.getIdToken(false);
+    return token ? `Token ${token}` : "";
   }
 }

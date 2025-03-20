@@ -1,11 +1,11 @@
 import React from "react";
 import { FlatList, StyleSheet } from "react-native";
-import { Habit } from "@/utils/service";
 import HabitPanel from "@/components/HabitPanel";
+import { LocalHabit } from "@/utils/habitStore";
 
 // Define the props for the HabitList component
 type HabitListProps = {
-  habits: Habit[];
+  habits: LocalHabit[];
 };
 
 // Define the HabitList component

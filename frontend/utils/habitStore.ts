@@ -1,20 +1,30 @@
 // Syncing habits between the app and the backend
 // Use Expo SQLite to store habits offline/locally
 
+import { resolveConflict } from "./conflict";
 import { CohabitService, Habit } from "./service";
 import * as SQLite from "expo-sqlite";
 
+export type LocalHabit = Omit<Habit, "email">;
+
 export interface HabitStore {
 
-  createHabit(habit: Omit<Habit, "id">): Promise<Habit>;
-  updateHabit(habit: Habit): Promise<void>;
+  createHabit(habit: Omit<LocalHabit, "id">): Promise<Habit>;
+  updateHabit(habit: LocalHabit): Promise<void>;
 
   /**
    * First, check if the habit with the given ID is stored locally
    * If stored locally, read the local copy
    * Otherwise, fetch from backend, store locally, and return the local copy
    */
-  readHabit(id: string): Promise<Habit | null>;
+  readHabit(id: string): Promise<LocalHabit | null>;
+
+  /**
+   * List all habits that should be completed on particular date.
+   * @param isoDate The date on which the habits should be performed in "YYYY-MM-DD" format
+   */
+  listHabits(isoDate: string): Promise<LocalHabit[]>;
+
   /**
    * If stored locally, remove local copy
    * Remove copy from backend
@@ -30,19 +40,35 @@ export interface HabitStore {
   syncWithBackend(): Promise<void>;
 
   /**
-   * Store the Expo Notifications ID for the recurring notifications
+   * Store the Expo Notifications IDs for the recurring notifications
    * set up to remind the user to perform a particular habit.
    * @param habitId The ID of the habit
-   * @param notifyId The Expo Notifications ID to associate with the habit.
-   *  To remove the associated ID, set this to `null`.
+   * @param notifyId The Expo Notifications IDs to associate with the habit.
+   *  To remove the associated IDs, set this to `[]`.
    */
   setHabitNotificationId(
     habitId: string,
-    notifyId: string | null
+    notifyId: string[],
   ): Promise<void>;
+
+  /**
+   * Retrieve Expo Notification IDs for the recurring notifications
+   * set up to remind the user to perform a particular habit and stored using `setHabitNotificationId`.
+   * @param habitId The ID of the habit to retrieve notification IDs for.
+   */
+  getHabitNotificationId(
+    habitId: string,
+  ): Promise<string[] | null>;
 }
 
 const STORE_DB_NAME = "habits";
+
+type LocalHabitRow = Omit<LocalHabit, "reminderDays" | "reminderId" | "lastModified" | "streaks"> & {
+  reminderDays: string, // JSON
+  reminderId: string | null,
+  lastModified: number,
+  streaks: string, // JSON
+}
 
 export default class LocalHabitStore implements HabitStore {
 
@@ -56,14 +82,14 @@ export default class LocalHabitStore implements HabitStore {
       PRAGMA journal_mode = WAL;
       PRAGMA foreign_keys = ON;
       CREATE TABLE IF NOT EXISTS habit (
-        id TEXT PRIMARY KEY NOT NULL,
+        id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         description TEXT,
         startDate DATE NOT NULL,
         endDate DATE NOT NULL,
         reminderTime TEXT,
         reminderDays TEXT,
-        reminderId TEXT,
+        reminderIds TEXT,
         lastModified REAL,
         streaks TEXT,
         privacy TEXT NOT NULL
@@ -77,14 +103,14 @@ export default class LocalHabitStore implements HabitStore {
     return new LocalHabitStore(server);
   }
 
-  async updateHabit(habit: Habit): Promise<void> {
+  async updateHabit(habit: LocalHabit): Promise<void> {
     // Save the new habit both locally and on the server.
     this.markModified(habit);
     await this.runUpsertCommand(habit);
     await this.server.updateHabit(habit.id, habit);
   }
 
-  async readHabit(id: string): Promise<Habit | null> {
+  async readHabit(id: string): Promise<LocalHabit | null> {
     // Read from local. If local doesn't have it, read from remote.
     const local = await this.runReadCommand(id);
     if (local !== null) return local;
@@ -94,6 +120,24 @@ export default class LocalHabitStore implements HabitStore {
     // Save the un-cached version locally.
     await this.runUpsertCommand(remote);
     return remote;
+  }
+
+  async listHabits(isoDate: string): Promise<LocalHabit[]> {
+    console.assert(/^\d\d\d\d-\d\d-\d\d$/.test(isoDate));
+    const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
+    const stmt = await db.prepareAsync(
+      `SELECT * FROM habit WHERE
+        unixepoch(startDate) <= unixepoch($queryDate) AND
+        unixepoch($queryDate) <= unixepoch(endDate)`
+    );
+    try {
+      const results = await stmt.executeAsync<LocalHabitRow>({ $queryDate: isoDate });
+      const habits = (await results.getAllAsync()).map(this.parseHabit);
+      return habits;
+    } finally {
+      await stmt.finalizeAsync();
+      await db.closeAsync();
+    }
   }
 
   async deleteHabit(id: string): Promise<void> {
@@ -120,67 +164,74 @@ export default class LocalHabitStore implements HabitStore {
     const localIds = new Set(await this.listLocalIDs());
     const remoteHabits = await this.server.fetchUserHabits();
     const remoteIds = new Set(remoteHabits.map(hb => hb.id));
-
-    const onlyLocalIds = localIds.difference(remoteIds);
-    const onlyRemoteIds = remoteIds.difference(localIds);
-    const remoteRemovals = onlyLocalIds.size === 0 ?
-      {} : await this.server.habitsRemoved(Array.from(onlyLocalIds));
-
-    const tasks: Promise<void | boolean>[] = [];
-    for (const localId of onlyLocalIds) {
-      if (remoteRemovals[localId] === undefined) {
-        tasks.push((async () => {
-          const habit = await this.readHabit(localId);
-          await this.server.createHabit(habit!);
-        })());
-      } else {
-        tasks.push(this.deleteHabit(localId));
-      }
-    }
-
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
-    for (const remoteId of onlyRemoteIds) {
-      const localTombstone = await this.getLocalTombstone(remoteId, db);
-      if (localTombstone === null) {
-        // download it
-        tasks.push((async (id: string) => {
-          const remote = await this.server.fetchHabit(id);
-          if (remote === null) return;
-          await this.runUpsertCommand(remote);
-        })(remoteId));
-      } else {
-        // remove it remotely
-        tasks.push(this.server.deleteHabit(remoteId));
-      }
-    }
-    await Promise.all(tasks);
+
+    const actions = await resolveConflict(
+      localIds, remoteIds,
+      (habits) => this.server.habitsRemoved(Array.from(habits)),
+      (id) => this.getLocalTombstone(id, db),
+    );
+
+    const upload = async (localId: string) => {
+      const habit = await this.readHabit(localId);
+      await this.server.createHabit(habit!);
+    };
+    const download = async (id: string) => {
+      const remote = await this.server.fetchHabit(id);
+      if (remote === null) return;
+      await this.runUpsertCommand(remote);
+    };
+    
+    await Promise.all([
+      ...Array.from(actions.upload).map(upload),
+      ...Array.from(actions.download).map(download),
+      ...Array.from(actions.deleteLocal).map(this.deleteHabit.bind(this)),
+      ...Array.from(actions.deleteRemote).map(this.server.deleteHabit.bind(this)),
+    ]);
   }
 
-  async createHabit(habit: Omit<Habit, "id">): Promise<Habit> {
+  async createHabit(habit: Omit<LocalHabit, "id">): Promise<Habit> {
     const habitData = await this.server.createHabit(habit);
+    this.markModified(habitData);
     await this.runUpsertCommand(habitData);
     return habitData;
   }
 
-  async setHabitNotificationId(habitId: string, notifyId: string | null): Promise<void> {
+  async setHabitNotificationId(habitId: string, notifyIds: string[]): Promise<void> {
+    const newFlatValue: string | null = notifyIds.length === 0 ? null : notifyIds.join("\n");
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
     const stmt = await db.prepareAsync(
-      "UPDATE habit SET reminderId = $notifyId WHERE id = $habitId"
+      "UPDATE habit SET reminderIds = $notifyId WHERE id = $habitId"
     );
     try {
-      await stmt.executeAsync({ $notifyId: notifyId, $habitId: habitId });
+      await stmt.executeAsync({ $notifyId: newFlatValue, $habitId: habitId });
     } finally {
       await stmt.finalizeAsync();
       await db.closeAsync();
     }
   }
 
-  async runUpsertCommand(habit: Habit) {
+  async getHabitNotificationId(habitId: string): Promise<string[] | null> {
+    const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
+    const stmt = await db.prepareAsync(
+      "SELECT reminderIds FROM habit WHERE id = $habitId"
+    );
+    try {
+      const result = await stmt.executeAsync<{ reminderIds: string }>({ $habitId: habitId });
+      const firstRow = await result.getFirstAsync();
+      return firstRow?.reminderIds.split("\n") ?? null;
+    } finally {
+      await stmt.finalizeAsync();
+      await db.closeAsync();
+    }
+  }
+
+  async runUpsertCommand(habit: LocalHabit) {
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
     const stmt = await db.prepareAsync(`
       INSERT OR REPLACE INTO habit (
         id, title, description, startDate, endDate, reminderTime,
-        reminderDays, reminderId, lastModified, streaks, privacy
+        reminderDays, reminderIds, lastModified, streaks, privacy
       ) VALUES (
         $id, $title, $description, $startDate, $endDate, $reminderTime,
         $reminderDays, $reminderId, $lastModified, $streaks, $privacy
@@ -206,30 +257,26 @@ export default class LocalHabitStore implements HabitStore {
     }
   }
 
-  async runReadCommand(habitId: string): Promise<Habit | null> {
+  private parseHabit(row: LocalHabitRow): LocalHabit {
+    return {
+      ...row,
+      reminderDays: JSON.parse(row.reminderDays),
+      reminderId: row.reminderId ?? undefined,
+      streaks: JSON.parse(row.streaks),
+      lastModified: new Date(row.lastModified),
+    };
+  }
+
+  async runReadCommand(habitId: string): Promise<LocalHabit | null> {
     const db = await SQLite.openDatabaseAsync(STORE_DB_NAME);
     const stmt = await db.prepareAsync("SELECT * FROM habit WHERE id = $id");
     try {
-      const res = await stmt.executeAsync<
-        Omit<Habit, "reminderDays" | "reminderId" | "lastModified" | "streaks"> &
-        {
-          reminderDays: string, // JSON
-          reminderId: string | null,
-          lastModified: number,
-          streaks: string, // JSON
-        }
-      >({ $id: habitId });
+      const res = await stmt.executeAsync<LocalHabitRow>({ $id: habitId });
       const firstRow = await res.getFirstAsync();
       if (firstRow === null || firstRow === undefined) {
         return null;
       }
-      return {
-        ...firstRow,
-        reminderDays: JSON.parse(firstRow.reminderDays),
-        reminderId: firstRow.reminderId ?? undefined,
-        streaks: JSON.parse(firstRow.streaks),
-        lastModified: new Date(firstRow.lastModified),
-      };
+      return this.parseHabit(firstRow);
     } finally {
       await stmt.finalizeAsync();
       await db.closeAsync();
@@ -262,7 +309,7 @@ export default class LocalHabitStore implements HabitStore {
     }
   }
 
-  private markModified(habit: Omit<Habit, "id">) {
+  private markModified(habit: Omit<LocalHabit, "id">) {
     habit.lastModified = new Date();
   }
 }
