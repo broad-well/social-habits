@@ -18,48 +18,10 @@ import { StyleSheet, FlatList, View } from "react-native";
 import React from "react";
 import { useFonts } from "expo-font";
 import { router, SplashScreen, Stack } from "expo-router";
-
-interface FriendListItem {
-  id: string;
-  profileLogo?: string;
-  name: string;
-  requested: boolean;
-  // Future: Maybe summary stats for habit completion
-}
-
-async function fetchFriendList(): Promise<FriendListItem[]> {
-  // Placeholder demo data. Replace with backend access
-  // return new Promise((res, rej) => setTimeout(() => rej(new Error("simulated error")), 5000));
-  return [
-    {
-      id: "abcdef",
-      name: "Michael Coblenz",
-      requested: true,
-    },
-    {
-      id: "fhhqhr",
-      name: "Antariksha Ray",
-      requested: false,
-    },
-    {
-      id: "qhrbaf",
-      name: "Loris D'Antoni",
-      requested: false,
-    },
-  ];
-}
+import useBackendStore from "@/stores/useBackendStore";
+import { FriendListItem } from "@/utils/service";
 
 export default function FriendList() {
-  const [loaded] = useFonts({
-    Poppins: require("@/assets/fonts/Poppins/Poppins-Regular.ttf"), // eslint-disable-line
-    PoppinsBold: require("@/assets/fonts/Poppins/Poppins-Bold.ttf"), // eslint-disable-line
-  });
-
-  React.useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
 
   const { colorTheme } = useColorTheme();
   const insets = useSafeAreaInsets();
@@ -114,20 +76,18 @@ export default function FriendList() {
 
   const [friends, setFriends] = React.useState<FriendListItem[] | null>(null);
   const [fetchError, setFetchError] = React.useState<Error | null>(null);
+  const backend = useBackendStore((u) => u.server);
+
   React.useEffect(() => {
     (async () => {
       try {
-        setFriends(await fetchFriendList());
+        setFriends(await backend.fetchFriends());
         setFetchError(null);
       } catch (e) {
         setFetchError(e as Error);
       }
     })();
   }, []);
-
-  if (!loaded) {
-    return null;
-  }
 
   return (
     <PaperProvider theme={theme}>
@@ -148,7 +108,7 @@ export default function FriendList() {
           />
         </Appbar.Header>
         <View style={stylesheet.page}>
-          {friends !== null && (
+          {friends !== null && friends.length > 0 && (
             <FlatList
               data={friends}
               renderItem={({ item }) => (
@@ -178,6 +138,12 @@ export default function FriendList() {
             <View style={stylesheet.errorMessage}>
               <Icon source="alert" color={theme.colors.onError} size={48} />
               <Text>Loading failed: {fetchError.message}. Try again?</Text>
+            </View>
+          )}
+          {friends?.length === 0 && (
+            <View style={stylesheet.errorMessage}>
+              <Icon source="account-off" size={48} />
+              <Text>You don't have any friends yet</Text>
             </View>
           )}
           <FAB

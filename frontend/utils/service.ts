@@ -3,6 +3,14 @@ import { auth } from "@/config/firebaseConfig";
 export interface FriendListItem {
   id: string;
   name: string;
+  /**
+   * List of friend IDs
+   */
+  friendList: string[];
+  /**
+   * List of habit IDs
+   */
+  habitList: string[];
   profileLogo?: string;
 }
 
@@ -21,6 +29,12 @@ export interface Habit {
   privacy: "Private" | "Friends-Only" | "Public";
 }
 
+export interface FriendRequest {
+  senderId: string;
+  receiverId: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
 export interface CohabitService {
   fetchUserByEmail(handle: string): Promise<FriendListItem | null>;
   fetchUserByName(name: string): Promise<FriendListItem | null>;
@@ -28,6 +42,7 @@ export interface CohabitService {
 
   fetchFriends(): Promise<FriendListItem[]>;
   sendFriendRequest(id: string): Promise<boolean>;
+  fetchFriendRequest(receiverId: string): Promise<FriendRequest | null>;
   cancelFriendRequest(id: string): Promise<boolean>;
   acceptFriendRequest(id: string): Promise<boolean>;
   rejectFriendRequest(id: string): Promise<boolean>;
@@ -54,6 +69,7 @@ export default class CohabitServiceImpl implements CohabitService {
 
   constructor(backendUrl?: string) {
     this.backendUrl = backendUrl ?? "https://cohabit-server.vercel.app/api/";
+    // this.backendUrl = "http://book-2.local:5500/api/";
   }
 
   fetchHabit(id: string): Promise<Habit | null> {
@@ -74,7 +90,9 @@ export default class CohabitServiceImpl implements CohabitService {
 
   // User Functions
   async fetchUserByEmail(handle: string): Promise<FriendListItem | null> {
-    return this.fetch<FriendListItem | null>(`users/email/${handle}`);
+    return this.fetch<FriendListItem | null>(`users/email/${handle}`, "GET", {
+      on404: null,
+    });
   }
 
   async fetchUserByName(name: string): Promise<FriendListItem | null> {
@@ -87,7 +105,13 @@ export default class CohabitServiceImpl implements CohabitService {
 
   // Friend Functions
   async fetchFriends(): Promise<FriendListItem[]> {
-    return this.fetch<FriendListItem[]>("friends");
+    return (await this.fetch<{ friends: FriendListItem[] }>("friends")).friends;
+  }
+
+  async fetchFriendRequest(receiverId: string): Promise<FriendRequest | null> {
+    return this.fetch(`friends/request/${encodeURIComponent(receiverId)}`, "GET", {
+      on404: null,
+    });
   }
 
   async sendFriendRequest(id: string): Promise<boolean> {
@@ -170,7 +194,7 @@ export default class CohabitServiceImpl implements CohabitService {
     });
     const json = await res.json();
     if (!res.ok) {
-      if (options?.on404 && res.status === 404) {
+      if (options?.on404 !== undefined && res.status === 404) {
         return options.on404;
       }
       throw new Error(json.error || "Unknown API error");
@@ -203,5 +227,9 @@ export default class CohabitServiceImpl implements CohabitService {
   private async getAuthorization(): Promise<string> {
     const token = await auth.currentUser?.getIdToken(false);
     return token ? `Token ${token}` : "";
+  }
+
+  private getOwnUserId(): string | undefined {
+    return auth.currentUser?.email?.split("@")?.[0];
   }
 }
