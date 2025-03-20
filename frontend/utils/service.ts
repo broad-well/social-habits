@@ -36,6 +36,8 @@ export interface FriendRequest {
 }
 
 export interface CohabitService {
+  register(): Promise<void>;
+
   fetchUserByEmail(handle: string): Promise<FriendListItem | null>;
   fetchUserByName(name: string): Promise<FriendListItem | null>;
   fetchUserById(id: string): Promise<FriendListItem | null>;
@@ -70,6 +72,10 @@ export default class CohabitServiceImpl implements CohabitService {
   constructor(backendUrl?: string) {
     this.backendUrl = backendUrl ?? "https://cohabit-server.vercel.app/api/";
     // this.backendUrl = "http://book-2.local:5500/api/";
+  }
+
+  async register(): Promise<void> {
+    await this.fetchWithBody(`users/signup`, {}, "POST");
   }
 
   fetchHabit(id: string): Promise<Habit | null> {

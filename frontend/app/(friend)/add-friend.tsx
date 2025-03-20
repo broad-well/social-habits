@@ -76,7 +76,8 @@ export default function AddFriend() {
 
   const sendRequest = React.useCallback(async (receiverId: string) => {
     await backend.sendFriendRequest(receiverId);
-    await query.send();
+    const fq = await backend.fetchFriendRequest(queryEmail);
+    query.setResult((res) => ({ ...res!, request: fq}));
   }, [backend]);
 
   return <PaperProvider theme={theme}>
