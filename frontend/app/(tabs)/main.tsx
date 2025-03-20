@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, ScrollView } from "react-native";
+import { Text, View, ScrollView, Alert } from "react-native";
 import {
   FAB,
   MD3LightTheme as DefaultTheme,
@@ -26,6 +26,7 @@ export default function Main() {
   const insets = useSafeAreaInsets();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const habitStore = useBackendStore((s) => s.getHabitStore());
+  const habitStoreLastUpdate = useBackendStore((s) => s.lastHabitUpdate);
 
   const theme = {
     ...DefaultTheme,
@@ -70,12 +71,11 @@ export default function Main() {
 
   const [currentDateHabits, setCurrentDateHabits] = React.useState<LocalHabit[] | null>(null);
   React.useEffect(() => {
-    setCurrentDateHabits(null);
     (async () => {
       const habits = await habitStore.listHabits(selectedDate.toISOString().slice(0, 10));
-      setCurrentDateHabits(habits);
-    })();
-  }, [selectedDate]);
+      setCurrentDateHabits(habits ?? []);
+    })().catch(e => Alert.alert("Failed to list habits", `${e}`));
+  }, [selectedDate, habitStoreLastUpdate]);
 
   return (
     <PaperProvider theme={theme}>

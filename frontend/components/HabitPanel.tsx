@@ -20,13 +20,13 @@ const HabitPanel: React.FC<HabitPanelProps> = ({ habit }) => {
           <Title>{habit.title}</Title>
           <Paragraph>{habit.description}</Paragraph>
           <Paragraph>
-            <Text style={styles.bold}>Start Date:</Text> {habit.startDate}
+            <Text style={styles.bold}>Start Date:</Text> {new Date(habit.startDate).toLocaleDateString()}
           </Paragraph>
           <Paragraph>
-            <Text style={styles.bold}>End Date:</Text> {habit.endDate}
+            <Text style={styles.bold}>End Date:</Text> {new Date(habit.endDate).toLocaleDateString()}
           </Paragraph>
           <Paragraph>
-            <Text style={styles.bold}>Reminder Time:</Text> {habit.reminderTime}
+            <Text style={styles.bold}>Reminder Time:</Text> {new Date(habit.reminderTime).toLocaleTimeString()}
           </Paragraph>
           <Paragraph>
             <Text style={styles.bold}>Streaks:</Text> {habit.streaks.join(", ")}

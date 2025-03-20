@@ -1,13 +1,16 @@
 import React from "react";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { ScrollView, StyleSheet, View, Image } from "react-native";
+import { ScrollView, StyleSheet, View, Image, Alert } from "react-native";
 import { Habit } from "@/utils/service";
 import MonthlyView from "@/components/ui/MonthlyView";
 import getHabitById from "@/utils/getHabitById";
 import { useColorTheme } from "@/stores/useColorTheme";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import DarkThemeColors from "@/constants/DarkThemeColors.json";
-import { Title, Paragraph, Button, Appbar } from "react-native-paper";
+import { Title, Paragraph, Button, Appbar, ActivityIndicator, Text } from "react-native-paper";
+import useBackendStore from "@/stores/useBackendStore";
+import useBackendQuery from "@/utils/useBackendQuery";
+import { LocalHabit } from "@/utils/habitStore";
 
 export default function Detail() {
   const { colorTheme } = useColorTheme();
@@ -17,9 +20,9 @@ export default function Detail() {
   };
 
   const { id } = useLocalSearchParams();
-  const habit: Habit = getHabitById("1" as string);
-
-  const streakCount = calculateStreak(habit.streaks);
+  const store = useBackendStore((u) => u.getHabitStore());
+  const habit = useBackendQuery(() => store.readHabit(id as string));
+  React.useEffect(() => { habit.send(); }, []);
 
   const handleGoBack = () => {
     router.back();
@@ -51,6 +54,14 @@ export default function Detail() {
       return `You have kept doing this habit for ${streakCount} days! Keep it up!`;
     }
   };
+
+  const onPressComplete = React.useCallback(async () => {
+    try {
+      await store.markHabitCompletion(id as string, today(), true);
+    } catch (e) {
+      Alert.alert("Failed to mark habit complete", `${e}`);
+    }
+  }, [store]);
 
   // Add styles for the Detail component
   const styles = StyleSheet.create({
@@ -120,54 +131,65 @@ export default function Detail() {
         />
       </Appbar.Header>
       <Stack.Screen options={screenOptions} />
-      <ScrollView style={{ backgroundColor: "white", padding: 20 }}>
-        <View style={styles.content}>
-          <Title
-            style={{
-              ...styles.sectionTitle,
-              color: theme.colors.primary,
-            }}
-          >
-            {habit.title}
-          </Title>
-          <Paragraph style={styles.descriptionText}>
-            {habit.description}
-          </Paragraph>
-          <View style={styles.streakContainer}>
-            <Image
-              source={getStreakImageUrl(streakCount)}
-              style={styles.streakImage}
-              resizeMode="contain"
-            />
-            <View style={styles.streakTextContainer}>
-              <Paragraph style={styles.streakText}>
-                {getStreakMessage(streakCount)}
-              </Paragraph>
+      {habit.loading && <ActivityIndicator size="large" animating />}
+      {habit.error && <Text>Failed: {habit.error.message}</Text>}
+      {habit.result && 
+        <ScrollView style={{ backgroundColor: "white", padding: 20 }}>
+          <View style={styles.content}>
+            <Title
+              style={{
+                ...styles.sectionTitle,
+                color: theme.colors.primary,
+              }}
+            >
+              {habit.result.title}
+            </Title>
+            <Paragraph style={styles.descriptionText}>
+              {habit.result.description}
+            </Paragraph>
+            <View style={styles.streakContainer}>
+              <Image
+                source={getStreakImageUrl(habit.result.streaks.length)}
+                style={styles.streakImage}
+                resizeMode="contain"
+              />
+              <View style={styles.streakTextContainer}>
+                <Paragraph style={styles.streakText}>
+                  {getStreakMessage(habit.result.streaks.length)}
+                </Paragraph>
+              </View>
             </View>
+            <MonthlyView streaks={habit.result.streaks} />
+            {canCompleteHabitToday(habit.result) &&
+              <Button mode="contained" onPress={onPressComplete} style={{ marginTop: 10 }}>
+              Complete Habit!
+              </Button>
+            }
+            <Button
+              mode="contained"
+              onPress={() => navigateToUpdatePage(id as string)}
+              style={{ marginTop: 10 }}
+            >
+              Update Habit
+            </Button>
           </View>
-          <MonthlyView streaks={habit.streaks} />
-          <Button mode="contained" onPress={() => {}} style={{ marginTop: 10 }}>
-            Complete Habit!
-          </Button>
-          <Button
-            mode="contained"
-            onPress={() => navigateToUpdatePage(id as string)}
-            style={{ marginTop: 10 }}
-          >
-            Update Habit
-          </Button>
-        </View>
-      </ScrollView>
+        </ScrollView>}
     </>
   );
 }
 
-// Helper function to calculate streak count
-function calculateStreak(streaks: string[]): number {
-  return streaks.length;
-}
-
 // Function to navigate to the update page
 function navigateToUpdatePage(id: string) {
-  router.push(`/(habit)/(detail)/${id}/update` as any); // eslint-disable-line
+  router.push(`/(habit)/(update)/${id}`);
+}
+
+function canCompleteHabitToday(habit: LocalHabit) {
+  const todaysDate = today();
+  return !habit.streaks.includes(todaysDate) &&
+    todaysDate >= habit.startDate.substring(0, 10) &&
+    todaysDate <= habit.endDate.substring(0, 10);
+}
+
+function today() {
+  return new Date().toLocaleDateString("sv");
 }

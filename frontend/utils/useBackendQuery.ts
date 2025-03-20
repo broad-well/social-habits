@@ -22,8 +22,10 @@ export default function useBackendQuery<R>(query: () => Promise<R>) {
       setError(undefined);
       try {
         setLoading(true);
-        setResult(await query());
+        const res = await query();
+        setResult(res);
         setError(undefined);
+        return res;
       } catch (e) {
         console.trace("useBackendQuery detected error", e);
         setError(e as Error);
