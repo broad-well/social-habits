@@ -6,12 +6,20 @@ export interface FriendListItem {
   /**
    * List of friend IDs
    */
-  friendList: string[];
+  friendList?: string[];
   /**
    * List of habit IDs
    */
-  habitList: string[];
+  habitList?: string[];
   profileLogo?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  friendCount: number;
+  visibleHabits: Habit[];
 }
 
 export interface Habit {
@@ -41,6 +49,10 @@ export interface CohabitService {
   fetchUserByEmail(handle: string): Promise<FriendListItem | null>;
   fetchUserByName(name: string): Promise<FriendListItem | null>;
   fetchUserById(id: string): Promise<FriendListItem | null>;
+
+  fetchProfileByEmail(handle: string): Promise<UserProfile | null>;
+  fetchProfileByName(name: string): Promise<UserProfile | null>;
+  fetchProfileById(id: string): Promise<UserProfile | null>;
 
   fetchFriends(): Promise<string[]>;
   sendFriendRequest(id: string): Promise<boolean>;
@@ -107,6 +119,19 @@ export default class CohabitServiceImpl implements CohabitService {
 
   async fetchUserById(id: string): Promise<FriendListItem | null> {
     return this.fetch<FriendListItem | null>(`users/${id}`);
+  }
+
+  // Profile Fetching Functions
+  async fetchProfileByEmail(handle: string): Promise<UserProfile | null> {
+    return this.fetch<UserProfile | null>(`users/profile/email/${handle}`);
+  }
+
+  async fetchProfileByName(name: string): Promise<UserProfile | null> {
+    return this.fetch<UserProfile | null>(`users/profile/name/${name}`);
+  }
+
+  async fetchProfileById(id: string): Promise<UserProfile | null> {
+    return this.fetch<UserProfile | null>(`users/profile/${id}`);
   }
 
   // Friend Functions
