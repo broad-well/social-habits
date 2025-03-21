@@ -16,7 +16,8 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
-import DateTimePicker from "@react-native-community/datetimepicker";
+//import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { requestNotificationPermissions, scheduleHabitNotification, sendLocalNotification } from "@/utils/notifications";
 import useBackendStore from "@/stores/useBackendStore"
 import createStyles from "@/styles/NewHabitStyles";
@@ -38,6 +39,34 @@ export default function HabitCreation() {
   const [privacy, setPrivacy] = useState("Private");
   const [reminderTime, setReminderTime] = useState(new Date());
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+
+  const [isreminderTimePickerVisible, setreminderTimePickerVisibility] = useState(false);  
+  const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
+  const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
+
+  const showStartDatePicker = () => setStartDatePickerVisibility(true);
+  const hideStartDatePicker = () => setStartDatePickerVisibility(false);
+  const showEndDatePicker = () => setEndDatePickerVisibility(true);
+  const hideEndDatePicker = () => setEndDatePickerVisibility(false);
+
+  const showreminderTimePicker = () => setreminderTimePickerVisibility(true);
+  const hidereminderTimePicker = () => setreminderTimePickerVisibility(false);
+
+  const handleStartDateConfirm = (date: Date) => {
+    setStartDate(date);
+    hideStartDatePicker();
+  };
+
+  const handleEndDateConfirm = (date: Date) => {
+    setEndDate(date);
+    hideEndDatePicker();
+  };
+
+  const handlereminderTimeConfirm = (time: Date) => {
+    setReminderTime(time);
+    hidereminderTimePicker();
+  };
+
 
   const handleReset = React.useCallback(() => {
     setHabitName("");
@@ -193,7 +222,7 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text
+                {/* <Text
                   style={{
                     color: theme.colors.onPrimaryContainer,
                   }}
@@ -204,10 +233,18 @@ export default function HabitCreation() {
                   value={startDate}
                   mode="date"
                   display="default"
-                  design="material"
+                  design="default"
                   themeVariant={colorTheme}
                   minimumDate={new Date()}
                   onChange={handleStartDateChange}
+                /> */}
+                <Button onPress={showStartDatePicker}>Pick Start Date</Button>
+                <Text>{startDate.toDateString()}</Text>
+                <DateTimePickerModal
+                  isVisible={isStartDatePickerVisible}
+                  mode="date"
+                  onConfirm={handleStartDateConfirm}
+                  onCancel={hideStartDatePicker}
                 />
               </View>
               <View
@@ -216,18 +253,26 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>
+                {/* <Text style={{ color: theme.colors.onPrimaryContainer }}>
                   End Date:
                 </Text>
                 <DateTimePicker
                   value={endDate}
                   mode="date"
                   display="default"
-                  design="material"
+                  design="default"
                   themeVariant={colorTheme}
                   minimumDate={startDate}
                   onChange={handleEndDateChange}
-                />
+                /> */}
+                 <Button onPress={showEndDatePicker}>Pick End Date</Button>
+                  <Text>{endDate.toDateString()}</Text>
+                  <DateTimePickerModal
+                    isVisible={isEndDatePickerVisible}
+                    mode="date"
+                    onConfirm={handleEndDateConfirm}
+                    onCancel={hideEndDatePicker}
+                  />
               </View>
             </View>
           )}
@@ -250,15 +295,24 @@ export default function HabitCreation() {
           </View>
           <View style={styles.divider} />
           <View style={styles.groupContainer}>
-            <Text style={styles.radioGroupLabel}>Reminder:</Text>
+            {/* <Text style={styles.radioGroupLabel}>Reminder:</Text>
                 <DateTimePicker
               value={reminderTime}
                   mode="time"
                   display="default"
-                  design="material"
+                  design="default"
                   themeVariant={colorTheme}
               onChange={(event, time) => setReminderTime(time || reminderTime)}
-                />
+                /> */}
+
+                  <Button onPress={showreminderTimePicker}>Pick Reminder Time</Button>
+                  <Text>{reminderTime.toTimeString()}</Text>
+                  <DateTimePickerModal
+                    isVisible={isreminderTimePickerVisible}
+                    mode="time"
+                    onConfirm={handlereminderTimeConfirm}
+                    onCancel={hidereminderTimePicker}
+                  />
               </View>
           <View style={styles.divider} />
           <View style={styles.radioGroupContainer}>
@@ -267,9 +321,9 @@ export default function HabitCreation() {
               radioButtons={[
                 { id: "Public", label: "Public", value: "Public" },
                 {
-                  id: "Friend-Only",
-                  label: "Friend-Only",
-                  value: "Friend-Only",
+                  id: "Friends-Only",
+                  label: "Friends-Only",
+                  value: "Friends-Only",
                 },
                 { id: "Private", label: "Private", value: "Private" },
               ]}

@@ -11,9 +11,10 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { router, Stack } from "expo-router";
-import DateTimePicker from "@react-native-community/datetimepicker";
+// import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { scheduleHabitNotification, sendLocalNotification } from "./utils/notifications";
-import { HabitStore } from "../utils/habitStore"
+import { HabitStore } from "@/utils/habitStore";
 
 export default function HabitCreation() {
   const screenOptions = {
@@ -32,9 +33,46 @@ export default function HabitCreation() {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [timeType, setTimeType] = useState(0);
+  const [reminderTime, setreminderTime] = useState(new Date());
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
-  const [privacy, setPrivacy] = useState("Public");
+  const [privacy, setPrivacy] = useState("Private");
+
+  const [isreminderTimePickerVisible, setreminderTimePickerVisibility] = useState(false);
+  const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
+
+  const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
+  const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
+
+  const showStartDatePicker = () => setStartDatePickerVisibility(true);
+  const hideStartDatePicker = () => setStartDatePickerVisibility(false);
+  const showEndDatePicker = () => setEndDatePickerVisibility(true);
+  const hideEndDatePicker = () => setEndDatePickerVisibility(false);
+
+  const showreminderTimePicker = () => setreminderTimePickerVisibility(true);
+  const hidereminderTimePicker = () => setreminderTimePickerVisibility(false);
+  const showEndTimePicker = () => setEndTimePickerVisibility(true);
+  const hideEndTimePicker = () => setEndTimePickerVisibility(false);
+
+  const handleStartDateConfirm = (date: Date) => {
+    setStartDate(date);
+    hideStartDatePicker();
+  };
+
+  const handleEndDateConfirm = (date: Date) => {
+    setEndDate(date);
+    hideEndDatePicker();
+  };
+
+  const handlereminderTimeConfirm = (time: Date) => {
+    setreminderTime(time);
+    hidereminderTimePicker();
+  };
+
+  const handleEndTimeConfirm = (time: Date) => {
+    setEndTime(time);
+    hideEndTimePicker();
+  };
 
   const handleReset = () => {
     setHabitName("");
@@ -45,7 +83,8 @@ export default function HabitCreation() {
     setTimeType(0);
     setStartTime(new Date());
     setEndTime(new Date());
-    setPrivacy("Public");
+    setreminderTime(new Date());
+    setPrivacy("Private");
   };
 
   const handleSave = async () => {
@@ -85,6 +124,8 @@ export default function HabitCreation() {
   };
 
   useEffect(() => {
+    //console.log(isreminderTimePickerVisible); // Should log false initially
+    //console.log(isEndTimePickerVisible); // Should log false initially
     if (loaded) {
       SplashScreen.hideAsync();
     }
@@ -281,7 +322,7 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text
+                {/* <Text
                   style={{
                     color: theme.colors.onPrimaryContainer,
                   }}
@@ -292,11 +333,19 @@ export default function HabitCreation() {
                   value={startDate}
                   mode="date"
                   display="default"
-                  design="material"
+                  design="default"
                   themeVariant={colorTheme}
                   minimumDate={new Date()}
                   onChange={(event, date) => setStartDate(date || startDate)}
-                />
+                /> */}
+                <Button onPress={showStartDatePicker}>Pick Start Date</Button>
+              <Text>{startDate.toDateString()}</Text>
+              <DateTimePickerModal
+                isVisible={isStartDatePickerVisible}
+                mode="date"
+                onConfirm={handleStartDateConfirm}
+                onCancel={hideStartDatePicker}
+              />
               </View>
               <View
                 style={{
@@ -304,16 +353,24 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>End Date:</Text>
+                {/* <Text style={{ color: theme.colors.onPrimaryContainer }}>End Date:</Text>
                 <DateTimePicker
                   value={endDate}
                   mode="date"
                   display="default"
-                  design="material"
+                  design="default"
                   themeVariant={colorTheme}
                   minimumDate={startDate}
                   onChange={(event, date) => setEndDate(date || endDate)}
-                />
+                /> */}
+                <Button onPress={showEndDatePicker}>Pick End Date</Button>
+              <Text>{endDate.toDateString()}</Text>
+              <DateTimePickerModal
+                isVisible={isEndDatePickerVisible}
+                mode="date"
+                onConfirm={handleEndDateConfirm}
+                onCancel={hideEndDatePicker}
+              />
               </View>
             </View>
           )}
@@ -341,17 +398,25 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>
+                {/* <Text style={{ color: theme.colors.onPrimaryContainer }}>
                   Start Time:
                 </Text>
                 <DateTimePicker
                   value={startTime}
                   mode="time"
                   display="default"
-                  design="material"
+                  design="default"
                   themeVariant={colorTheme}
                   onChange={(event, time) => setStartTime(time || startTime)}
-                />
+                /> */}
+                <Button onPress={showreminderTimePicker}>Pick Start Time</Button>
+              <Text>{reminderTime.toTimeString()}</Text>
+              <DateTimePickerModal
+                isVisible={isreminderTimePickerVisible}
+                mode="time"
+                onConfirm={handlereminderTimeConfirm}
+                onCancel={hidereminderTimePicker}
+              />
               </View>
               <View
                 style={{
@@ -359,16 +424,24 @@ export default function HabitCreation() {
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: theme.colors.onPrimaryContainer }}>End Time:</Text>
-                <DateTimePicker
+                {/* <Text style={{ color: theme.colors.onPrimaryContainer }}>End Time:</Text> */}
+                {/* <DateTimePicker
                   value={endTime}
                   mode="time"
                   display="default"
-                  design="material"
+                  design="default"
                   themeVariant={colorTheme}
                   minimumDate={startTime}
                   onChange={(event, time) => setEndTime(time || endTime)}
-                />
+                /> */}
+                <Button onPress={showEndTimePicker}>Pick End Time</Button>
+              <Text>{endTime.toTimeString()}</Text>
+              <DateTimePickerModal
+                isVisible={isEndTimePickerVisible}
+                mode="time"
+                onConfirm={handleEndTimeConfirm}
+                onCancel={hideEndTimePicker}
+              />
               </View>
             </View>
           )}
@@ -378,13 +451,13 @@ export default function HabitCreation() {
             <RadioButtonRN
               data={[
                 { label: "Public", value: "Public" },
-                { label: "Friend-Only", value: "Friend-Only" },
+                { label: "Friends-Only", value: "Friends-Only" },
                 { label: "Private", value: "Private" },
               ]}
               selectedBtn={(e: any) => handlePrivacyChange(e.value)} // eslint-disable-line
               box={false}
               initial={
-                privacy === "Public" ? 1 : privacy === "Friend-Only" ? 2 : 3
+                privacy === "Public" ? 1 : privacy === "Friends-Only" ? 2 : 3
               }
               textStyle={{ color: theme.colors.onPrimaryContainer }}
               activeColor={theme.colors.onPrimaryContainer }

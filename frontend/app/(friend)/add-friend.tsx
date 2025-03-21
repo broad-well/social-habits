@@ -82,7 +82,7 @@ export default function AddFriend() {
 
   return <PaperProvider theme={theme}>
     <Stack.Screen options={{
-      title: "Add friend",
+      title: "Add Friend",
     }} />
     <Appbar.Header
       style={{
@@ -92,7 +92,7 @@ export default function AddFriend() {
     >
       <Appbar.BackAction onPress={() => router.back()} />
       <Appbar.Content
-        title="Add friend"
+        title="Add Friend"
         titleStyle={{
           fontSize: 18,
         }}
@@ -133,7 +133,9 @@ export default function AddFriend() {
               </View>
             </Card.Content>
             <Card.Actions>
-              <Button>Profile</Button>
+                <Button onPress={() => router.push(`/friend-details/${query.result.id}`)}>
+                  Profile
+                </Button>
               {query.result.request === null &&
                 <Button onPress={() => sendRequest(query.result!.id)}>
                   Send friend request

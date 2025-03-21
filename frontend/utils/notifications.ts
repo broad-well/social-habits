@@ -67,13 +67,23 @@ export const scheduleHabitNotification = async (habitName: string, habitTime: Da
     // Need different notification ID for each day that habit repeats
     for (const day of daysToRepeat) {
 
+        // const notifTrigger = {
+        //     type: 'calendar',
+        //     hour,
+        //     minute,
+        //     repeats: true,
+        //     weekday: day,
+        // } as Notifications.CalendarTriggerInput;
         const notifTrigger = {
-            type: 'calendar',
+            type: 'date',
+            year: startDate.getFullYear(),
+            month: startDate.getMonth(),
+            day: startDate.getDate() + ((day - startDate.getDay() + 7) % 7), // Calculates the correct day
+            date: startDate,
             hour,
             minute,
-            repeats: true,
-            weekday: day,
-        } as Notifications.CalendarTriggerInput;
+            repeats: true, // Will repeat on each selected day
+        } as Notifications.DateTriggerInput;  // Use DateTriggerInput
 
         // Only create notification IDs after start date
         if (delayTime > 0) {
@@ -120,6 +130,18 @@ Notifications.setNotificationHandler({
 });
 
 Notifications.setNotificationCategoryAsync('habit-reminders', actions);
+
+// Function to unschedule a specific habit's notifications by ID
+export const unscheduleHabitNotification = async (notificationId: string) => {
+  try {
+    // Cancel the specific notification using its ID
+    await Notifications.cancelScheduledNotificationAsync(notificationId);
+    console.log(`Notification with ID ${notificationId} has been cancelled.`);
+  } catch (error) {
+    console.error(`Error cancelling notification with ID ${notificationId}:`, error);
+  }
+};
+
 
 // Function to cancel all scheduled notifications
 export const unscheduleAllScheduledNotifications = async () => {

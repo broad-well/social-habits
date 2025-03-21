@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Alert, Text, View, StyleSheet } from "react-native";
 import {
   Button,
   TextInput,
@@ -14,10 +14,17 @@ import DarkThemeColors from "@/constants/DarkThemeColors.json";
 import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useColorTheme } from "@/stores/useColorTheme";
 import { Link, router, Stack } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signInWithCredential,
+  GoogleAuthProvider
+} from "firebase/auth";
 import { auth } from "@/config/firebaseConfig";
 import { modalStyle } from "@/components/modalStyle";
 import { FirebaseError } from "firebase/app";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { jwtDecode } from "jwt-decode";
+import useEmailStore from "@/stores/useEmail";
 import useBackendStore from "@/stores/useBackendStore";
 
 export function formatError(error: FirebaseError) {
@@ -56,11 +63,103 @@ export default function SignIn() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const setEmail = useEmailStore((state) => state.setEmail);
 
   const theme = {
     ...DefaultTheme,
     colors:
       colorTheme === "light" ? LightThemeColors.colors : DarkThemeColors.colors,
+  };
+
+  function checkTokenType(token: string): void {
+    if (!token) {
+      console.error("Invalid Token: Empty or Undefined");
+      return;
+    } try {
+      const decoded = jwtDecode(token);
+      console.error("Decoded Payload:", decoded);
+      if (decoded.iss?.includes("accounts.google.com")) {
+        console.error("This is a Google ID Token.");
+      } else if (decoded.iss?.includes("securetoken.google.com")) {
+        console.error("This is a Firebase ID Token.");
+      } else { 
+        console.error("Unknown Token Type.");
+      }
+    } catch (error) {
+      console.error("Invalid Token: Could not decode", error);
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    
+    try {
+      GoogleSignin.configure({
+        webClientId: "884027047581-vro97mr4eg39fba7rla68uup2bd3jqoa.apps.googleusercontent.com",
+        offlineAccess: false,
+        scopes: ['profile', 'email']
+      });
+      await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
+      const userInfo = await GoogleSignin.signIn();
+      //const tokens = await GoogleSignin.getTokens();
+      const idToken = userInfo.data?.idToken;
+      
+      //console.error(idToken);
+      
+      if (!idToken) {
+        throw new Error("No ID token returned from Google Sign-In");
+      }
+
+      
+      const googleCredential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, googleCredential);
+      const user = userCredential.user;
+      //userCredential.
+      // const user = userInfo.data?.user;
+      const firebaseIdToken = await user.getIdToken(true);
+
+      //console.error((idToken === firebaseIdToken));
+
+      //console.error(idToken);
+
+      //checkTokenType(idToken);
+      //checkTokenType(firebaseIdToken);
+
+      if (!user?.email?.endsWith("@ucsd.edu")) {
+        await auth.signOut();
+        Alert.alert("Access Denied", "Only UCSD emails are allowed.");
+        return;
+      }
+
+      // console.error("FIRST RAN PROPERLY")
+      const response = await fetch("https://cohabit-server.vercel.app/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ "idToken" : firebaseIdToken }),
+      });
+      //console.error("SUCCESS");
+
+      // console.log(response);
+      
+      // Check if response is OK and has correct content type
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server Error: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+
+  
+      if (!data.exists) {
+        Alert.alert("Failure", "User does not exist, please sign up.");
+      } else {
+        setEmail(user.email);
+        router.replace("/(tabs)/main");
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Login Failed", "Please try again.");
+    }
   };
 
   const validateInputs = () => {
@@ -98,6 +197,7 @@ export default function SignIn() {
       // TODO consider a more explicit loading screen for this
       await backend.register();
       await habitStore.syncWithBackend();
+      setEmail(cred.user.email);
       router.replace("/(tabs)/main");
     } catch (fail) {
       setError(fail);
@@ -174,6 +274,15 @@ export default function SignIn() {
           disabled={isLoading}
         >
           {isLoading ? "Signing In..." : "Sign In"}
+        </Button>
+        <Button
+          icon="google"
+          mode="contained"
+          onPress={handleGoogleSignIn}
+          style={[styles.button, { backgroundColor: theme.colors.primary }]}
+          labelStyle={styles.buttonLabel}
+        >
+          Sign In With Google
         </Button>
         <View style={styles.signupContainer}>
           <Text style={{ color: theme.colors.onPrimaryContainer }}>

@@ -159,18 +159,6 @@ export default function Detail() {
               </View>
             </View>
             <MonthlyView streaks={habit.result.streaks} />
-            {canCompleteHabitToday(habit.result) &&
-              <Button mode="contained" onPress={onPressComplete} style={{ marginTop: 10 }}>
-              Complete Habit!
-              </Button>
-            }
-            <Button
-              mode="contained"
-              onPress={() => navigateToUpdatePage(id as string)}
-              style={{ marginTop: 10 }}
-            >
-              Update Habit
-            </Button>
           </View>
         </ScrollView>}
     </>

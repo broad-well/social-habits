@@ -22,7 +22,7 @@ export default function Avatar(props: AvatarProps) {
   const avatarStyle = {
     width: props.size ?? 120,
     height: props.size ?? 120,
-    borderRadius: "100%",
+    borderRadius: props.size ?? 120,
     borderWidth: 3,
     borderColor: theme.colors.onPrimary,
   };

@@ -49,6 +49,8 @@ export interface CohabitService {
   fetchUserByEmail(handle: string): Promise<FriendListItem | null>;
   fetchUserByName(name: string): Promise<FriendListItem | null>;
   fetchUserById(id: string): Promise<FriendListItem | null>;
+  updateUser(updates: { name?: string; email?: string }): Promise<void>;
+  deleteUser(): Promise<void>;
 
   fetchProfileByEmail(handle: string): Promise<UserProfile | null>;
   fetchProfileByName(name: string): Promise<UserProfile | null>;
@@ -119,6 +121,31 @@ export default class CohabitServiceImpl implements CohabitService {
 
   async fetchUserById(id: string): Promise<FriendListItem | null> {
     return this.fetch<FriendListItem | null>(`users/${id}`);
+  }
+
+  async updateUser(updates: { name?: string; email?: string }): Promise<void> {
+    try {
+      await this.fetchWithBody<{ updates: { name?: string; email?: string } }, { message: string }>(
+        "users", { updates }, "PATCH"
+      );
+    } catch (error) {
+      console.error("Error updating user:", error);
+      throw error;
+    }
+  }
+
+  async deleteUser(): Promise<void> {
+    try {
+      const userEmail = auth.currentUser?.email;
+      if (!userEmail) {
+        throw new Error("No user is currently logged in.");
+      }
+
+      await this.fetchWithBody<{ email: string }, void>("users", { email: userEmail }, "DELETE");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error;
+    }
   }
 
   // Profile Fetching Functions

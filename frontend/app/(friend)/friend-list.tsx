@@ -66,6 +66,9 @@ export default function FriendList() {
       right: 0,
       bottom: insets.bottom,
       backgroundColor: theme.colors.primary,
+      minWidth: 150,
+      alignItems: "center",
+      justifyContent: "center"
     },
     container: {
       display: "flex",
@@ -133,7 +136,10 @@ export default function FriendList() {
                     >
                       Remove
                     </Button>
-                    <Button buttonColor={theme.colors.primary}>
+                    <Button 
+                      buttonColor={theme.colors.primary}
+                      onPress={() => router.push(`/friend-details/${item.id}`)}  // Navigate to friend profile page
+                    >
                       View Profile
                     </Button>
                   </Card.Actions>
@@ -164,7 +170,7 @@ export default function FriendList() {
           <FAB
             style={stylesheet.fab}
             icon="plus"
-            label="Add friend"
+            label="Add Friend"
             color={theme.colors.onPrimary}
             onPress={() => router.push("/(friend)/add-friend")}
           />
