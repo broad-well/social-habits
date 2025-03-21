@@ -3,7 +3,23 @@ import { auth } from "@/config/firebaseConfig";
 export interface FriendListItem {
   id: string;
   name: string;
+  /**
+   * List of friend IDs
+   */
+  friendList?: string[];
+  /**
+   * List of habit IDs
+   */
+  habitList?: string[];
   profileLogo?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  friendCount: number;
+  visibleHabits: Habit[];
 }
 
 export interface Habit {
@@ -21,18 +37,31 @@ export interface Habit {
   privacy: "Private" | "Friends-Only" | "Public";
 }
 
+export interface FriendRequest {
+  senderId: string;
+  receiverId: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
 export interface CohabitService {
+  register(): Promise<void>;
+
   fetchUserByEmail(handle: string): Promise<FriendListItem | null>;
   fetchUserByName(name: string): Promise<FriendListItem | null>;
   fetchUserById(id: string): Promise<FriendListItem | null>;
 
-  fetchFriends(): Promise<FriendListItem[]>;
+  fetchProfileByEmail(handle: string): Promise<UserProfile | null>;
+  fetchProfileByName(name: string): Promise<UserProfile | null>;
+  fetchProfileById(id: string): Promise<UserProfile | null>;
+
+  fetchFriends(): Promise<string[]>;
   sendFriendRequest(id: string): Promise<boolean>;
+  fetchFriendRequest(receiverId: string): Promise<FriendRequest | null>;
   cancelFriendRequest(id: string): Promise<boolean>;
   acceptFriendRequest(id: string): Promise<boolean>;
   rejectFriendRequest(id: string): Promise<boolean>;
   removeFriend(id: string): Promise<boolean>;
-  fetchPendingFriendRequests(): Promise<FriendListItem[]>;
+  fetchPendingFriendRequests(): Promise<string[]>;
 
   createHabit(habit: Omit<Habit, "id" | "email"> & { id?: string }): Promise<Habit>;
   updateHabit(id: string, updates: Partial<Habit>): Promise<Habit>;
@@ -54,6 +83,11 @@ export default class CohabitServiceImpl implements CohabitService {
 
   constructor(backendUrl?: string) {
     this.backendUrl = backendUrl ?? "https://cohabit-server.vercel.app/api/";
+    // this.backendUrl = "http://book-2.local:5500/api/";
+  }
+
+  async register(): Promise<void> {
+    await this.fetchWithBody(`users/signup`, {}, "POST");
   }
 
   fetchHabit(id: string): Promise<Habit | null> {
@@ -74,7 +108,9 @@ export default class CohabitServiceImpl implements CohabitService {
 
   // User Functions
   async fetchUserByEmail(handle: string): Promise<FriendListItem | null> {
-    return this.fetch<FriendListItem | null>(`users/email/${handle}`);
+    return this.fetch<FriendListItem | null>(`users/email/${handle}`, "GET", {
+      on404: null,
+    });
   }
 
   async fetchUserByName(name: string): Promise<FriendListItem | null> {
@@ -85,9 +121,28 @@ export default class CohabitServiceImpl implements CohabitService {
     return this.fetch<FriendListItem | null>(`users/${id}`);
   }
 
+  // Profile Fetching Functions
+  async fetchProfileByEmail(handle: string): Promise<UserProfile | null> {
+    return this.fetch<UserProfile | null>(`users/profile/email/${handle}`);
+  }
+
+  async fetchProfileByName(name: string): Promise<UserProfile | null> {
+    return this.fetch<UserProfile | null>(`users/profile/name/${name}`);
+  }
+
+  async fetchProfileById(id: string): Promise<UserProfile | null> {
+    return this.fetch<UserProfile | null>(`users/profile/${id}`);
+  }
+
   // Friend Functions
-  async fetchFriends(): Promise<FriendListItem[]> {
-    return this.fetch<FriendListItem[]>("friends");
+  async fetchFriends(): Promise<string[]> {
+    return (await this.fetch<{ friends: string[] }>("friends")).friends;
+  }
+
+  async fetchFriendRequest(receiverId: string): Promise<FriendRequest | null> {
+    return this.fetch(`friends/request/${encodeURIComponent(receiverId)}`, "GET", {
+      on404: null,
+    });
   }
 
   async sendFriendRequest(id: string): Promise<boolean> {
@@ -107,11 +162,11 @@ export default class CohabitServiceImpl implements CohabitService {
   }
 
   async removeFriend(id: string): Promise<boolean> {
-    return this.fetchWithBody<{ friendId: string }, boolean>("friends/remove", { friendId: id });
+    return this.fetch<boolean>(`friends/${encodeURIComponent(id)}`, "DELETE");
   }
 
-  async fetchPendingFriendRequests(): Promise<FriendListItem[]> {
-    return this.fetch<FriendListItem[]>("friends/pending");
+  async fetchPendingFriendRequests(): Promise<string[]> {
+    return (await this.fetch<{ pending: string[] }>("friends/pending")).pending;
   }
 
   // Habit Functions
@@ -170,7 +225,7 @@ export default class CohabitServiceImpl implements CohabitService {
     });
     const json = await res.json();
     if (!res.ok) {
-      if (options?.on404 && res.status === 404) {
+      if (options?.on404 !== undefined && res.status === 404) {
         return options.on404;
       }
       throw new Error(json.error || "Unknown API error");
@@ -203,5 +258,9 @@ export default class CohabitServiceImpl implements CohabitService {
   private async getAuthorization(): Promise<string> {
     const token = await auth.currentUser?.getIdToken(false);
     return token ? `Token ${token}` : "";
+  }
+
+  private getOwnUserId(): string | undefined {
+    return auth.currentUser?.email?.split("@")?.[0];
   }
 }

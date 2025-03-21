@@ -7,26 +7,9 @@ import React from "react";
 import { router, Stack } from "expo-router";
 import Avatar from "@/components/accounts/Avatar";
 import useBackendQuery from "@/utils/useBackendQuery";
+import { FriendListItem } from "@/utils/service";
+import useBackendStore from "@/stores/useBackendStore";
 
-interface FriendListItem {
-  id: string;
-  profileLogo?: string;
-  name: string;
-  // Future: Maybe summary stats for habit completion
-}
-
-/**
- * @param handle The first part of the target user's email (before the @)
- */
-async function fetchUserByEmail(handle: string): Promise<FriendListItem | null> {
-  return new Promise((res) => setTimeout(() =>
-    res(handle === "other" ? {
-      id: "hqhrb1",
-      profileLogo: "https://i.pinimg.com/originals/ae/c6/2f/aec62fe5319733b32fde1a6a3ff28e7b.jpg",
-      name: "Other user",
-    } : null),
-  1000));
-}
 
 export default function AddFriend() {
   const { colorTheme } = useColorTheme();
@@ -79,10 +62,23 @@ export default function AddFriend() {
     },
   });
 
+  const backend = useBackendStore((u) => u.server);
   const [queryEmail, setQuery] = React.useState<string>("");
   const query = useBackendQuery(
-    React.useCallback(() => fetchUserByEmail(queryEmail), [queryEmail])
+    React.useCallback(async () => {
+      const [user, request] = await Promise.all([
+        backend.fetchUserByEmail(queryEmail + "@ucsd.edu"),
+        backend.fetchFriendRequest(queryEmail),
+      ]);
+      return user == null ? null : { ...user, request };
+    }, [queryEmail])
   );
+
+  const sendRequest = React.useCallback(async (receiverId: string) => {
+    await backend.sendFriendRequest(receiverId);
+    const fq = await backend.fetchFriendRequest(queryEmail);
+    query.setResult((res) => ({ ...res!, request: fq}));
+  }, [backend]);
 
   return <PaperProvider theme={theme}>
     <Stack.Screen options={{
@@ -119,7 +115,7 @@ export default function AddFriend() {
           Search
         </Button>
         <View style={stylesheet.separator} />
-        {query.sent && query.result === undefined && query.error === undefined &&
+        {query.loading && query.result === undefined && query.error === undefined &&
           <ActivityIndicator size="large" animating />}
         {query.result &&
           <Card>
@@ -131,16 +127,21 @@ export default function AddFriend() {
               <View>
                 <Text variant="titleLarge">{query.result.name}</Text>
                 <View style={stylesheet.stats}>
-                  <Text>3 habits</Text>
-                  <Text>2 friends</Text>
+                  <Text>{query.result.habitList.length} habit{query.result.habitList.length === 1 ? "" : "s"}</Text>
+                  <Text>{query.result.friendList.length} friend{query.result.friendList.length === 1 ? "" : "s"}</Text>
                 </View>
               </View>
             </Card.Content>
             <Card.Actions>
-              <Button>Block</Button>
-              <Button>
-                View Profile
-              </Button>
+              <Button>Profile</Button>
+              {query.result.request === null &&
+                <Button onPress={() => sendRequest(query.result!.id)}>
+                  Send friend request
+                </Button>}
+              {query.result.request?.status === "pending" &&
+                <Button disabled>
+                  Friend request pending
+                </Button>}
             </Card.Actions>
           </Card>}
         {query.error &&

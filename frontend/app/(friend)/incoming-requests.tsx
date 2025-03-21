@@ -16,12 +16,11 @@ import LightThemeColors from "@/constants/LightThemeColors.json";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StyleSheet, FlatList, View } from "react-native";
 import React from "react";
-import { useFonts } from "expo-font";
 import { router, SplashScreen, Stack } from "expo-router";
 import useBackendStore from "@/stores/useBackendStore";
 import { FriendListItem } from "@/utils/service";
 
-export default function FriendList() {
+export default function FriendRequestsView() {
 
   const { colorTheme } = useColorTheme();
   const insets = useSafeAreaInsets();
@@ -81,9 +80,9 @@ export default function FriendList() {
   React.useEffect(() => {
     (async () => {
       try {
-        const friendIds = await backend.fetchFriends();
-        const friends = await Promise.all(friendIds.map((id) => backend.fetchUserById(id)));
-        setFriends(friends.filter((i) => i) as FriendListItem[]);
+        const senderList = await backend.fetchPendingFriendRequests();
+        const senders = await Promise.all(senderList.map((sender) => backend.fetchUserById(sender)));
+        setFriends(senders as FriendListItem[]);
         setFetchError(null);
       } catch (e) {
         setFetchError(e as Error);
@@ -91,15 +90,20 @@ export default function FriendList() {
     })();
   }, []);
 
-  const removeFriend = React.useCallback(async (id: string) => {
-    await backend.removeFriend(id);
-    setFriends((f) => f?.filter((item) => item.id !== id) ?? null);
+  const rejectRequest = React.useCallback(async (id: string) => {
+    await backend.rejectFriendRequest(id);
+    setFriends((f) => f?.filter(item => item.id !== id) ?? null);
+  }, [backend]);
+
+  const acceptRequest = React.useCallback(async (id: string) => {
+    await backend.acceptFriendRequest(id);
+    setFriends((f) => f?.filter(item => item.id !== id) ?? null);
   }, [backend]);
 
   return (
     <PaperProvider theme={theme}>
       <View style={stylesheet.container}>
-        <Stack.Screen name="friend-list" options={{ title: "Friends" }} />
+        <Stack.Screen name="incoming-requests" options={{ title: "Friend Requests" }} />
         <Appbar.Header
           style={{
             height: 50,
@@ -108,15 +112,10 @@ export default function FriendList() {
         >
           <Appbar.BackAction onPress={() => router.back()} />
           <Appbar.Content
-            title="Friends"
+            title="Friend Requests"
             titleStyle={{
               fontSize: 18,
             }}
-          />
-          <Appbar.Action
-            onPress={() => router.push("/(friend)/incoming-requests")}
-            icon="account-arrow-left"
-            accessibilityLabel="Friend requests"
           />
         </Appbar.Header>
         <View style={stylesheet.page}>
@@ -127,14 +126,16 @@ export default function FriendList() {
                 <Card style={stylesheet.friendCard}>
                   <Card.Title title={item.name} />
                   <Card.Actions>
-                    <Button mode="text"
-                      textColor={MD3Colors.error40}
-                      onPress={() => removeFriend(item.id)}
+                    <Button
+                      onPress={() => rejectRequest(item.id)}
                     >
-                      Remove
+                      Reject
                     </Button>
-                    <Button buttonColor={theme.colors.primary}>
-                      View Profile
+                    <Button
+                      buttonColor={theme.colors.primary}
+                      onPress={() => acceptRequest(item.id)}
+                    >
+                      Accept
                     </Button>
                   </Card.Actions>
                 </Card>
@@ -158,16 +159,9 @@ export default function FriendList() {
           {friends?.length === 0 && (
             <View style={stylesheet.errorMessage}>
               <Icon source="account-off" size={48} />
-              <Text>You don't have any friends yet</Text>
+              <Text>You don't have any friend requests yet</Text>
             </View>
           )}
-          <FAB
-            style={stylesheet.fab}
-            icon="plus"
-            label="Add friend"
-            color={theme.colors.onPrimary}
-            onPress={() => router.push("/(friend)/add-friend")}
-          />
         </View>
       </View>
     </PaperProvider>

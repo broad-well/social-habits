@@ -76,6 +76,7 @@ export default function SignIn() {
   };
 
   const habitStore = useBackendStore((s) => s.getHabitStore());
+  const backend = useBackendStore((s) => s.server);
   const handleSignIn = async () => {
     if (!validateInputs()) return;
 
@@ -95,6 +96,7 @@ export default function SignIn() {
       }
 
       // TODO consider a more explicit loading screen for this
+      await backend.register();
       await habitStore.syncWithBackend();
       router.replace("/(tabs)/main");
     } catch (fail) {

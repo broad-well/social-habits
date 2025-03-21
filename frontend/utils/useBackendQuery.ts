@@ -41,6 +41,7 @@ export default function useBackendQuery<R>(query: () => Promise<R>) {
       setResult(undefined);
       setError(undefined);
     },
+    setResult,
     loading,
     result,
     error,
